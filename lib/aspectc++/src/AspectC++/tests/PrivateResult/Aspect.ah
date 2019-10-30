@@ -1,0 +1,45 @@
+#ifndef __Aspect_h__
+#define __Aspect_h__
+
+#include <iostream>
+using namespace std;
+
+#include "Safe.h"
+
+aspect Test {
+public:
+  advice call ("Safe f(...)") : around () {
+    tjp->proceed ();
+    cout << "call result 1: " << *tjp->result () << endl;
+  }
+  advice call ("Safe f(...)") : around () {
+    tjp->proceed ();
+    cout << "* incrementing result id" << endl;
+    (*tjp->result ())._id++;
+    cout << "call result 2: " << *tjp->result () << endl;
+  }
+  advice call ("Safe f(...)") && result (safe) : after (Safe safe) {
+    cout << "call result 3: " << safe << endl;
+  }
+  advice execution ("Safe g(...)") : around () {
+    tjp->proceed ();
+    cout << "execution result 1: " << *tjp->result () << endl;
+  }
+  advice execution ("Safe g(...)") : around () {
+    tjp->proceed ();
+    cout << "* incrementing result id" << endl;
+    (*tjp->result ())._id++;
+    cout << "execution result 2: " << *tjp->result () << endl;
+  }
+  advice execution ("Safe g(...)") && result (safe) : after (Safe safe) {
+    cout << "execution result 3: " << safe << endl;
+  }
+  advice execution ("% Safe::uses_private_inner%(...)") : before () {
+    cout << "execution (\"" << JoinPoint::signature () << "\")" << endl;
+  }
+  advice execution ("AUnion h()") : after () {
+    cout << "execution (\"" << JoinPoint::signature () << "\")" << endl;
+  }
+};
+
+#endif // __Aspect_h__

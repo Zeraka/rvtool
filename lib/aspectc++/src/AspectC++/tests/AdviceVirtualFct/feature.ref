@@ -1,0 +1,22 @@
+AdviceVirtualFct
+=============================================================
+first we cast 'obj' to 'Derived': here should be *no* advice
+inside Derived::a(1, 2.000000)
+-------------------------------------------------------------
+now we call 'b()' on 'obj': *only call* advice should be run
+A: before(call) int Base::b(int,int)
+inside Derived::b(3, 4)
+A: after(call) int Base::b(int,int)
+-------------------------------------------------------------
+a call 'Base::b()' fully qualified: *both* call and exec
+A: before(call) int Base::b(int,int)
+A: before(exec) int Base::b(int,int)
+inside Base::b(5, 6)
+A: after(exec) int Base::b(int,int)
+A: after(call) int Base::b(int,int)
+-------------------------------------------------------------
+a call to a pure virtual function: *only call* advice
+A: before(call) void Base::c()
+inside Derived::c()
+A: after(call) void Base::c()
+=============================================================

@@ -1,0 +1,181 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __CSemBinding_ah__
+#define __CSemBinding_ah__
+
+#include "Puma/CSemantic.h"
+
+// This aspect controls the parsing process on the C code level
+// by maintaining semantic information.
+
+aspect CSemBinding {
+
+  advice execution("% Puma::CSyntax::PrivateName::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().PrivateName();
+  }
+
+  advice execution("% Puma::CSyntax::TypedefName::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().typedef_name();
+  }
+
+  advice execution("% Puma::CSyntax::TransUnit::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().trans_unit();
+  }
+
+  advice execution("% Puma::CSyntax::IdExpr::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().id_expr();
+  }
+
+  advice execution("% Puma::CSyntax::LabelStmt::build(...)") : after () {
+    if (*tjp->result ())
+      tjp->arg<0>()->semantic().introduce_label(*tjp->result ());
+  }
+
+  advice execution("% Puma::CSyntax::CmpdStmt::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().cmpd_stmt();
+  }
+
+  advice execution("% Puma::CSyntax::SelectStmt::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().select_stmt();
+  }
+
+  advice execution("% Puma::CSyntax::IterStmt::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().iter_stmt();
+  }
+
+  advice execution("% Puma::CSyntax::DeclSpecSeq::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().begin_decl ();
+  }
+
+  advice execution("% Puma::CSyntax::DeclSpecSeq::parse(...)") : around () {
+    tjp->arg<0>()->semantic().decl_spec_seq ();
+    tjp->proceed ();
+    if (!*tjp->result ())
+      tjp->arg<0>()->semantic().decl_spec_seq_err ();
+  }
+
+  advice execution("% Puma::CSyntax::DeclSpecSeq1::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().decl_spec_seq1();
+  }
+
+  advice execution("% Puma::CSyntax::ElaboratedTypeSpec::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_tag ();
+  }
+
+  advice execution("% Puma::CSyntax::EnumSpec1::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_enum ();
+  }
+
+  advice execution("% Puma::CSyntax::EnumeratorDef::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().enumerator_def ();
+  }
+
+  advice execution("% Puma::CSyntax::Enumerator::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_enumerator ();
+  }
+
+  advice execution("% Puma::CSyntax::InitDeclarator::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().init_declarator ();
+  }
+
+  advice execution("% Puma::CSyntax::InitDeclarator1::parse(...)") : after () {
+    if (!*tjp->result ())
+      tjp->arg<0>()->semantic().finish_declarator ();
+  }
+
+  advice execution("% Puma::CSyntax::InitDeclarator1::build(...)") : around () {
+    Puma::CTree *result;
+    if (tjp->arg<0>()->semantic ().in_arg_decl_seq ())
+      result = tjp->arg<0>()->semantic ().declare_parameter ();
+    else
+      result = tjp->arg<0>()->semantic ().introduce_object ();
+    tjp->arg<0>()->semantic().finish_declarator ();
+    *tjp->result () = result;
+  }
+
+  advice execution("% Puma::CSyntax::IdentifierList::parse(...)") ||
+         execution("% Puma::CSyntax::ParamDeclClause::parse(...)"): around () {
+    tjp->arg<0>()->semantic().enter_param_decl_clause ();
+    tjp->proceed ();
+    tjp->arg<0>()->semantic().leave_param_decl_clause ();
+  }
+
+  advice execution("% Puma::CSyntax::IdentifierList::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().identifier_list ();
+  }
+
+  advice execution("% Puma::CSyntax::ParamDeclClause::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().param_decl_clause ();
+  }
+
+  advice execution("% Puma::CSyntax::ArrayDelim::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().array_delim ();
+  }
+
+  advice execution("% Puma::CSyntax::TypeId::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_named_type ();
+  }
+
+  advice execution("% Puma::CSyntax::TypeId::parse(...)") : after () {
+    tjp->arg<0>()->semantic().finish_declarator ();
+  }
+
+  advice execution("% Puma::CSyntax::TypeSpecSeq::parse(...)") : around () {
+    tjp->arg<0>()->semantic().decl_spec_seq ();
+    tjp->proceed ();
+    if (!*tjp->result())
+      tjp->arg<0>()->semantic().decl_spec_seq_err ();
+  }
+
+  advice execution("% Puma::CSyntax::TypeSpecSeq::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().begin_decl ();
+  }
+
+  advice execution("% Puma::CSyntax::TypeSpecSeq1::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().decl_spec_seq1 ();
+  }
+
+  advice execution("% Puma::CSyntax::AbstDeclarator::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().abst_declarator ();
+  }
+
+  advice execution("% Puma::CSyntax::DirectAbstDeclarator::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().direct_abst_declarator ();
+  }
+
+  advice execution("% Puma::CSyntax::ParamDecl1::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_parameter ();
+  }
+  
+  advice call("% Puma::CSyntax::Declarator::check(...)") &&
+    within("% Puma::CSyntax::ParamDecl1::parse(...)") : around () {
+    tjp->arg<0>()->semantic ().begin_param_check (); // ambiguity check
+    tjp->proceed();
+    // The following check runs *after* the syntax tree node has been built!
+    // It is possible that it has to be deleted (if result is false).
+    *tjp->result() = tjp->arg<0>()->semantic ().finish_param_check (*tjp->result());
+  }
+
+  advice execution("% Puma::CSyntax::ClassHead::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_class ();
+  }
+
+};
+
+#endif /* __CSemBinding_ah__ */

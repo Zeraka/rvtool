@@ -1,0 +1,87 @@
+Prerequisites
+=============
+
+To be able to compile the PUMA library ensure that a suitable version
+of the program `ac++' is installed and the environment variable AC is
+set to the program location.  You can download the newest version at
+www.aspectc.org.
+
+
+Basic Installation
+==================
+
+The simplest way to build and install the PUMA library is to follow
+these steps:
+
+  1. `cd' to the directory containing PUMA's source code.
+
+  2. Type `make' to compile the PUMA library.  If `make' succeeds you
+     can find the library in the `lib' sub-directory and PUMA's headers
+     in the `include' sub-directory.
+
+     If you want to compile PUMA for a non-default target platform, use:
+     'make TARGET=<platform>' or 'make TARGET=<platform>-release' for a
+     "release build" (no debugging & optimization), e.g.
+     'make TARGET=win32-release'.
+
+     If you want to enable/disable parser extensions, use:
+     'make EXTENSIONS="<list of extensions>"'. The available extensions
+     are listed in extensions.mk.
+
+     On multi-processor machines parallel weaving and compilation
+     will probably pay off. In order to run multiple build processes
+     in parallel add -j<num_procs> to the make command line.
+
+  3. Optionally, type `make examples' to compile any examples that
+     come along with PUMA.
+
+  4. Type `make install' to install the library and headers to
+     `/usr/local'.  You may change the target directory by typing
+     `make install PREFIX=...'.
+
+  5. By typing `make clean' you can remove all the files created during
+     the make process except the files in the `lib', `include', and
+     `examples' sub-directories.  To also remove these files, type
+     `make distclean'.
+
+
+Generating the Visual C++ Project
+=================================
+
+To compile the PUMA library on Win32 using Visual Studio 7.0 or higher
+follow these steps:
+
+  1. `cd' to the directory containing PUMA's source code and type
+     `make cleanall'.
+
+  2. Type `export AC_OPTFLAGS="--no_line --problem_force_inline
+     --problem_local_class --no_problem_spec_scope"'.
+
+  3. Type `make weave EXTENSIONS="winext"' to generate the woven PUMA
+     source files for a Release build.
+
+     Or type `make weave EXTENSIONS="winext tracing" TARGET=linux' to
+     generate the woven PUMA source files for a Debug build.
+
+     The extensions are optional and can be omitted.
+
+  4. Type `bash ./tools/gen_vcpp_proj.sh release pack' to generate the
+     project file Puma.vcproj and the source package PumaVCProj.zip for
+     a Release build.
+
+     Or type `bash ./tools/gen_vcpp_proj.sh debug pack' to generate the
+     project file Puma_d.vcproj and the source package PumaVCProj_d.zip
+     for a Debug build.
+
+
+Compilers and Options
+=====================
+
+The following special build targets are supported:
+
+  * `weave' only builds the tools and applies the aspects coming along
+    with PUMA to the sources
+
+  * `compile' only compiles the previously transformed sources
+
+  * `libclean' only removes the object files and libraries

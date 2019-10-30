@@ -1,0 +1,13 @@
+#ifndef __Aspect__
+#define __Aspect__
+
+#include <stdio.h>
+
+
+aspect Aspect {
+  advice call("% %::foo()"||"% bar()") : before() {
+    printf("%s\n", JoinPoint::signature());
+  }
+};
+
+#endif /* __Aspect__ */

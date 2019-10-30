@@ -1,0 +1,56 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//
+// This program is free software;  you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 2 of
+// the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this program; if not, write to the Free
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+// MA  02111-1307  USA
+
+#ifndef __ExtACTree_ah__
+#define __ExtACTree_ah__
+
+// TODO:
+// this shall be introduced by the ExtAC aspect as soon as the include cycle
+// problem is solved!
+
+namespace Puma {
+  class CTree;
+}
+
+aspect ExtACTree {
+  pointcut members () = "Puma::CT_ClassDef";
+
+  // implemented in a separate .cc file, because Builder.h is needed!
+  void delete_tree (Puma::CTree *t);
+
+  advice members () : slice class {
+    Puma::CTree *_intro_members;
+    Puma::CTree *_base_intros;
+  public:
+    Puma::CTree *IntroMembers () const { return _intro_members; }
+    void IntroMembers (Puma::CTree *members) { _intro_members = members; }
+    Puma::CTree *BaseIntros () const { return _base_intros; }
+    void BaseIntros (Puma::CTree *bases) { _base_intros = bases; }
+  };
+
+  advice construction (members ()) : after () {
+    tjp->that ()->_intro_members = 0;
+    tjp->that ()->_base_intros = 0;
+  }
+  advice destruction (members ()) : before () {
+    delete_tree (tjp->that ()->_intro_members);
+    delete_tree (tjp->that ()->_base_intros);
+  }
+};
+
+#endif // __ExtACTree_ah__

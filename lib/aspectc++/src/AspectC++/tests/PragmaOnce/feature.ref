@@ -1,0 +1,4 @@
+PragmaOnce: check how the include expander handles pragma once
+==============================================================
+Everything is fine if it compiles without warnings or errors
+==============================================================

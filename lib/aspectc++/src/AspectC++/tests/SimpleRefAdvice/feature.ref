@@ -1,0 +1,175 @@
+Before: int a
+ent: 42
+Around: int a
+ent: 42
+Around (inner): int a
+ent (inner): 42
+res (inner): 42
+tmp: 42
+After: int a
+res: 42
+Before: int T1::x
+ent: 23
+Around: int T1::x
+ent: 23
+Around (inner): int T1::x
+ent (inner): 23
+res (inner): 23
+tmp: 23
+After: int T1::x
+res: 23
+
+REF (explitcit):
+
+A:
+Before: int a
+ent: 42
+Around: int a
+ent: 42
+Around (inner): int a
+ent (inner): 42
+res (inner): 42
+tmp: 42
+After: int a
+res: 42
+
+X1:
+Before: int T1::x
+ent: 23
+Around: int T1::x
+ent: 23
+Around (inner): int T1::x
+ent (inner): 23
+res (inner): 23
+tmp: 23
+After: int T1::x
+res: 23
+
+X2:
+Before: int T1::x
+ent: 23
+Around: int T1::x
+ent: 23
+Around (inner): int T1::x
+ent (inner): 23
+res (inner): 23
+tmp: 23
+After: int T1::x
+res: 23
+
+X3:
+Before: int T1::x
+ent: 23
+Around: int T1::x
+ent: 23
+Around (inner): int T1::x
+ent (inner): 23
+res (inner): 23
+tmp: 23
+After: int T1::x
+res: 23
+
+M1:
+ent ( via memberptr() ): 5
+Before: int T1::m
+ent: 5
+Around: int T1::m
+ent: 5
+Around (inner): int T1::m
+ent (inner): 5
+res (inner): 5
+tmp: 5
+After: int T1::m
+res: 5
+
+M2:
+ent ( via memberptr() ): 5
+Before: int T1::m
+ent: 5
+Around: int T1::m
+ent: 5
+Around (inner): int T1::m
+ent (inner): 5
+res (inner): 5
+tmp: 5
+After: int T1::m
+res: 5
+
+P1:
+ent ( via memberptr() ): 13
+Before: int T1::p
+ent: 13
+Around: int T1::p
+ent: 13
+Around (inner): int T1::p
+ent (inner): 13
+res (inner): 13
+tmp: 13
+After: int T1::p
+res: 13
+
+REF (implicit):
+
+local ref:
+Before: int a
+ent: 42
+Around: int a
+ent: 42
+Around (inner): int a
+ent (inner): 42
+res (inner): 42
+tmp: 42
+After: int a
+res: 42
+
+param ref:
+Before: int a
+ent: 42
+Around: int a
+ent: 42
+Around (inner): int a
+ent (inner): 42
+res (inner): 42
+tmp: 42
+After: int a
+res: 42
+1: 42
+
+default param ref (no default):
+Before: int a
+ent: 42
+Around: int a
+ent: 42
+Around (inner): int a
+ent (inner): 42
+res (inner): 42
+tmp: 42
+After: int a
+res: 42
+2: 42
+
+default param ref (default):
+Before: int T1::x
+ent: 23
+Around: int T1::x
+ent: 23
+Around (inner): int T1::x
+ent (inner): 23
+res (inner): 23
+tmp: 23
+After: int T1::x
+res: 23
+2: 23
+
+return ref:
+Before: int T1::x
+ent: 23
+Around: int T1::x
+ent: 23
+Around (inner): int T1::x
+ent (inner): 23
+res (inner): 23
+tmp: 23
+After: int T1::x
+res: 23
+23

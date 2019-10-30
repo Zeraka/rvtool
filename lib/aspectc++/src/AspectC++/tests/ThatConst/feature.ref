@@ -1,0 +1,15 @@
+construction 1
+construction 2
+ThatConst: checks access to const objects with 'that'
+=====================================================
+c1 (non-const object):
+execution 1
+call 1
+execution 1
+c2 (const object):
+execution 2
+call 2
+execution 2
+=====================================================
+destruction 2
+destruction 1

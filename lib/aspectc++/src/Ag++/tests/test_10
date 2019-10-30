@@ -1,0 +1,29 @@
+DESC="Custom Configuration Command"
+
+main()
+{
+  CONFIG_COMMAND="cat test_10.in"
+
+  EXEC="${AGCC} -Dtest_10_file_3='\"a string\"' -v3 --gen_config  -o test_10.config --config_command \"${CONFIG_COMMAND}\""
+  if  ( eval ${EXEC} );then true;else
+    ERR_MSG="Failed executing '${EXEC}'";
+    return 1;
+  fi;
+
+
+  if [ ! -f test_10.config ];then
+    ERR_MSG="Puma Configuration File 'test10.config' was not generated";
+    return 1;
+  fi;
+
+  if (  diff -w test_10.config test_10.ref );then true;else
+    ERR_MSG="Outputs differ: Configuration file not correctly generated";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+  rm -f test_10.config
+}
+

@@ -1,0 +1,7 @@
+Bug512: advice for macro-generated call not woven
+=================================================
+BEFORE: void hal_thread_switch_context()
+BEFORE: void hal_thread_switch_context()
+BEFORE: C a()
+BEFORE: void C::b()
+=================================================

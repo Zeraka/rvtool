@@ -1,0 +1,19 @@
+#ifndef __ABDef_ah__
+#define __ABDef_ah__
+
+#include <stdio.h>
+#include "A.h"
+#include "B.h"
+#include "ABDecl.ah"
+
+slice void ABCrossed::ASlice::f2 () {
+    printf ("  function ABCrossed::ASlice::f2 calls B::f1\n");
+    _bref->f1 ();
+}
+
+slice void ABCrossed::BSlice::f2 () {
+    printf ("  function ABCrossed::BSlice::f2 calls A::f1\n");
+    _aref->f1 ();
+}
+
+#endif // __ABDef_ah__

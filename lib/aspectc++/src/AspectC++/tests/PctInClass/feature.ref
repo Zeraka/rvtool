@@ -1,0 +1,5 @@
+PctInClass: tests pointcut lookup
+=================================
+before void N1::C::f()
+after void N1::C::f()
+=================================

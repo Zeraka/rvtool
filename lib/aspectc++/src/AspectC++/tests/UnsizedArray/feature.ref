@@ -1,0 +1,22 @@
+member offsets (should be distinct):
+====================================
+i: 0
+letter: 1
+data: 2
+
+member values:
+==============
+i: 0
+letter: 56
+data:
+
+write to m->data[] and use copy ctor (m2's data should be zeros):
+=================================================================
+m->data[]: 49494949494949494949
+m2->data[]: 0000000000
+
+member values (m2's letter should be 56):
+=========================================
+i: 0
+letter: 56
+data:

@@ -1,0 +1,57 @@
+
+All: int a
+Root (long): int a
+Root (rec,new): int a
+Root (norec,new): int a
+
+All: int b
+Root (long): int b
+Root (rec,new): int b
+Root (norec,new): int b
+
+All: int T::a
+Root (rec,new): int T::a
+WCard (rec,new): int T::a
+WCard (norec,new): int T::a
+T (long): int T::a
+T (new): int T::a
+
+All: int T::b
+Root (rec,new): int T::b
+WCard (rec,new): int T::b
+WCard (norec,new): int T::b
+T (long): int T::b
+T (new): int T::b
+
+All: int Q::R::a
+Root (rec,new): int Q::R::a
+WCard (rec,new): int Q::R::a
+Q (rec,long): int Q::R::a
+Q (rec,new): int Q::R::a
+Q::R (long): int Q::R::a
+Q::R (new): int Q::R::a
+
+All: int Q::R::a
+Root (rec,new): int Q::R::a
+WCard (rec,new): int Q::R::a
+Q (rec,long): int Q::R::a
+Q (rec,new): int Q::R::a
+Q::R (long): int Q::R::a
+Q::R (new): int Q::R::a
+
+All: int Q::R::b
+Root (rec,new): int Q::R::b
+WCard (rec,new): int Q::R::b
+Q (rec,long): int Q::R::b
+Q (rec,new): int Q::R::b
+Q::R (long): int Q::R::b
+Q::R (new): int Q::R::b
+
+All: int Q::a
+Root (rec,new): int Q::a
+WCard (rec,new): int Q::a
+WCard (norec,new): int Q::a
+Q (long): int Q::a
+Q (norec,new): int Q::a
+Q (rec,long): int Q::a
+Q (rec,new): int Q::a

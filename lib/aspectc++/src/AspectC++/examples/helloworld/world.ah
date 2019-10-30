@@ -1,0 +1,15 @@
+#ifndef __WORLD_AH__
+#define __WORLD_AH__
+
+#include <iostream>
+
+aspect World {
+
+  advice execution("void hello()") : after() {
+    //print "World" after execution of the 'hello()' function
+    std::cout << "World" << std::endl;
+  }
+
+};
+
+#endif

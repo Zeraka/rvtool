@@ -1,0 +1,57 @@
+TemplateExtCall: tracing template arg dependant calls
+=====================================================
+methods of class template instances
+
+--- "void Array<int,4>::set(int,const int &)" ---
+ArrayTracer for any Array: "void Array<int,4>::set(int,const int &)"
+ArrayTracer for <int,4>: "void Array<int,4>::set(int,const int &)"
+
+--- "void Array<int,4>::set(int,const int &)" ---
+ArrayTracer for any Array: "void Array<int,4>::set(int,const int &)"
+ArrayTracer for <int,4>: "void Array<int,4>::set(int,const int &)"
+
+--- "void Array<int,4>::set(int,const int &)" ---
+ArrayTracer for any Array: "void Array<int,4>::set(int,const int &)"
+ArrayTracer for <int,4>: "void Array<int,4>::set(int,const int &)"
+
+--- "void Array<int,4>::set(int,const int &)" ---
+ArrayTracer for any Array: "void Array<int,4>::set(int,const int &)"
+ArrayTracer for <int,4>: "void Array<int,4>::set(int,const int &)"
+
+--- "int Array<int,4>::get(int) const" ---
+ArrayTracer for any Array: "int Array<int,4>::get(int) const"
+ArrayTracer for <int,4>: "int Array<int,4>::get(int) const"
+
+--- "void Array<long int,5>::set(int,const long int &)" ---
+ArrayTracer for any Array: "void Array<long int,5>::set(int,const long int &)"
+ArrayTracer for <long,%>: "void Array<long int,5>::set(int,const long int &)"
+
+--- "void Array<float,3>::set(int,const float &)" ---
+ArrayTracer for any Array: "void Array<float,3>::set(int,const float &)"
+ArrayTracer for <%,3>: "void Array<float,3>::set(int,const float &)"
+
+--- "float Array<float,3>::get(int) const" ---
+ArrayTracer for any Array: "float Array<float,3>::get(int) const"
+ArrayTracer for <%,3>: "float Array<float,3>::get(int) const"
+
+--- "int Max<int>(const int &,const int &)" ---
+MaxTracer for any Max(...): "int Max<int>(const int &,const int &)"
+MaxTracer for Max<int>(...): "int Max<int>(const int &,const int &)"
+
+--- "double HardMatch::Max<double>(const double &,const double &)" ---
+MaxTracer for any Max(...): "double HardMatch::Max<double>(const double &,const double &)"
+-----------------------------------------------------
+static template functions/member functions
+
+--- "C *alloc<C>()" ---
+C constructor
+
+--- "void dealloc<C>(C *)" ---
+C destructor
+
+--- "C *Sys<42>::Mem<C>::alloc()" ---
+C constructor
+
+--- "void Sys<42>::Mem<C>::dealloc(C *)" ---
+C destructor
+=====================================================

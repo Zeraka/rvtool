@@ -1,0 +1,34 @@
+#include <iostream>
+
+namespace acc {
+  attribute myNoreturn();
+  attribute aha(typename X, template<typename, int> class A);
+  attribute myAttr(int i, void (*param)(int));
+  attribute myNNAttr(typename X, X& b);
+  attribute wholeFunc(int a);
+  attribute hi(int a, const char* B);
+}
+
+aspect funcModifierClass {
+  advice construction ("[[acc::aha(int, List)]]") : before() {
+    std::cout << "ClassAttributed" << std::endl;
+  }
+};
+
+aspect funcModifierClassFail {
+  advice construction ("[[acc::aha(char, List)]]") : before() {
+    std::cout << "ClassAttributed failed" << std::endl;
+  }
+};
+
+aspect funcModifierFail {
+  advice execution (/*"% %(...)"*/"[[acc::myNNAttr(Core, co2)]]" &&  "[[acc::hi( 3, \"al\" \"oa\" )]]" && "[[acc::aha(char, List)]]") && within("[[acc::aha(int, List)]]") : before() {
+    std::cout << "FunctionAttributed faied" << std::endl;
+  }
+};
+
+aspect funcModifier {
+  advice execution (/*"% %(...)"*/"[[acc::myNNAttr(Core, co)]]" &&  "[[acc::hi( 3, \"al\" \"oa\" )]]" && "[[acc::aha(char, List)]]") && within("[[acc::aha(int, List)]]") : before() {
+    std::cout << "FunctionAttributed" << std::endl;
+  }
+};

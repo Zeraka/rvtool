@@ -1,0 +1,2088 @@
+#LyX 1.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 221
+\textclass article
+\begin_preamble
+\usepackage{floatflt}
+\usepackage{../styles/pure-systems}
+\doctype{Documentation:}
+\titleback{
+  \null\thispagestyle{empty}\vfill
+  \noindent\small{(c) 2002-2003 pure-systems GmbH\\All rights reserved.}
+  \null\cleardoublepage}
+\pslogo{
+  \resizebox{6cm}{!}{\includegraphics{../images/ps-logo.eps}}}
+\otherlogo{
+  \resizebox{4cm}{!}{\includegraphics{../images/ac++logo.eps}}}
+\sloppy
+\remark{
+  \small{(c) 2002-2003 pure-systems GmbH\\Agnetenstr. 14\\39106 Magdeburg\\http://www.pure-systems.com}}
+\end_preamble
+\language english
+\inputencoding auto
+\fontscheme pslatex
+\graphics default
+\float_placement hbt
+\paperfontsize 11
+\spacing single 
+\papersize Default
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\use_natbib 0
+\use_numerical_citations 0
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Title
+
+AspectC++ Programming Guide
+\begin_inset Note
+collapsed false
+
+\layout Standard
+
+!!!NOCH NICHT BEGONNEN!!! (=> EHEMALIGES Manual.sgml)
+\end_inset 
+
+
+\layout Author
+
+Danilo Beuche
+\newline 
+Daniel Mahrenholz
+\layout Standard
+
+
+\begin_inset LatexCommand \tableofcontents{}
+
+\end_inset 
+
+
+\begin_inset ERT
+status Collapsed
+
+\layout Standard
+
+\backslash 
+clearpage
+\end_inset 
+
+
+\layout Comment
+
+
+\begin_inset ERT
+status Collapsed
+
+\layout Standard
+
+\backslash 
+twocolumn
+\end_inset 
+
+
+\layout Section
+
+Introduction
+\layout Standard
+
+AspectC++ is an aspect-oriented extension to the C++ language.
+ It is similar to AspectJ
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+
+\family typewriter 
+www.aspectj.org
+\end_inset 
+
+ but, due to the nature of C++, in some points completely different.
+ AspectC++ works as a C/C++ to C++ compiler and so can be used as a front-end
+ to any C++-compliant compiler.
+ AspectC++ does not require a special runtime system.
+ This enables AspectC++ to be used in areas where e.g.
+ Java/AspectJ are not suitable.
+ 
+\layout Section
+
+Getting Started
+\layout Subsection
+
+Installation
+\layout Standard
+
+Currently AspectC++ is available as precompiled binary only.
+ To install AspectC++, follow these steps:
+\layout Enumerate
+
+Download the archive appropriate for your platform/system from the download
+ section of 
+\family typewriter 
+AspectC.org
+\family default 
+
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+
+\family typewriter 
+www.aspectc.org
+\end_inset 
+
+.
+\layout Enumerate
+
+Unpack the archive.
+\layout Itemize
+
+Linux/Solaris/MacOS X version: using 
+\series bold 
+tar
+\series default 
+ and 
+\series bold 
+gzip
+\series default 
+: 
+\series bold 
+tar xzf
+\series default 
+ 
+\series bold 
+aspectc++-{version}.tar.gz
+\series default 
+.
+ All files will be placed under 
+\family typewriter 
+aspectc++-{version}
+\family default 
+.
+\layout Itemize
+
+Win32 version: using e.g.
+ 
+\series bold 
+Winzip
+\series default 
+.
+ Extract the archive to 
+\family typewriter 
+C:
+\backslash 
+
+\family default 
+.
+ All files will than be placed under 
+\family typewriter 
+C:
+\backslash 
+AC
+\family default 
+.
+\layout Subsection
+
+Configuration: Linux/Solaris/MacOS X version
+\layout Standard
+
+Before AspectC++ can run correctly some environment variables need to be
+ set up and a configuration file for the PUMA parser has to be created.
+\layout Itemize
+
+
+\family typewriter 
+CC
+\family default 
+ (optional) should be set to your preferred C compiler.
+\layout Itemize
+
+
+\family typewriter 
+CXX
+\family default 
+ (optional) should be set to your preferred C++ compiler.
+\layout Itemize
+
+
+\family typewriter 
+PUMA
+\family default 
+ (mandatory) should point to your PUMA directory.
+ In most cases this variable should be set to 
+\family typewriter 
+<install-dir>/PUMA
+\family default 
+.
+\layout Itemize
+
+
+\family typewriter 
+PUMA_CONFIG
+\family default 
+ (mandatory) should point to your PUMA configuration file.
+ If you follow this installation instructions this variable should be set
+ to 
+\family typewriter 
+<install-dir>/puma.config
+\family default 
+.
+\layout Standard
+
+After setting up all the environment variables the creation of the PUMA
+ configuration file can be done by running 
+\series bold 
+$PUMA/Runtime/Binaries/pumag++conf.pl $PUMA_CONFIG
+\series default 
+.
+ You need a functioning PERL installation to use this configuration script.
+\layout Quote
+
+
+\series bold 
+Important:
+\series default 
+ In most cases the generated configuration file can be used only with the
+ selected (
+\family typewriter 
+CC
+\family default 
+, 
+\family typewriter 
+CXX
+\family default 
+) compiler.
+ So you have to create a new configuration every time you choose another
+ compiler.
+ 
+\layout Subsection
+
+Configuration: Win32 version
+\layout Standard
+
+See the 
+\family typewriter 
+README.win32
+\family default 
+ file included in the Win32 archive.
+\layout Subsection
+
+Running the Examples
+\layout Standard
+
+The AspectC++ package comes with a set of working examples (subdirectory
+ 
+\family typewriter 
+examples
+\family default 
+).
+ To run 
+\series bold 
+ac++
+\series default 
+ on these examples you can simply type 
+\series bold 
+make test
+\series default 
+.
+ The transformed source code of each example will be stored under 
+\series bold 
+examples/<name>-out
+\series default 
+.
+ To compile and run a single example simply change to the output directory
+ and type 
+\series bold 
+make
+\series default 
+.
+ To compile and run all examples at once you can also type 
+\series bold 
+make testrun
+\series default 
+ from the main directory.
+\layout Section
+
+Quick Reference
+\layout Subsection
+
+ac++: Command Line Options
+\layout Standard
+
+The main AspectC++ binary is 
+\series bold 
+ac++
+\series default 
+.
+ It has the command line options listed in table 
+\begin_inset LatexCommand \ref{tab:ac++-command-line}
+
+\end_inset 
+
+.
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="5" columns="3">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="20text%">
+<column alignment="left" valignment="top" leftline="true" width="20text%">
+<column alignment="block" valignment="top" leftline="true" rightline="true" width="51text%">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+-p <input-dir>
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+mandatory
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+This option specifies the input directory.
+ It denotes the root directory that contains the C++ input files (in both
+ modes) and aspect definitions (dir mode only).
+ 
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+-d <output-dir>
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+mandatory (dir mode)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+This option specifies the directory where the manipulated files will be
+ stored.
+ It implicitly defines the directory mode.
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+-v <number>
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+optional
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+This option specifies the verbosity level.
+ Values from 0 to 9 can be used here.
+ A higher number produces a more detailed output.
+ 
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+-I <path>
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+optional
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+This option specifies additional include directories.
+ It can be given multiple times.
+ 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+-D <define>
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+optional
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+This option can be used to define additional preprocessor macros.
+ It can be given multiple times.
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\series bold 
+
+\begin_inset LatexCommand \label{tab:ac++-command-line}
+
+\end_inset 
+
+ac++
+\series default 
+ command line options
+\end_inset 
+
+
+\layout Quote
+
+
+\series bold 
+Important:
+\series default 
+ If you use include files that lie inside the 
+\family typewriter 
+input-dir
+\family default 
+ tree you have to specify the root directory for those include files with
+ the 
+\family typewriter 
+-I
+\family default 
+ option.
+ This is necessary because 
+\series bold 
+ac++
+\series default 
+ might manipulate the contents of these header files and otherwise would
+ translate the include path to point to the original and not to the manipulated
+ version.
+ 
+\layout Subsubsection*
+
+Example 1.
+ Common ac++ invocation (directory mode)
+\layout Standard
+
+Suppose you have a C++ project in the directory 
+\family typewriter 
+Project
+\family default 
+ using include files from 
+\family typewriter 
+Project/include
+\family default 
+ and want a detailed process report, then you would invoke the 
+\series bold 
+ac++
+\series default 
+ in directory mode like:
+\layout LyX-Code
+
+
+\family typewriter 
+ac++ -p Project -d
+\family default 
+ 
+\family typewriter 
+Project-out -I
+\family default 
+ 
+\family typewriter 
+Project/include -v9
+\layout Subsubsection*
+
+Example 2.
+ Common ac++ invocation (single file mode)
+\layout Standard
+
+Suppose you have two files containing C++ code (
+\family typewriter 
+foo.cc
+\family default 
+, 
+\family typewriter 
+bar.cc
+\family default 
+) in the current directory using include files from the 
+\family typewriter 
+include
+\family default 
+ subdirectory, the aspect code is in 
+\family typewriter 
+important.ah
+\family default 
+.
+ Generated and manipulated files should be stored in directory 
+\family typewriter 
+../generated
+\family default 
+.
+ The transformation requires three invocations of 
+\series bold 
+ac++
+\series default 
+:
+\layout LyX-Code
+
+
+\family typewriter 
+ac++ -p .
+ -c foo.cc -o ../generated/foo.cc -a important.ah -I include
+\family default 
+ 
+\newline 
+
+\family typewriter 
+ac++ -p .
+ -c bar.cc -o ../generated/foo.cc -a important.ah -I include
+\family default 
+ 
+\newline 
+
+\family typewriter 
+ac++ -p .
+ -g -a important.ah -I include
+\layout Subsection
+
+Tutorial: Writing Simple Aspects
+\layout Standard
+
+Writing aspects works very similar to writing C++ class definitions.
+ They can be placed in separate include files (extension 
+\family typewriter 
+.ah
+\family default 
+) or together with a class implementation.
+ The first method should be preferred to support a later splitting into
+ an aspect declaration and an aspect definition file.
+ Include files used for aspect definitions should be protected agains multiple
+ inclusion like any other include file.
+ Example 3 shows how to achieve this.
+\layout Subsubsection*
+
+Example 3.
+ Tutorial 01:
+\layout LyX-Code
+
+#ifndef __Tutorial_01_ah
+\newline 
+#define __Tutorial_01_ah 
+\newline 
+
+\newline 
+aspect Tutorial01 { 
+\newline 
+  // aspect code
+\newline 
+}; 
+\newline 
+
+\newline 
+#endif // __Tutorial_01_ah 
+\layout Subsubsection
+
+Syntax Overview
+\layout Standard
+
+The AspectC++ syntax is an extension to the syntax defined in the ANSI C++
+ standard.
+ It adds three new keywords to the C++ language: 
+\family typewriter 
+aspect
+\family default 
+, 
+\family typewriter 
+advice
+\family default 
+, and 
+\family typewriter 
+pointcut
+\family default 
+.
+\layout Subsubsection*
+
+
+\family typewriter 
+aspect
+\family default 
+ Declaration
+\layout Standard
+
+The basic structure of an aspect declaration is exactly the same as a normal
+ C++ class definition, except for the keyword 
+\family typewriter 
+aspect
+\family default 
+.
+ According to that aspects can have attributes and methods or can inherit
+ from classes or other aspects.
+\layout Subsubsection*
+
+Example 4.
+ Tutorial 02:
+\layout LyX-Code
+
+#ifndef __Tutorial_02_ah 
+\newline 
+#define __Tutorial_02_ah 
+\newline 
+
+\newline 
+aspect Tutorial02 : public BaseClassOrAspect { 
+\newline 
+  // counter to store the number 
+\newline 
+  // of activations of this aspect   
+\layout LyX-Code
+
+  int m_countRuns; 
+\newline 
+  
+\newline 
+public: 
+\newline 
+  Tutorial02() : m_countRuns(0) {} 
+\newline 
+  
+\newline 
+  int runs() const { return m_countRuns; } 
+\newline 
+}; 
+\newline 
+
+\newline 
+#endif // __Tutorial_02_ah 
+\layout Subsubsection*
+
+advice Declaration
+\layout Standard
+
+An advice declaration is used either to specify code that should run when
+ the join points specified by a pointcut expression are reached or to introduce
+ a new method, attribute, or type to all join points specified by a pointcut
+ expression.
+ 
+\layout Standard
+
+The keyword 
+\family typewriter 
+advice
+\family default 
+ is followed by a pointcut expression describing all join points where the
+ advice should be applied.
+ The actual advice follows the colon.
+\layout Standard
+
+The simple aspect in example 5 specifies all main functions with an arbitrary
+ list of parameters and any return type as target of the aspect.
+ The special advice declaration 
+\family typewriter 
+before
+\family default 
+ causes the following advice code to be executed before the code of the
+ matched function.
+\layout Subsubsection*
+
+Example 5.
+ A simple aspect modifying a program's main function:
+\layout LyX-Code
+
+#ifndef __Tutorial_03_ah 
+\newline 
+#define __Tutorial_03_ah 
+\newline 
+
+\newline 
+#include <stdio.h> 
+\newline 
+
+\newline 
+aspect Tutorial03 { 
+\newline 
+  advice "% main(...)" : before() { 
+\newline 
+    printf("Aspects first!
+\backslash 
+n"); 
+\newline 
+  } 
+\newline 
+}; 
+\newline 
+
+\newline 
+#endif // __Tutorial_03_ah 
+\layout Subsubsection
+
+Match Expressions
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="block" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+int
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches the built-in scalar type 
+\family typewriter 
+int
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+Chain
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches the class, struct or union 
+\family typewriter 
+Chain
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+Memory%
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches all classes, structs or unions having a name starting with 
+\family typewriter 
+Memory
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:Examples-matching-types}
+
+\end_inset 
+
+Examples for match expressions matching types
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+Chain *Chain::next
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches the attribute 
+\family typewriter 
+next
+\family default 
+ of the class or struct 
+\family typewriter 
+Chain
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+% State::%
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches all attributes of any type of the class or struct 
+\family typewriter 
+State
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:Examples-matching-attributes}
+
+\end_inset 
+
+Examples for match expressions matching attributes
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="block" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+void reset()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches the function 
+\family typewriter 
+reset
+\family default 
+ having no return value and no parameters
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+int main(int, char**)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches the function having exact the given signature
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+% printf(...)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches any function with the name 
+\family typewriter 
+printf
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+void %(int, %)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches functions with any name, taking an 
+\family typewriter 
+int
+\family default 
+ as the first argument, and having a second argument of any type
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+void %::clear(...)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches any method 
+\family typewriter 
+clear
+\family default 
+ of any class 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+% Mode::get%()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+matches all methods of class 
+\family typewriter 
+Mode
+\family default 
+ whose name start with 
+\family typewriter 
+get
+\family default 
+, having any return type and no parameters
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:Examples-matching-methods}
+
+\end_inset 
+
+Examples for match expressions matching methods
+\end_inset 
+
+
+\layout Subsubsection
+
+Pointcut functions
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+call(pointcut)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+call
+\family default 
+ filters all join points from the pointcut that are method calls
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+execution(pointcut)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+execution
+\family default 
+ filters all join points referring to method implementations (the execution
+ of the method body)
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:Pointcut-types}
+
+\end_inset 
+
+Pointcut functions: methods
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+classes(pointcut)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+classes
+\family default 
+ delivers only the classes, structs and unions from a pointcut
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+derived(pointcut)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+derived
+\family default 
+ delivers all types in the pointcut and all classes derived from them
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+base(pointcut)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+base
+\family default 
+ can be used to find all base types of classes in the pointcut
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+instanceof(pointcut)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+instanceof
+\family default 
+ can be used to locate objects of certain types
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:Pointcut-types}
+
+\end_inset 
+
+Pointcut functions: types
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="1" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+within(pointcut)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+within
+\family default 
+ delivers all join points declared in methods of types in the pointcut
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:Pointcut-scopes}
+
+\end_inset 
+
+Pointcut functions: scopes
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="1" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+cflow(pointcut)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+cflow
+\family default 
+ captures join points occuring in the dynamic execution context of join
+ points in the pointcut
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:Pointcut-control}
+
+\end_inset 
+
+Pointcut functions: control flow
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+that(type pattern)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+that
+\family default 
+ returns all join points where the current C++ 
+\family typewriter 
+this
+\family default 
+ pointer refers to an object which is an instance of the type described
+ by the type pattern
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+target(type pattern)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+target
+\family default 
+ returns all join points where the target object of a call is an instance
+ of a type in the type pattern
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+args(type pattern, ...)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+args
+\family default 
+ receives a list of type patterns and filters all methods or attributes
+ with a matching signature
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:Pointcut-context}
+
+\end_inset 
+
+Pointcut functions: context
+\end_inset 
+
+
+\layout Subsection
+
+
+\family typewriter 
+ThisJoinPoint
+\family default 
+-API
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\series bold 
+Type
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\series bold 
+Description
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+Result
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+result type of a function
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+That
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+object type (object initiating a call)
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+Target
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+target object type (target object of a call)
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:type-definitions}
+
+\end_inset 
+
+
+\family typewriter 
+ThisJoinPoint
+\family default 
+-API: type definitions
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="8" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\series bold 
+Function
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\series bold 
+Description
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+AC::Type type()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns the encoded type for the join point conforming with the C++ ABI
+ V3 specification
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+int args()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns the number of arguments of a method for call and execution join
+ points
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+AC::Type argtype(int number)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns the encoded type of an argument conforming with the C++ ABI V3 specifica
+tion
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+const char *signature()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+gives a textual description of the join point (method name, class name,
+ ...)
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+unsigned int id()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns a unique numeric identifier for this join point
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+AC::Type resulttype()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns the encoded type of the result type conforming with the C++ ABI
+ V3 specification
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+AC::JPType jptype()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns a unique identifier describing the type of the join point
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:static-functions}
+
+\end_inset 
+
+
+\family typewriter 
+ThisJoinPoint
+\family default 
+-API: static functions
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Float table
+placement H
+wide false
+collapsed true
+
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="35col%">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="60col%">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\series bold 
+Method
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\series bold 
+Description
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+void *arg(int number)
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns a pointer to the memory position holding the argument value with
+ index 
+\family typewriter 
+number
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+Result *result()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns a pointer to the memory location designated for the result value
+ or 0 if the function has no result value
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+That *that()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns a pointer to the object initiating a call or 0 if it is a static
+ method or a global function
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+Target *target()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns a pointer to the object that is the target of a call or 0 of it
+ is a static method or a global function
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family typewriter 
+ACAction &action()
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+returns the runtime action object containing the execution environment to
+ execute (
+\family typewriter 
+trigger()
+\family default 
+) the original functionality encapsulated by an around advice
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Caption
+
+
+\begin_inset LatexCommand \label{tab:non-static-functions}
+
+\end_inset 
+
+
+\family typewriter 
+ThisJoinPoint
+\family default 
+-API: non-static functions
+\end_inset 
+
+
+\the_end

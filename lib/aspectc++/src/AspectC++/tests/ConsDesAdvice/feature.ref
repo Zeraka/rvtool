@@ -1,0 +1,53 @@
+ConsDesAdvice: advice for object construction & destruction
+===========================================================
+--C2:
+  after Unique::Unique(), that Unique 0
+  before C1::C1(int), that C1 0
+  before C1::C1(int)
+  dump: C1 obj 0 (815, [815, 815, 815], 4711, 4711, 13, [3.14, 2.71] 4711)
+  after integer constructor 4711
+  after C1::C1(int), that Unique 0
+  before C2::C2()
+  before C2::C2(), that C1 0
+  instead of C2::C2()
+  after C2::C2(), that Unique 0
+--C2-copy:
+  after Unique::Unique(const Unique &), that Unique 1
+  before C1::C1(const C1 &), that C1 1
+  before C1::C1(const C1 &)
+  after C1::C1(const C1 &), that Unique 1
+  before C2::C2(const C2 &), that C1 1
+  instead of C2::C2(const C2 &)
+  after C2::C2(const C2 &), that Unique 1
+--C3:
+  after Unique::Unique(), that Unique 2
+  before C1::C1(int), that C1 2
+  before C1::C1(int)
+  dump: C1 obj 2 (815, [815, 815, 815], 50, 50, 13, [3.14, 2.71] 4711)
+  after integer constructor 50
+  after C1::C1(int), that Unique 2
+  before C3::C3(int), that C1 2
+  after integer constructor 10
+  after C3::C3(int), that Unique 2
+--C4:
+  instead of C4::C4()
+  before C4::C4()
+  after cons/dest within C4::C4()
+--correctly copied?
+  C1 obj 0 (815, [815, 815, 815], 4711, 4711, 13, [3.14, 2.71] 4711)
+  C1 obj 1 (815, [815, 815, 815], 4711, 4711, 13, [3.14, 2.71] 4711)
+--Bug530: is that object constructed here?
+  before Bug530::Bug530()
+  after Bug530::Bug530()
+  before Bug530::Bug530(const Bug530 &)
+  after Bug530::Bug530(const Bug530 &)
+--Instantiating template TXXX<int>: no advice should match here
+----------------------end-of-main--------------------------
+  after cons/dest within C4::~C4()
+  after C4::~C4()
+  before C1::~C1()
+  before C2::~C2()
+  before C1::~C1()
+  before C2::~C2()
+  before C1::~C1()
+===========================================================

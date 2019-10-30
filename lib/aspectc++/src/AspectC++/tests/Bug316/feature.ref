@@ -1,0 +1,8 @@
+e1: before void X::fx()
+e2: before void X::fx()
+e1: before void X::Y::fy(X::Y *)
+e2: before void X::Y::fy(X::Y *)
+e2: after void X::Y::fy(X::Y *)
+e1: after void X::Y::fy(X::Y *)
+e2: after void X::fx()
+e1: after void X::fx()

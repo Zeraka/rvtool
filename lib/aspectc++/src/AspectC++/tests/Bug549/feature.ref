@@ -1,0 +1,5 @@
+Bug549: exec joinpoint with function-reference-return-type
+==========================================================
+executing void (&get_func_ref())(int)
+executing void (*get_func_pointer())(int)
+executing int (&get_array_ref())[10]

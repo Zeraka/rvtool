@@ -1,0 +1,53 @@
+digraph ACModel {
+  node [fontname = "Helvetica"];
+  edge [fontname = "Helvetica"];
+  
+  
+  Any [shape=record label="{Any|jpid: int\n}"]
+ 
+  
+  Name [shape=record label="{Name|name: string\nbuiltin: bool\n}"]
+  Any -> Name [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Namespace [shape=record label="{Namespace|}"]
+  Name -> Namespace [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Function [shape=record label="{Function|kind: FunctionType\nvariadic_args: bool\ncv_qualifiers: CVQualifiers\n}"]
+  Name -> Function [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Variable [shape=record label="{Variable|kind: VariableType\n}"]
+  Name -> Variable [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Class [shape=record label="{Class|}"]
+  Name -> Class [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  ClassSlice [shape=record label="{ClassSlice|is_struct: bool\n}"]
+  Name -> ClassSlice [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Code [shape=record label="{Code|}"]
+  Any -> Code [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Access [shape=record label="{Access|lid: int\ntarget_object_lid: int\ncfg_block_lid: int\n}"]
+  Code -> Access [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Get [shape=record label="{Get|}"]
+  Access -> Get [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Set [shape=record label="{Set|}"]
+  Access -> Set [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Call [shape=record label="{Call|default_args: int\n}"]
+  Access -> Call [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Builtin [shape=record label="{Builtin|}"]
+  Access -> Builtin [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Ref [shape=record label="{Ref|}"]
+  Access -> Ref [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  GetRef [shape=record label="{GetRef|kind: VariableType\n}"]
+  Access -> GetRef [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  SetRef [shape=record label="{SetRef|kind: VariableType\n}"]
+  Access -> SetRef [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  CallRef [shape=record label="{CallRef|kind: VariableType\n}"]
+  Access -> CallRef [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Execution [shape=record label="{Execution|}"]
+  Code -> Execution [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Construction [shape=record label="{Construction|}"]
+  Code -> Construction [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Destruction [shape=record label="{Destruction|}"]
+  Code -> Destruction [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  
+  
+  
+  { rank=same Name Code }
+  { rank=min Any }
+  
+}

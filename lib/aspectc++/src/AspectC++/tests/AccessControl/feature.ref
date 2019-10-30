@@ -1,0 +1,49 @@
+AccessControl: advice for calls with special privileges
+=======================================================
+call to int Derived::val()
+around1: call to int Derived::val()
+around2: call to int Derived::val()
+ --> call to private member from constructor init list
+call to void Derived::g1()
+around1: call to void Derived::g1()
+around2: call to void Derived::g1()
+ --> public
+call to void Derived::p()
+around1: call to void Derived::p()
+around2: call to void Derived::p()
+ --> private in same class
+call to void Base::f()
+around1: call to void Base::f()
+around2: call to void Base::f()
+ --> protected in base
+call to void Base::x()
+around1: call to void Base::x()
+around2: call to void Base::x()
+call to void HasFriend::h()
+around1: call to void HasFriend::h()
+around2: call to void HasFriend::h()
+Calls2: call to void HasFriend::h()
+Calls3: call to void HasFriend::h()
+ --> access for friend Base::x() only
+call to void Derived::g2()
+around1: call to void Derived::g2()
+around2: call to void Derived::g2()
+ --> public
+call to void Derived::p()
+around1: call to void Derived::p()
+around2: call to void Derived::p()
+ --> private in same class
+call to void Base::f()
+around1: call to void Base::f()
+around2: call to void Base::f()
+ --> protected in base
+call to void Base::x()
+around1: call to void Base::x()
+around2: call to void Base::x()
+call to void HasFriend::h()
+around1: call to void HasFriend::h()
+around2: call to void HasFriend::h()
+Calls2: call to void HasFriend::h()
+Calls3: call to void HasFriend::h()
+ --> access for friend Base::x() only
+=======================================================

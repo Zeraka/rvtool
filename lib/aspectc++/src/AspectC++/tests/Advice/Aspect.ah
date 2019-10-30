@@ -1,0 +1,19 @@
+#ifndef __Aspect_ah__
+#define __Aspect_ah__
+
+#include <stdio.h>
+
+aspect Action {
+  advice execution("% A::%(...)"||"% b(...)"||"% d(...)"||"% e(...)"||"% f(...)") : around()  {
+    printf("A: before(exec) %s\n", JoinPoint::signature());
+    tjp->proceed();
+    printf("A: after(exec) %s\n", JoinPoint::signature());
+  }
+  advice call("% A::%(...)"||"% b(...)"||"% d(...)"||"% e(...)"||"% f(...)") : around()  {
+    printf("A: before(call) %s\n", JoinPoint::signature());
+    tjp->proceed();
+    printf("A: after(call) %s\n", JoinPoint::signature());
+  }
+};
+
+#endif // __Aspect_ah__

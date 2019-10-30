@@ -1,0 +1,17 @@
+Slice: of few simple slice implementations
+==========================================
+before Puma::XXX::XXX(bool)
+before bool Puma::XXX::in_advice() const
+in: 1
+before void Puma::XXX::enter_advice()
+before void Puma::XXX::Nested3::nf()
+call advice for introduced code works.
+before void Puma::XXX::Nested3::here_I_am()
+before bool Puma::XXX::in_advice() const
+in: 1
+before void Puma::XXX::leave_advice()
+before bool Puma::XXX::in_advice() const
+in: 0
+before void Puma::XXX::g()
+==========================================
+before Puma::XXX::~XXX()

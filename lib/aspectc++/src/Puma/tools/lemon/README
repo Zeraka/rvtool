@@ -1,0 +1,20 @@
+The LEMON Parser Generator
+
+home: http://www.hwaci.com/sw/lemon/
+
+This is a patched version based on the original lemon sources taken from here:
+
+repository: http://www.sqlite.org/src/artifact?ci=trunk&filename=tool/lemon.c
+File tool/lemon.c part of check-in [34eb6911] at 2015-10-29 13:48:15 on branch trunk
+
+repository: http://www.sqlite.org/src/artifact?ci=trunk&filename=tool/lempar.c
+File tool/lempar.c part of check-in [e9d604b4] at 2015-09-07 20:02:39 on branch lemon-update
+
+See lemon.c.orig and lempar.c.orig for the unpatched originals.
+
+Changes to lemon.c:
+- added a second command line argument: an output directory for the generated source files
+- changed file extension .c to .cc for the generated parser implementation file
+
+Changes to lempar.c:
+- allow empty files to be successfully parsed

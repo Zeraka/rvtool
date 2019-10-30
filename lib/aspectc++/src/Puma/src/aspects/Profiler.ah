@@ -1,0 +1,61 @@
+#ifndef __profiler_ah__
+#define __profiler_ah__
+
+#include "Puma/GenericProfiler.ah"
+#include <iostream>
+
+  // These functions cannot be woven due to ac++ problems:
+  // pointcut virtual measureFct () = "% ...::% (...)" &&
+  //   !"% CSVProfiler::%(...)" &&
+  //   !"% ...::operator new(...)" &&
+  //   !"% ...::operator delete(...)" &&
+  //   !"% ...::yy_%(...)" &&
+  //   !"% void PreExprParser(...)" &&
+  //   !"% void CMatchParser(...)";
+
+//aspect PathManagerProfiler : public GenericProfiler {
+//
+//  PathManagerProfiler() : GenericProfiler("PathManager") {}
+//
+//  pointcut virtual measureFct () = "% Puma::PathManager::%(...)";
+//};
+
+aspect SyscallProfiler : public GenericProfiler {
+
+  SyscallProfiler() : GenericProfiler("SysCall") {}
+
+  pointcut virtual measureFct () = "% Puma::SysCall::%(...)";
+};
+
+aspect NameLookupProfiler : public GenericProfiler {
+
+  NameLookupProfiler() : GenericProfiler("NameLookup") {}
+
+  pointcut virtual measureFct () = "% Puma::CCNameLookup::lookup%(...)";
+};
+
+aspect SemanticProfiler : public GenericProfiler {
+
+  SemanticProfiler() : GenericProfiler("Semantic") {}
+
+  pointcut virtual measureFct () = "Puma::CTree *Puma::CCSemantic::%(...)";
+};
+
+aspect NoGroupProfiler : public GenericProfiler {
+
+  NoGroupProfiler() {
+    atexit (csv_stat);
+  }
+
+  pointcut virtual measureFct () =
+    "% Puma::CScanner::scan_all(...)" ||
+    "% Puma::PreprocessorParser::next()" ||
+    "% Puma::Parser::parse(...)" ||
+    "% Puma::CCInstantiation::instantiate(...)" ||
+    "% Puma::CScanner::make_token(...)" ||
+    "% Puma::CRecognizer::recognize(...)" ||
+    "% Puma::ManipCommander::commit(...)";
+
+};
+
+#endif

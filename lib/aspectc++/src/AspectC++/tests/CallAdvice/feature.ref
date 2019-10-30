@@ -1,0 +1,134 @@
+CallAdvice: code generation for all kinds of functions
+=============================================================
+global initialization:
+before int global()
+in a global function
+before int global()
+in a global function
+before int global()
+in a global function
+-------------------------------------------------------------
+call to global function from local class => shall not match:
+in a global function
+-------------------------------------------------------------
+various kinds of functions:
+before C C::dup()
+before C &C::operator =(const C &)
+before int f2(int,int)
+before int f1(int)
+before C C::dup()
+before C &C::operator =(const C &)
+before C C::dup()
+before C &C::operator =(const C &)
+before int C::val() const
+result is 4717
+before int f2(int,int)
+before int f1(int)
+before int f2(int,int)
+before int f1(int)
+before int f3(int,int,int)
+before C C::operator !()
+before C C::operator !()
+before C C::operator !()
+before C C::operator !()
+before int C::operator +(int)
+before int f1(int)
+before int C::operator +(int)
+before bool operator +(C,C)
+before int operator ~(C)
+before void C::cnst()
+the non-const version
+before int C::stuff(C *)
+before int C::stuff(C *)
+in function with class-ptr arg
+before void C::cnst() const
+the const function
+before void testfoo::ldebug(const char *,const char *)
+in ldebug
+-------------------------------------------------------------
+static member called:
+before void C::stat(int)
+in a static member
+-------------------------------------------------------------
+call in default arg:
+before void G::f(int)
+before int global()
+in a global function
+-------------------------------------------------------------
+static member called with object:
+before void C::stat(int)
+in a static member
+-------------------------------------------------------------
+function with variable argument list:
+before void var_arg_fct(const char *,...)
+before void var_arg_fct(const char *,...)
+-------------------------------------------------------------
+calls with fully qualified name:
+before void B2::f()
+before void B1::f(int)
+before void B1::g()
+in the base function - OK
+-------------------------------------------------------------
+calls in const member function:
+before void A::f() const
+before void C::cnst() const
+the const function
+before void C::cnst()
+the non-const version
+before void A::g()
+before void C::cnst()
+the non-const version
+before void C::cnst()
+the non-const version
+-------------------------------------------------------------
+operator calls from within non-static methods:
+before void OpTester::run()
+before bool operator +(C,C)
+before int operator ~(C)
+before int C::operator *()
+before modulo operator C operator %(const C &,const C &)
+before C operator %(const C &,const C &)
+before modulo operator C &C::operator %=(int)
+before C &C::operator %=(int)
+-------------------------------------------------------------
+calls to conversion functions:
+before C::operator int()
+-------------------------------------------------------------
+calls to operator():
+before void CallOp::operator ()()
+before void CallOp::operator ()(int)
+-------------------------------------------------------------
+chained calls to operator->():
+before DataProxy &C::operator ->()
+before Data *DataProxy::operator ->()
+other chained call (bug 513):
+before Cyg_Thread *Cyg_Thread::self()
+before void Cyg_Thread::set_timer()
+before Cyg_Thread *Cyg_Thread::self()
+before void Foo::bar()
+-------------------------------------------------------------
+implicit conversion:
+before QStream &QStream::operator <<(const QString &)
+  *hello*
+before QStream &QStream::operator <<(const QString &)
+  *world*
+-------------------------------------------------------------
+prefix and postfix operators:
+before C &C::operator ++(int)
+before C &C::operator ++(int)
+before C &C::operator ++()
+-------------------------------------------------------------
+checking index operator []:
+before int C::operator [](int) const
+  The answer is 42!
+-------------------------------------------------------------
+calls with macros expansions as argument:
+before bool C::operator !=(int)
+  operator !=
+before int C::operator +(int)
+  operator +
+before int f1(int)
+  ordinary function
+before void assert_fct()
+  call in macro
+=============================================================

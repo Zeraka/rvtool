@@ -1,0 +1,22 @@
+NonInlineIntros: Checks location of non-inline introductions
+============================================================
+calling normal functions:
+void C::f()
+void D::f()
+void E::f()
+static void F::f()
+calling introduced functions:
+introduced ...::g()
+introduced ...::g()
+introduced ...::g()
+accessing introduced static members:
+C::pi is 3.140000
+D::pi is 3.140000
+F::pi is 3.140000
+============================================================
+introduced ...::square(Intro::Int)
+introduced destructor
+introduced ...::square(Intro::Int)
+introduced destructor
+introduced ...::square(Intro::Int)
+introduced destructor

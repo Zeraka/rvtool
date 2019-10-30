@@ -1,0 +1,28 @@
+Taking reference of a member
+ REF "int MyTest::x" : <some address>
+
+Accessing member of MyTest
+ GET via ALIAS "int <unknown>" : 3
+
+Accessing member of MyTest
+ GET via ALIAS "int <unknown>" : 3
+
+Accessing member of MyTest
+ SET via ALIAS "int <unknown>" : 3 -> 6
+
+Taking reference of a member
+ REF "int MyTest::x" : <some address>
+
+Accessing member of MyTest
+ GET via ALIAS "int <unknown>" : 6
+
+Accessing member of MyTest
+ SET via ALIAS "int <unknown>" : 6 -> 5
+
+Taking reference of a member
+ REF "unsigned long int MyAnother::z" : <some address>
+
+Accessing member of MyAnother
+ SET via ALIAS "unsigned long int <unknown>" : 42 -> 4711
+
+UNKNOWN SET

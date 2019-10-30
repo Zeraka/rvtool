@@ -1,0 +1,70 @@
+DESC="Pass options directly to compiler"
+
+main()
+{
+  EXEC="${AGCC} -p src -v2 --Xcompiler --real-instances --Xweaver  -o test_11.out src/*.cc"
+  if  ( ${EXEC} );then
+    ERR_MSG="Execution should have failed as --real-instances is not a gcc option: '${EXEC}'";
+    return 1;
+  else
+    true;
+  fi;
+
+  OPT_COUNTER=`grep 'Options (G++):' ${STDOUT_FILE}|grep -c '\-\-real-instances'`;
+  if [ ${OPT_COUNTER} -eq 1 ];then true;else
+    ERR_MSG="The option '--real-instances' has not been passed to gcc";
+    return 1;
+  fi;
+
+  OPT_COUNTER=`grep 'Options (AC++)' ${STDOUT_FILE}|grep -c '\-\-real-instances'`
+  if [ test ${OPT_COUNTER} -eq 1 ];then
+    ERR_MSG="The option '--real-instances' has accidently been passed to ac++";
+    return 1;
+  else
+    true;
+  fi;
+
+  EXEC="${AGCC} -v2 --Xcompiler -ansi -pipe -DFOO --Xweaver --real-instances --gen_config -o test_11.config"
+  if  ( ${EXEC} -v2 --Xcompiler -ansi -pipe -DFOO --Xweaver --real-instances --gen_config -o test_11.config );then true;else
+    ERR_MSG="Execution failed: '${EXEC}'";
+    return 1;
+  fi;
+
+  OPT_COUNTER=`grep 'Options (G++):' ${STDOUT_FILE}|grep -c '\-ansi'`
+  if [ ${OPT_COUNTER} -eq 1 ];then true;else
+    ERR_MSG="The option '-ansi' has not been passed to gcc";
+    return 1;
+  fi;
+
+  OPT_COUNTER=`grep 'Options (G++)' ${STDOUT_FILE}|grep -c '\-pipe'`
+  if [ ${OPT_COUNTER} -eq 1 ];then true;else
+    ERR_MSG="The option '-pipe' has not been passed to gcc";
+    return 1;
+  fi;
+
+
+  OPT_COUNTER=`grep 'Options (AC++)' ${STDOUT_FILE}|grep -c '\-\-real-instances'`
+  if [ ${OPT_COUNTER} -eq 1 ];then true;else
+    ERR_MSG="The option '--real-instances' has not been passed to ac++";
+    return 1;
+  fi;
+
+   OPT_COUNTER=`grep 'Options (G++)' ${STDOUT_FILE}|grep -c '\-D "FOO"'`
+  if [ ${OPT_COUNTER} -eq 1 ];then true;else
+    ERR_MSG="The option '-D"FOO"' has not been passed to gcc";
+    return 1;
+  fi;
+
+  OPT_COUNTER=`grep 'Options (AC++)' ${STDOUT_FILE}|grep -c '\-D "FOO"'`
+  if [ ${OPT_COUNTER} -eq 1 ];then true;else
+    ERR_MSG="The option '-D"FOO"' has not been passed to ac++";
+    return 1;
+  fi;
+
+}
+
+cleanup()
+{
+  rm -f test_11.config
+  rm -f test_11.out
+}

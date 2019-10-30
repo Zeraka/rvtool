@@ -1,0 +1,5288 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+
+%%  multi column support 
+\usepackage{multicol}
+
+%% width of vertical lines between columns
+\setlength{\columnseprule}{0.5pt}
+
+%%  separation between columns
+\setlength{\columnsep}{0.5cm}
+
+%%  7 mm space before grammar rules
+\def\ruleind{\hspace{14pt}}
+
+%%  special footnote symbols  
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+%%  space between description lines halved
+\def\myskip{10pt}
+\renewenvironment{description}
+  {\list{}{
+     \labelwidth\z@ \itemindent-\leftmargin     
+     \addtolength\itemindent{\myskip}
+     \let\makelabel\descriptionlabel}
+   \itemsep=-4pt\leftskip-\myskip}% 
+  {\endlist}
+
+%%  horizontal line over section name
+%\renewcommand\section{% 
+%  {\vspace*{\medskipamount}\hrule height 2pt}%
+%  {\vspace*{-10pt}}%
+%  \@startsection {section}{1}{\z@}% 
+%  {-3.5ex \@plus -1ex \@minus -.2ex}% 
+%  {2.3ex \@plus.2ex}% 
+%  {\normalfont\Large\bfseries}}
+
+%%  less vertical space before subsubsections
+\renewcommand\subsubsection{% 
+  {\vspace*{-15pt}}% 
+  \@startsection{subsubsection}{3}{\z@}% 
+  {-3.25ex\@plus -1ex \@minus -.2ex}% 
+  {1.5ex \@plus .2ex}% 
+  {\normalfont\normalsize\bfseries}}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing other 0.90000000000000002
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation landscape
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 0.5cm
+\topmargin 0.5cm
+\rightmargin 0.5cm
+\bottommargin 0.5cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 2
+\paperpagestyle empty
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\noindent
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{multicols*}{3}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\series bold
+\size huge
+\emph on
+AspectC++ Quick Reference
+\end_layout
+
+\begin_layout Subsection*
+\noindent
+
+\family sans
+Concepts
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\size small
+\emph on
+Aspects
+\emph default
+ are modular implementations of crosscutting concerns.
+ They can affect 
+\emph on
+join points
+\emph default
+ in the component code, e.g.
+ class definitions, or in the dynamic control flow, e.g.
+ function calls, by 
+\emph on
+advice
+\emph default
+.
+ A set of related join points is called 
+\emph on
+pointcut
+\emph default
+ and defined by a 
+\emph on
+pointcut expression
+\emph default
+.
+\end_layout
+
+\begin_layout Subsection*
+
+\family sans
+Aspects
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\size small
+Aspects extend the concept of C++ classes.
+ They may define ordinary class members as well as 
+\emph on
+advice
+\emph default
+.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+aspect
+\begin_inset space ~
+\end_inset
+
+
+\series medium
+\emph on
+A
+\series default
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+:
+\begin_inset space ~
+\end_inset
+
+
+\series medium
+\emph on
+public
+\begin_inset space ~
+\end_inset
+
+B
+\series default
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+{
+\begin_inset space ~
+\end_inset
+
+...
+\begin_inset space ~
+\end_inset
+
+};
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+defines the aspect 
+\emph on
+A
+\emph default
+, which inherits from class or aspect 
+\emph on
+B
+\end_layout
+
+\begin_layout Subsection*
+
+\family sans
+Slices
+\end_layout
+
+\begin_layout Standard
+
+\size small
+A slice is a fragment of a C++ element like a class.
+ It may be used by introduction 
+\emph on
+advice
+\emph default
+ to implemented static extensions of the program.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+slice
+\begin_inset space ~
+\end_inset
+
+class
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+ASlice
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+{
+\begin_inset space ~
+\end_inset
+
+...
+\begin_inset space ~
+\end_inset
+
+void
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+f
+\emph default
+();
+\begin_inset space ~
+\end_inset
+
+...
+\begin_inset space ~
+\end_inset
+
+}; 
+\begin_inset space ~
+\end_inset
+
+
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+defines a class slice called 
+\emph on
+ASlice
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+slice
+\begin_inset space ~
+\end_inset
+
+void
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+ASlice::f
+\emph default
+()
+\begin_inset space ~
+\end_inset
+
+{
+\begin_inset space ~
+\end_inset
+
+...
+\begin_inset space ~
+\end_inset
+
+} 
+\begin_inset space ~
+\end_inset
+
+
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+defines a non-inline member function f() of slice ASlice
+\end_layout
+
+\begin_layout Subsection*
+
+\family sans
+Advice
+\end_layout
+
+\begin_layout Standard
+
+\size small
+An advice declaration specifies 
+\emph on
+how
+\emph default
+ an aspect affects a set of join points.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+advice
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+pointcut
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+:
+\begin_inset space ~
+\end_inset
+
+
+\series default
+around
+\series medium
+(...)
+\begin_inset space ~
+\end_inset
+
+{...}
+\family default
+\series default
+ 
+\family sans
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+the advice code is executed in place of the join points in the pointcut
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+advice
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+pointcut
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+:
+\begin_inset space ~
+\end_inset
+
+
+\series default
+before
+\series medium
+/
+\series default
+after
+\series medium
+(...)
+\begin_inset space ~
+\end_inset
+
+{...}
+\family default
+\series default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+the advice code is executed before/after the join points in the pointcut
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+advice
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+pointcut
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+:
+\begin_inset space ~
+\end_inset
+
+
+\series default
+order
+\series medium
+(
+\emph on
+high
+\emph default
+,
+\family default
+\series default
+ 
+\family sans
+...
+\emph on
+low
+\emph default
+)
+\series bold
+;
+\family default
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+
+\emph on
+high
+\emph default
+ and 
+\emph on
+low
+\emph default
+ are pointcuts, which describe sets of aspects.
+ Aspects on the left side of the argument list always have a higher precedence
+ than aspects on the right hand side at the join points, where the order
+ declaration is applied.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+advice
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+pointcut
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+:
+\begin_inset space ~
+\end_inset
+
+
+\series default
+slice
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\series default
+class
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+:
+\begin_inset space ~
+\end_inset
+
+
+\series default
+public
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+Base
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+{...}
+\family default
+\series default
+ 
+\family sans
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+introduces a new base class 
+\emph on
+Base
+\emph default
+ and members into the target classes matched by 
+\emph on
+pointcut
+\emph default
+.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+advice
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+pointcut
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+:
+\begin_inset space ~
+\end_inset
+
+
+\series default
+slice
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+ASlice
+\begin_inset space ~
+\end_inset
+
+
+\series default
+\emph default
+; 
+\begin_inset space ~
+\end_inset
+
+
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+introduces the slice 
+\emph on
+ASlice
+\emph default
+ into the target classes matched by 
+\emph on
+pointcut
+\emph default
+.
+\end_layout
+
+\begin_layout Subsection*
+
+\family sans
+Match Expressions
+\end_layout
+
+\begin_layout Standard
+
+\size small
+\emph on
+Match expressions
+\emph default
+ are primitive pointcut expressions.
+ They filter program entities based on their signature.
+\begin_inset VSpace 15pt*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Type Matching
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"int"
+\family default
+\series default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches the C++ built-in scalar type 
+\family typewriter
+int
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"%
+\begin_inset space ~
+\end_inset
+
+*"
+\family default
+\series default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches any pointer type
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Namespace and Class Matching
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"Chain"
+\family default
+\series default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches the class, struct or union 
+\emph on
+Chain
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"Memory%"
+\family default
+\series default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches any class, struct or union whose name starts with 
+\begin_inset Quotes eld
+\end_inset
+
+Memory
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Function Matching
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"void
+\family default
+\series default
+ 
+\family typewriter
+reset()"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches the function 
+\emph on
+reset
+\emph default
+ having no parameters and returning 
+\family typewriter
+void
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"%
+\family default
+\series default
+ 
+\family typewriter
+printf(...)"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches the function 
+\emph on
+printf
+\emph default
+ having any number of parameters and returning any type
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"%
+\family default
+\series default
+ 
+\family typewriter
+...::%(...)"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches any function, operator function, or type conversion function (in
+ any class or namespace) 
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"%
+\family default
+\series default
+ 
+\family typewriter
+...::Service::%(...) const"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches any const member-function of the class 
+\family typewriter
+Service
+\family default
+ defined in any scope
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"%
+\family default
+\series default
+ 
+\family typewriter
+...::operator %(...)"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches any type conversion function
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"virtual %
+\family default
+\series default
+ 
+\family typewriter
+C::%(...)"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches any virtual member function of 
+\family typewriter
+C
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"static % 
+\series default
+...::%(...)"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches any static member or non-member function
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Variable Matching
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"int
+\family default
+\series default
+ 
+\family typewriter
+counter"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches the variable 
+\emph on
+counter
+\emph default
+ of type 
+\family typewriter
+int
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"%
+\family default
+\series default
+ 
+\family typewriter
+guard"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches the global variable 
+\emph on
+guard
+\emph default
+ of any type
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"%
+\family default
+\series default
+ 
+\family typewriter
+...::%"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches any variable (in any class or namespace) 
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"static 
+\series default
+% ...::%"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches any static member or non-member variable
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Template Matching
+\family default
+\series medium
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotemark[2]
+\end_layout
+
+\end_inset
+
+
+\series default
+ 
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"std::set<...>"
+\family default
+\series default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches all template instances of the class 
+\emph on
+std::set
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"std::set<int>"
+\family default
+\series default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches only the template instance 
+\emph on
+std::set<int>
+\emph default
+ 
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+\series medium
+\size small
+"%
+\family default
+\series default
+ 
+\family typewriter
+...::%<...>::%(...)"
+\family default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+matches any member function from any template class instance in any scope
+\end_layout
+
+\begin_layout Subsection*
+
+\family sans
+Predefined Pointcut Functions
+\end_layout
+
+\begin_layout Standard
+
+\size small
+Predefined pointcut functions are used to filter, map, join, or intersect
+ pointcuts.
+\begin_inset VSpace 15pt*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Functions / Variables
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+call
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\begin_inset Formula $_{C}$
+\end_inset
+
+
+\size small
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotemark[9]
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+provides all join points where a named and user provided entity in the 
+\emph on
+pointcut
+\emph default
+ is called.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+builtin
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotemark[3]
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\begin_inset Formula $_{B}$
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+provides all join points where a named built-in operator in the 
+\emph on
+pointcut
+\emph default
+ is called.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+execution
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\begin_inset Formula $_{E}$
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+provides all join points referring to the implementation of a named entity
+ in the 
+\emph on
+pointcut
+\emph default
+.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+construction
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\begin_inset Formula $_{Cons}$
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+all join points where an instance of the given class(es) is constructed.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+destruction
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\begin_inset Formula $_{Des}$
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+all join points where an instance of the given class(es) is destructed.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+get
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\begin_inset Formula $_{G}$
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+provides all join points where a global variable or data member in the 
+\emph on
+pointcut
+\emph default
+ is read.
+ 
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+set
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\begin_inset Formula $_{S}$
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+provides all join points where a global variable or data member in the 
+\emph on
+pointcut
+\emph default
+ is written.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+ref
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\begin_inset Formula $_{R}$
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+provides all join points where a reference (reference type or pointer) to
+ a global variable or data member in the 
+\emph on
+pointcut
+\emph default
+ is created.
+\end_layout
+
+\begin_layout Standard
+
+\size small
+\emph on
+pointcut
+\emph default
+ may contain function, variable, namespace or class names.
+ A namespace or class name is equivalent to the names of all functions and
+ variables defined within its scope combined with the 
+\series bold
+||
+\series default
+ operator (see below).
+\begin_inset VSpace 8pt
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Control Flow
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+cflow
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+C
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+captures join points occuring in the dynamic execution context of join points
+ in the 
+\emph on
+pointcut
+\emph default
+.
+ The argument 
+\emph on
+pointcut
+\emph default
+ is forbidden to contain context variables or join points with runtime condition
+s (currently cflow, that, or target).
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Types
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+base
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+N
+\begin_inset Formula $_{C,F}$
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns all base classes resp.
+\begin_inset space ~
+\end_inset
+
+redefined functions of classes in the 
+\emph on
+pointcut
+\emph default
+ 
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+derived
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+N
+\begin_inset Formula $_{C,F}$
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns all classes in the 
+\emph on
+pointcut
+\emph default
+ and all classes derived from them resp.
+\begin_inset space ~
+\end_inset
+
+all redefined functions of derived classes
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Scope
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+within
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+filters all join points that are within the functions or classes in the
+ 
+\emph on
+pointcut
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+member
+\series medium
+(
+\emph on
+pointcut
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+N
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+maps the scopes given in 
+\emph on
+pointcut
+\emph default
+ to any contained named entities.
+ Thus a class name for example is mapped to all contained member functions,
+ variables and nested types.
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Context
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+that
+\series medium
+(
+\emph on
+type
+\begin_inset space ~
+\end_inset
+
+pattern
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns all join points where the current C++ 
+\family typewriter
+this
+\family default
+ pointer refers to an object which is an instance of a type that is compatible
+ to the type described by the 
+\emph on
+type pattern
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+target
+\series medium
+(
+\emph on
+type
+\begin_inset space ~
+\end_inset
+
+pattern
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns all join points where the target object of a call or other access
+ is an instance of a type that is compatible to the type described by the
+ 
+\emph on
+type pattern
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+result
+\series medium
+(
+\emph on
+type
+\begin_inset space ~
+\end_inset
+
+pattern
+\emph default
+)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns all join points where the result object of a call/execution or other
+ access join point is an instance of a type described by the 
+\emph on
+type pattern
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+args
+\series medium
+(
+\emph on
+type
+\begin_inset space ~
+\end_inset
+
+pattern
+\emph default
+,
+\begin_inset space ~
+\end_inset
+
+...)
+\family default
+\series default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+(N,...)
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+a list of 
+\emph on
+type patterns
+\emph default
+ is used to provide all joinpoints with matching argument signatures
+\end_layout
+
+\begin_layout Standard
+
+\size small
+Instead of the 
+\emph on
+type pattern
+\emph default
+ it is possible here to pass the name of a 
+\series bold
+context variable
+\series default
+ to which the context information is bound.
+ In this case the type of the variable is used for the type matching.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace 15pt*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Algebraic Operators
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+pointcut
+\series default
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+&&
+\series medium
+\emph on
+
+\begin_inset space ~
+\end_inset
+
+pointcut
+\family default
+\series default
+\emph default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+(N,N)
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+N, (C,C)
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+intersection of the join points in the 
+\emph on
+pointcuts
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+pointcut
+\series default
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+||
+\series medium
+\emph on
+
+\begin_inset space ~
+\end_inset
+
+pointcut
+\family default
+\series default
+\emph default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+(N,N)
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+N, (C,C)
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+union of the join points in the 
+\emph on
+pointcuts
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+!
+\series medium
+\emph on
+
+\begin_inset space ~
+\end_inset
+
+pointcut
+\family default
+\series default
+\emph default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\size scriptsize
+N
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+N, C
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+C
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+exclusion of the join points in the 
+\emph on
+pointcut
+\end_layout
+
+\begin_layout Subsection*
+
+\family sans
+Named Pointcuts and Attributes
+\end_layout
+
+\begin_layout Standard
+Pointcut expressions can also refer to user-defined pointcuts.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+class
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+[[myns::myattr]]
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+C
+\begin_inset space ~
+\end_inset
+
+{...}
+\family default
+\series default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+annotates class C with the attribute 
+\emph on
+myattr
+\emph default
+ from the namespace 
+\emph on
+myns
+\emph default
+.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+pointcut
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+mypct
+\emph default
+()
+\begin_inset space ~
+\end_inset
+
+=
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Quotes eld
+\end_inset
+
+C
+\begin_inset Quotes erd
+\end_inset
+
+;
+\family default
+\series default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+defines a 
+\begin_inset Quotes eld
+\end_inset
+
+named pointcut
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\emph on
+my
+\emph default
+pct(), which represents the class 
+\begin_inset Quotes eld
+\end_inset
+
+C
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\size small
+attribute
+\series medium
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+myattr
+\emph default
+();
+\family default
+\series default
+ // in 
+\emph on
+myns
+\emph default
+
+\begin_inset Newline newline
+\end_inset
+
+declares a user-defined attribute 
+\emph on
+myattr
+\emph default
+(), which also represents 
+\begin_inset Quotes eld
+\end_inset
+
+C
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+
+\family sans
+JoinPoint-API for Advice Code
+\end_layout
+
+\begin_layout Standard
+
+\size small
+The JoinPoint-API is provided within every advice code body by the built-in
+ object 
+\series bold
+tjp
+\series default
+ of class 
+\series bold
+JoinPoint
+\series default
+.
+\begin_inset VSpace 15pt
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Compile-time Types and Constants
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+That
+\series default
+\size scriptsize
+\emph default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+object type (object initiating a call or entity access)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Target
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+target object type (target object of a call or entity access)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Entity
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+type of the primary referenced entity (function or variable)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+MemberPtr
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+type of the member pointer for entity or 
+\begin_inset Quotes eld
+\end_inset
+
+void *
+\begin_inset Quotes erd
+\end_inset
+
+ for nonmembers.
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Result
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+type of the object, used to 
+\emph on
+store
+\emph default
+ the result of the join point
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Res::Type,
+\series default
+ Res::ReferredType
+\size scriptsize
+\emph default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+result type of the affected function or entity access
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Arg<i>::Type,
+\family default
+\series default
+\emph default
+ 
+\family sans
+\emph on
+Arg<i>::ReferredType
+\family default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+type of the 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+$i^{
+\backslash
+,th}$
+\end_layout
+
+\end_inset
+
+ argument of the affected join point (with 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$0 
+\backslash
+leq i < ARGS$
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+ARGS
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[const]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+number of arguments
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Array
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+type of an accessed array
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Dim<i>::Idx, Dim<i>::Size
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+, 
+\family sans
+\size scriptsize
+[const]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+type of used index and size of the 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+$i^{
+\backslash
+,th}$
+\end_layout
+
+\end_inset
+
+ dimension (with 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$0 
+\backslash
+leq i < DIMS$
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+DIMS
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[const]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+number of dimensions of an accessed array or 0 otherwise
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+JPID
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[const]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+unique numeric identifier for this join point
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+JPTYPE
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[const]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+numeric identifier describing the type of this join point
+\family sans
+ 
+\family default
+(
+\family sans
+\emph on
+AC::CALL
+\family default
+, 
+\family sans
+AC::BUILTIN, AC::EXECUTION
+\family default
+\emph default
+, 
+\family sans
+\emph on
+AC::
+\emph default
+CONSTRUCTION
+\family default
+, 
+\family sans
+\emph on
+AC::
+\emph default
+DESTRUCTION
+\family default
+, 
+\family sans
+\emph on
+AC::GET
+\family default
+\emph default
+, 
+\family sans
+\emph on
+AC::SET
+\family default
+\emph default
+ or 
+\family sans
+\emph on
+AC::REF
+\family default
+\emph default
+) 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace 6pt*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Runtime Functions and State
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+static
+\begin_inset space ~
+\end_inset
+
+const
+\begin_inset space ~
+\end_inset
+
+char
+\series default
+
+\begin_inset space ~
+\end_inset
+
+
+\series medium
+*
+\series default
+\emph default
+signature
+\series medium
+()
+\family default
+\series default
+ 
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+gives a textual description of the join point (type + name)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+static
+\begin_inset space ~
+\end_inset
+
+const
+\begin_inset space ~
+\end_inset
+
+char
+\series default
+
+\begin_inset space ~
+\end_inset
+
+
+\series medium
+*
+\series default
+\emph default
+filename
+\series medium
+()
+\family default
+\series default
+ 
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns the name of the file in which the joinpoint shadow is located
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+static
+\begin_inset space ~
+\end_inset
+
+int
+\series default
+
+\begin_inset space ~
+\end_inset
+
+
+\emph default
+line
+\series medium
+()
+\family default
+\series default
+ 
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+the source code line number in which the joinpoint shadow is located
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+That
+\begin_inset space ~
+\end_inset
+
+*
+\series default
+\emph default
+that
+\series medium
+()
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns a pointer to the object initiating a call or 0 if it is a static
+ method or a global function
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Target
+\begin_inset space ~
+\end_inset
+
+*
+\series default
+\emph default
+target
+\series medium
+()
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns a pointer to the object that is the target of a call or 0 if it
+ is a static method or a global function
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Entity
+\begin_inset space ~
+\end_inset
+
+*
+\series default
+\emph default
+entity
+\series medium
+()
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns a pointer to the accessed entity (function or variable) or 0 for
+ member functions or builtin operators
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+MemberPtr
+\begin_inset space ~
+\end_inset
+
+
+\series default
+\emph default
+memberptr
+\series medium
+()
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns a member pointer to entity or 0 for nonmembers
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Result
+\emph default
+
+\begin_inset space ~
+\end_inset
+
+
+\emph on
+*
+\series default
+\emph default
+result
+\series medium
+()
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns a typed pointer to the result value or 0 if there is none
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Arg<i>::ReferredType
+\begin_inset space ~
+\end_inset
+
+*
+\series default
+\emph default
+arg
+\series medium
+\emph on
+<i>
+\emph default
+()
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns a typed pointer to the 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+$i^{
+\backslash
+,th}$
+\end_layout
+
+\end_inset
+
+ argument value (with 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+$0 
+\backslash
+leq i < ARGS$
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+void
+\begin_inset space ~
+\end_inset
+
+*
+\series default
+\emph default
+arg
+\series medium
+(
+\emph on
+int
+\series default
+
+\begin_inset space ~
+\end_inset
+
+
+\series medium
+\emph default
+i)
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns a pointer to the 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+$i^{
+\backslash
+,th}$
+\end_layout
+
+\end_inset
+
+ argument memory location
+\emph on
+ 
+\emph default
+(
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+$0 
+\backslash
+leq i < ARGS$
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+void
+\begin_inset space ~
+\end_inset
+
+
+\series default
+\emph default
+proceed
+\series medium
+()
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+executes the original code in an around advice (should be called at most
+ once in around advice)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+AC::Action
+\begin_inset space ~
+\end_inset
+
+&
+\series default
+\emph default
+action
+\series medium
+()
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns the runtime action object containing the execution environment to
+ execute ( 
+\emph on
+trigger()
+\emph default
+ ) the original code encapsulated by an around advice
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Array
+\begin_inset space ~
+\end_inset
+
+*
+\series default
+\emph default
+array
+\series medium
+()
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns a typed pointer to the accessed array
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Dim<i>::Idx
+\begin_inset space ~
+\end_inset
+
+
+\series default
+\emph default
+idx
+\series medium
+\emph on
+<i>
+\emph default
+()
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns the value of the 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+$i^{
+\backslash
+,th}$
+\end_layout
+
+\end_inset
+
+ used index 
+\family sans
+\series medium
+\emph on
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+\series medium
+\size small
+\emph on
+TODO?: int args()
+\end_layout
+
+\begin_layout Plain Layout
+returns the number of arguments
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\series medium
+\size small
+\emph on
+unsigned int id()
+\end_layout
+
+\begin_layout Plain Layout
+returns 
+\size small
+the unique numeric identifier of the join point
+\end_layout
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+
+
+\family default
+\series default
+\size default
+\emph default
+
+\begin_inset VSpace 6pt*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family sans
+\emph on
+Runtime Type Information
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+static
+\begin_inset space ~
+\end_inset
+
+AC::Type
+\begin_inset space ~
+\end_inset
+
+
+\series default
+\emph default
+resulttype
+\series medium
+()
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+static
+\begin_inset space ~
+\end_inset
+
+AC::Type
+\begin_inset space ~
+\end_inset
+
+
+\series default
+\emph default
+argtype
+\series medium
+(
+\emph on
+int
+\series default
+
+\begin_inset space ~
+\end_inset
+
+
+\series medium
+\emph default
+i)
+\family default
+\series default
+ 
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+return a C++ ABI V3
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotemark[8]
+\end_layout
+
+\end_inset
+
+ conforming string representation of the result type / argument type of
+ the affected function
+\end_layout
+
+\begin_layout Subsection*
+
+\family sans
+JoinPoint-API for Slices
+\end_layout
+
+\begin_layout Standard
+
+\size small
+The JoinPoint-API is provided within introduced slices by the built-in class
+ 
+\series bold
+JoinPoint
+\series default
+ (state of target class 
+\emph on
+before
+\emph default
+ introduction).
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+static
+\begin_inset space ~
+\end_inset
+
+const
+\begin_inset space ~
+\end_inset
+
+char
+\series default
+
+\begin_inset space ~
+\end_inset
+
+
+\series medium
+*
+\series default
+\emph default
+signature
+\series medium
+()
+\family default
+\series default
+ 
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns the target class name as a string
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+That
+\series default
+\size scriptsize
+\emph default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+The (incomplete) target type of the introduction
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+BASECLASSES
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[const]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+number of baseclasses of the target class
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+BaseClass<I>::Type
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+type of the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$I^{
+\backslash
+,th}$
+\end_layout
+
+\end_inset
+
+ baseclass
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+BaseClass<I>::prot,
+\begin_inset space ~
+\end_inset
+
+BaseClass<I>::spec
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[const]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+Protection level (AC::PROT_NONE /PRIVATE /PROTECTED /PUBLIC) and additional
+ specifiers (AC::SPEC_NONE /VIRTUAL) of the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$I^{
+\backslash
+,th}$
+\end_layout
+
+\end_inset
+
+ baseclass
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+MEMBERS
+\series default
+\size scriptsize
+\emph default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[const]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+number of member variables of the target class
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Member<I>::Type,
+\family default
+\series default
+\emph default
+ 
+\family sans
+\emph on
+Member<I>::ReferredType
+\size scriptsize
+\emph default
+ 
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[type]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+type of the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$I^{
+\backslash
+,th}$
+\end_layout
+
+\end_inset
+
+ member variable of the target class
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+Member<I>::prot,
+\begin_inset space ~
+\end_inset
+
+Member<I>::spec
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hfill 
+\end_layout
+
+\end_inset
+
+
+\family sans
+\size scriptsize
+[const]
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+Protection level (see BaseClass<I>::prot) and additional member variable
+ specifiers (AC::SPEC_NONE /STATIC /MUTABLE)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+static
+\begin_inset space ~
+\end_inset
+
+ReferredType
+\begin_inset space ~
+\end_inset
+
+*Member<I>::
+\series default
+\emph default
+pointer
+\series medium
+(
+\emph on
+T
+\begin_inset space ~
+\end_inset
+
+*obj=0
+\emph default
+)
+\family default
+\series default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns a typed pointer to the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$I^{
+\backslash
+,th}$
+\end_layout
+
+\end_inset
+
+ member variable (obj is needed for non-static members)
+\end_layout
+
+\begin_layout Description
+
+\family sans
+\series medium
+\size small
+\emph on
+static
+\begin_inset space ~
+\end_inset
+
+const
+\begin_inset space ~
+\end_inset
+
+char
+\begin_inset space ~
+\end_inset
+
+*Member<I>::
+\series default
+\emph default
+name
+\series medium
+\emph on
+()
+\family default
+\series default
+\emph default
+ 
+\family sans
+\size scriptsize
+
+\begin_inset space ~
+\end_inset
+
+
+\family default
+\size small
+
+\begin_inset Newline newline
+\end_inset
+
+returns the name of the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$I^{
+\backslash
+,th}$
+\end_layout
+
+\end_inset
+
+ member variable
+\end_layout
+
+\begin_layout Subsection*
+
+\family sans
+Example (simple tracing aspect)
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hspace{-24pt}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100text%"
+special "none"
+height "1pt"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout LyX-Code
+\noindent
+
+\family sans
+\series bold
+aspect
+\series default
+ Tracing {
+\end_layout
+
+\begin_layout LyX-Code
+
+\family sans
+\series bold
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hspace{10pt} 
+\end_layout
+
+\end_inset
+
+advice
+\series default
+ 
+\series bold
+execution
+\series default
+(
+\begin_inset Quotes eld
+\end_inset
+
+% Business::%(...)
+\begin_inset Quotes erd
+\end_inset
+
+) : 
+\series bold
+before
+\series default
+() {
+\end_layout
+
+\begin_layout LyX-Code
+
+\family sans
+\series bold
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hspace{20pt} 
+\end_layout
+
+\end_inset
+
+
+\series default
+cout <
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hspace{-1pt}
+\end_layout
+
+\end_inset
+
+< "before " <
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hspace{-1pt}
+\end_layout
+
+\end_inset
+
+< 
+\series bold
+JoinPoint
+\series default
+::
+\series bold
+signature
+\series default
+() <
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hspace{-1pt}
+\end_layout
+
+\end_inset
+
+< endl;
+\end_layout
+
+\begin_layout LyX-Code
+
+\family sans
+}  };
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset VSpace medskip*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\size small
+Reference sheet corresponding to AspectC++ 2.2, 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+today
+\end_layout
+
+\end_inset
+
+.
+ For more information visit 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.aspectc.org
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+
+\size small
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+(c) Copyright 2017, AspectC++ developers.
+ All rights reserved.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace medskip
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hrule width 4.6cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace 2pt*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\series medium
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotemark[2]
+\end_layout
+
+\end_inset
+
+
+\series default
+\size scriptsize
+support for template instance matching is an experimental feature
+\size default
+
+\begin_inset VSpace -1pt*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\series medium
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotemark[3]
+\end_layout
+
+\end_inset
+
+
+\series default
+\size scriptsize
+This feature has limitations.
+ Please see the AspectC++ Language Reference.
+\size default
+
+\begin_inset VSpace -1pt*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\series medium
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotemark[8]
+\end_layout
+
+\end_inset
+
+
+\series default
+\size scriptsize
+
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://mentorembedded.github.io/cxx-abi/abi.html#mangling
+\end_layout
+
+\end_inset
+
+
+\size default
+
+\begin_inset VSpace -2pt*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\series medium
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotemark[9]
+\end_layout
+
+\end_inset
+
+
+\series default
+\size scriptsize
+C, C
+\shape italic
+
+\begin_inset Formula $_{\textrm{C}}$
+\end_inset
+
+
+\shape default
+, C
+\shape italic
+
+\begin_inset Formula $_{\textrm{B}}$
+\end_inset
+
+
+\shape default
+, C
+\shape italic
+
+\begin_inset Formula $_{\textrm{E}}$
+\end_inset
+
+
+\shape default
+, C
+\begin_inset Formula $_{Cons}$
+\end_inset
+
+, C
+\begin_inset Formula $_{Des}$
+\end_inset
+
+, C
+\shape italic
+
+\begin_inset Formula $_{\textrm{G}}$
+\end_inset
+
+
+\shape default
+, C
+\shape italic
+
+\begin_inset Formula $_{\textrm{S}}$
+\end_inset
+
+
+\shape default
+, C
+\shape italic
+
+\begin_inset Formula $_{\textrm{R}}$
+\end_inset
+
+
+\shape default
+: Code (any, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{C}}}
+\end_layout
+
+\end_inset
+
+
+\emph on
+all
+\emph default
+, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{B}}}
+\end_layout
+
+\end_inset
+
+
+\emph on
+uiltin
+\emph default
+, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{E}}}
+\end_layout
+
+\end_inset
+
+
+\emph on
+xecution
+\emph default
+, only object 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{Cons}}}
+\end_layout
+
+\end_inset
+
+
+\emph on
+truction
+\emph default
+, only object 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{Des}}}
+\end_layout
+
+\end_inset
+
+
+\emph on
+truction
+\emph default
+, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{G}}}
+\end_layout
+
+\end_inset
+
+et, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{S}}}
+\end_layout
+
+\end_inset
+
+et, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{R}}}
+\end_layout
+
+\end_inset
+
+ef)
+\size default
+
+\begin_inset VSpace 2pt*
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\size scriptsize
+N, N
+\begin_inset Formula $_{N}$
+\end_inset
+
+, N
+\begin_inset Formula $_{C}$
+\end_inset
+
+, N
+\begin_inset Formula $_{F}$
+\end_inset
+
+, N
+\begin_inset Formula $_{V}$
+\end_inset
+
+, N
+\begin_inset Formula $_{T}$
+\end_inset
+
+: Names (any, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{N}}}
+\end_layout
+
+\end_inset
+
+
+\emph on
+amespace
+\emph default
+, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{C}}}
+\end_layout
+
+\end_inset
+
+
+\emph on
+lass
+\emph default
+, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{F}}}
+\end_layout
+
+\end_inset
+
+
+\emph on
+unction
+\emph default
+, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{V}}}
+\end_layout
+
+\end_inset
+
+ariables, only 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underline{
+\backslash
+smash{
+\backslash
+textit{T}}}
+\end_layout
+
+\end_inset
+
+
+\emph on
+ype
+\emph default
+)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{multicols*}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

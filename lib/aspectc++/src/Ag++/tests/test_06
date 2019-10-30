@@ -1,0 +1,14 @@
+DESC="Fail when trying to invoke ag++ with -o <filename> --weave_only and multiple files "
+
+main(){
+  EXEC="${AGCC} -p src -o test_06.out --weave_only src/Test.cc src/main.cc"
+  if  ( ${EXEC} );then
+    ERR_MSG="Succeed (should fail executing '${EXEC}')";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+  rm -f test_06.out;
+}

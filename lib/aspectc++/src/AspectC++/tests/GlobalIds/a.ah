@@ -1,0 +1,33 @@
+#ifndef __a_ah__
+#define __a_ah__
+
+#include <stdio.h>
+
+struct GlobalMsg {
+    bool instantiate;
+    GlobalMsg (int id) { 
+	static int last_id = -1;
+	if (last_id == -1) {
+	    printf ("GlobalIds: checks whether a JPID is globally unique\n");
+	    printf ("===================================================\n");
+	    printf ("IDs are fine if no other message follows.\n", id);
+	}
+	else if (last_id != id)
+	    printf ("IDs of two translation units differ!\n", id);
+	last_id = id;
+    }
+};
+
+template <int ID> struct Tester {
+    static GlobalMsg msg;
+};
+
+template <int ID> GlobalMsg Tester<ID>::msg (ID);
+
+aspect IdChecker {
+    advice execution ("void f()") : after () {
+	Tester<JoinPoint::JPID>::msg.instantiate = true;
+    }
+};
+
+#endif //  __a_ah__

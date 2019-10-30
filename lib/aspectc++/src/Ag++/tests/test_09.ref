@@ -1,0 +1,3 @@
+before (Trace 1): int Test::get()
+after(Trace 2): int Test::get()
+Hello 0

@@ -1,0 +1,4 @@
+Bug207: ac++ mixes up private and public
+==============================================================
+Check if methodA and B are still private after weaving
+==============================================================

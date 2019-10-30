@@ -1,0 +1,35 @@
+ExternC: advice for call/exec of extern "C" functions
+=======================================================
+call "void b(char,const char *)"
+exec "void b(char,const char *)"
+b(H, ello World)
+-------------------------------------------------------
+call "void d(char,const char *)"
+exec "void d(char,const char *)"
+d(H, ello World)
+call "void b(char,const char *)"
+exec "void b(char,const char *)"
+b(H, ello World)
+-------------------------------------------------------
+call "void b2(char,const char *)"
+exec "void b2(char,const char *)"
+b2(H, ello World)
+-------------------------------------------------------
+call "void d2(char,const char *)"
+exec "void d2(char,const char *)"
+d2(H, ello World)
+call "void b2(char,const char *)"
+exec "void b2(char,const char *)"
+b2(H, ello World)
+-------------------------------------------------------
+call "void b3(char,const char *)"
+exec "void b3(char,const char *)"
+b3(H, ello World)
+-------------------------------------------------------
+call "void d3(char,const char *)"
+exec "void d3(char,const char *)"
+d3(H, ello World)
+call "void b3(char,const char *)"
+exec "void b3(char,const char *)"
+b3(H, ello World)
+=======================================================

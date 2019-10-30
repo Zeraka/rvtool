@@ -1,0 +1,124 @@
+#ifndef __genericprofiler_ah__
+#define __genericprofiler_ah__
+
+#include <iostream>
+#include <cstdlib>
+using namespace std;
+
+
+// GenericProfiler - generic aspect to gather profiling information
+// (Name and signature of each executed function, how often the function
+// was executed and how many clock cycles were spent executing it.)
+//
+// The following definitions need to be specialized:
+//
+//    pointcut virtual measureFct () = ... ;
+//    Define a match expression for the functions to be profiled
+//
+//    virtual void (*summary())() { ... }
+//    This function should return a pointer to a static function that
+//    will be called when exiting the program.
+//    If this function is not defined in a derived aspect, a simple
+//    textual summary will be printed.
+//    Refer to the function simple_stat() to learn how to access the
+//    profiling data.
+//
+// This aspect uses the time stamp counter of the x86 processors
+// to measure the execution time in clock cycles.
+// When the profiling aspect should be used on other architectures
+// the rdtsc() function and possibly the definition of the typedef
+// ClockTicks and the function duration() must be replaced accordingly.
+
+
+
+namespace Profiler {
+
+  typedef unsigned long long int ClockTicks;
+
+  // rdtsc() - read the time stamp counter of x86 processors  
+  extern inline ClockTicks rdtsc() {
+    unsigned long long int x;
+    __asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
+    return x;
+  }
+
+  // duration() - calculate time spent between start and stop
+  extern inline ClockTicks duration(ClockTicks start, ClockTicks end) {
+    if (end > start) {
+      return (end - start);
+    } else { // counter overflow
+      return (ClockTicks)(-1LL) - end + start;
+    }
+  }
+
+  // Data structure used to gather the profiling information
+  // New Data objects link themselves to existing ones at creation
+  // time.
+  struct Data {
+    static Data *&first () { static Data *data = 0; return data; }
+    struct Data *_next;
+    unsigned _calls;
+    ClockTicks _time;
+    const char *_name;
+    Data (const char* n) : _calls(0), _time(0L), _name (n) {
+      Data *head = first ();
+      first () = this;
+      _next = head;
+    }
+  };
+
+}
+
+
+aspect GenericProfiler {
+
+  // Do not measure the Profiler's own methods
+  pointcut dontMeasure () = "% Profiler::...::%(...)" ||
+    "% GenericProfiler::...::%(...)";
+
+  // Pure virtual pointcut: to be specified in a derived aspect
+  pointcut virtual measureFct () = 0;
+
+  // Execution advice for the functions that are to be measured.
+  // For each JoinPoint the advice code will be transformed into
+  // a new template function instantiation. Therefore a new Data object
+  // will be created whenever a function is executed the first time.
+  // Further executions of the same function will reuse this object,
+  // enabling it to count the number of invocations and the overall
+  // time consumed.
+  advice execution(measureFct() && !dontMeasure()) : around() {
+    static Profiler::Data data (JoinPoint::signature ());
+    Profiler::ClockTicks start = Profiler::rdtsc();
+    tjp->proceed();
+    Profiler::ClockTicks end = Profiler::rdtsc();
+    data._calls++;
+    data._time += Profiler::duration (start, end);
+  };
+
+  // Print a simple summary
+  static void simple_stat () {
+    cout << "Statistics:" << endl;
+    for (Profiler::Data *curr = Profiler::Data::first ();
+	 curr; curr = curr->_next) {
+      cout << "---" << endl;
+      cout << "function:    " << curr->_name << endl;
+      cout << "no of execs: " << curr->_calls << endl;
+      cout << "total time:  " << curr->_time << endl;
+    }
+  }
+
+  // Return the function that should be used to print the profiling summary
+  // Specialize this function if you prefer a different kind of output.
+  virtual void (*summary())() {
+    return &simple_stat;
+  }
+
+  // This advice is used to register the function that prints the summary
+  // to be executed when the program exits.
+  advice execution ("% main(...)") : after () {
+    atexit (summary());
+  }
+};
+
+
+#endif

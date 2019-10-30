@@ -1,0 +1,88 @@
+#pragma once
+
+#include "JPTL.h"
+
+#include <iostream>
+using namespace std;
+
+
+
+template<typename TypeInfo, typename CONTEXT>
+struct Printer {
+  template<typename T>
+  static void exec(T obj, bool* proceed) { if(*proceed) { cout << TypeInfo::signature() << endl; } *proceed = true; }
+
+  // EXEC is optional, and so is the specialization for void (initial EXEC)
+  struct EXEC {
+    enum { BASES = CONTEXT::BASES + TypeInfo::BASECLASSES };
+  };
+};
+template<typename TypeInfo>
+struct Printer<TypeInfo, void> {
+  // initial EXEC
+  struct EXEC {
+    enum { BASES = 0 };
+  };
+};
+
+
+template<typename MemberInfo, typename CONTEXT>
+struct MemberView {
+  struct EXEC {
+    enum { SIZE = CONTEXT::SIZE + sizeof(typename MemberInfo::ReferredType) };
+  };
+
+  template<typename T>
+  static void exec(T obj) { cout << "+ " << sizeof(*MemberInfo::pointer(obj)) << " = " << EXEC::SIZE << endl; }
+};
+template<typename MemberInfo>
+struct MemberView<MemberInfo, void> {
+  // initial EXEC
+  struct EXEC {
+    enum { SIZE = 0 };
+  };
+};
+
+
+template<typename FunctionInfo, typename CONTEXT>
+struct FunctionCount {
+  struct EXEC {
+    enum { COUNT = CONTEXT::COUNT + 1 };
+  };
+};
+template<typename FunctionInfo>
+struct FunctionCount<FunctionInfo, void> {
+  struct EXEC {
+    enum { COUNT = 0 };
+  };
+};
+
+
+
+aspect TestAspect {
+
+  advice "%" && !"TestAspect" : slice class {
+    public:
+    //int should_not_work[AC::TypeInfo<JoinPoint::That>::MEMBERS]; //THIS yields the TypeInfo of the BASE CLASS :-( : FIXME!
+
+    typedef JPTL::BaseIterator<JoinPoint, Printer> bit;
+    typedef JPTL::MemberIterator<JoinPoint, MemberView> mit;
+    typedef JPTL::FunctionIterator<JoinPoint, FunctionCount> fit;
+  };
+  
+  advice execution("%" && !"TestAspect") : after() {
+    cout << "*** BaseIterator ***" << endl;
+    bool result = true;
+    JoinPoint::That::bit::exec(tjp->that(), &result);
+
+    cout << "BASES: " << JoinPoint::That::bit::EXEC::BASES << endl;
+  
+    cout << "*** MemberIterator ***" << endl;
+    JoinPoint::That::mit::exec(tjp->that());
+    cout << "SIZE: " << JoinPoint::That::mit::EXEC::SIZE << endl;
+
+    cout << "*** FunctionIterator ***" << endl;
+    cout << "COUNT: " << JoinPoint::That::fit::EXEC::COUNT << endl;
+  }
+
+};

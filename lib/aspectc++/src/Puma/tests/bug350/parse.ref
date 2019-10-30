@@ -1,0 +1,26 @@
+void print(char*,...) {
+}
+
+      int main() {
+  char *msg, *msg1;
+
+  print(msg  );       // => print(msg)
+
+  print(msg  );      // => print(msg)
+
+  print(  msg);      // => print(msg)
+
+  print(msg1);     // => print(msg1)
+
+
+  print(msg  );       // => print(msg)
+
+  print(msg  );      // => print(msg,)
+
+  print(msg,  1);     // => print(msg,1)
+
+  print(msg,  1,2);   // => print(msg,1,2)
+
+  
+  return 0;
+}

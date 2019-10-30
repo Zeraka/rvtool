@@ -1,0 +1,5 @@
+test16.cc:9: warning: empty expression in conditional
+test16.cc:11: warning: empty expression in conditional
+test22.cc:30: error: call to function `f ()' is ambiguous
+test22.cc:21: candidates are: void C::f()
+test22.cc:17:                 void B::f()

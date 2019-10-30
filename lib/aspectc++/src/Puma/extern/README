@@ -1,0 +1,10 @@
+This file documents external code that has been imported into PUMA:
+
+lexertl
+=======
+
+ * is an open source lexical analyzer generator
+ * has been downloaded from http://www.benhanson.net/lexertl/download.html
+   on 27/8/2015 and imported into PUMA
+
+Read the license in the lexertl directory!

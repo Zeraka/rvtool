@@ -1,0 +1,76 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//
+// This program is free software;  you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 2 of
+// the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this program; if not, write to the Free
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+// MA  02111-1307  USA
+
+#ifndef __win_keywords_ah__
+#define __win_keywords_ah__
+
+#include "Puma/Config.h"
+#include "Puma/CLexer.h"
+
+aspect WinKeywords {
+
+  // ----------------------------------------------------
+  // extend the scanner to recognize VC++ tokens
+  // ----------------------------------------------------
+
+  static const unsigned int _config_mask_visual_c = 8;
+
+  advice "Puma::CScanner" : slice class { bool _config_visual_c; };
+
+  advice construction("Puma::CScanner") : after () {
+    tjp->that ()->_config_visual_c = false;
+  }
+
+  advice args (config) &&
+         execution("void Puma::CScanner::configure (...)"):
+  after (const Puma::Config &config) {
+    tjp->that()->_config_visual_c = false;
+    // check whether --vc was given and potentially enable VisualC++ keywords
+    if (config.Option ("--vc")) {
+      tjp->that()->_config_visual_c = true;
+    }
+  }
+
+  advice call ("% Puma::CLexer::instance(...)" ||
+               "% Puma::CCLexer::instance(...)") &&
+    within ("Puma::CScanner"): before () {
+    if (tjp->that ()->_config_visual_c)
+      *tjp->arg<0>() |= _config_mask_visual_c;
+  }
+
+  advice execution ("% Puma::CLexer::add_c89_keywords(...)") : after () {
+    if (tjp->that ()->_config_mask & _config_mask_visual_c) {
+
+      lexertl::rules &rules = *tjp->arg<0>();
+
+      // C win specific keywords
+      rules.push ("__int64", Puma::TOK_INT64, LID(Puma::Token::keyword_id));
+      rules.push ("_cdecl", Puma::TOK_CDECL, LID(Puma::Token::keyword_id));
+      rules.push ("__cdecl", Puma::TOK_CDECL_2, LID(Puma::Token::keyword_id));
+      rules.push ("_stdcall", Puma::TOK_STDCALL, LID(Puma::Token::keyword_id));
+      rules.push ("__stdcall", Puma::TOK_STDCALL_2, LID(Puma::Token::keyword_id));
+      rules.push ("_fastcall", Puma::TOK_FASTCALL, LID(Puma::Token::keyword_id));
+      rules.push ("__fastcall", Puma::TOK_FASTCALL_2, LID(Puma::Token::keyword_id));
+      rules.push ("__if_exists", Puma::TOK_IF_EXISTS, LID(Puma::Token::keyword_id));
+      rules.push ("__if_not_exists", Puma::TOK_IF_NOT_EXISTS, LID(Puma::Token::keyword_id));
+    }
+  }
+
+};
+
+#endif /* __win_keywords_ah__ */

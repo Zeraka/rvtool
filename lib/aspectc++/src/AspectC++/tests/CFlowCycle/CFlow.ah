@@ -1,0 +1,19 @@
+#ifndef __CFlow_ah__
+#define __CFlow_ah__
+
+#include <stdio.h>
+
+#include "D.h"
+
+aspect CFlow {
+
+  advice execution ("C") && cflow (execution ("A"||"B")) : around () {
+    printf ("executing %s\n", JoinPoint::signature ());
+    D::f ();
+    printf ("... and D::f()\n");
+    tjp->proceed ();
+  }
+
+};
+
+#endif // __CFlow_ah__

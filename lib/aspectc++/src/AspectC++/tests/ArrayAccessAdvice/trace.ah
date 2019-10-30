@@ -1,0 +1,105 @@
+#ifndef __TRACE_AH__
+#define __TRACE_AH__
+
+#include <iostream>
+#include "namemap.h"
+
+using namespace std;
+
+template <typename TJP, unsigned int D> struct IdxPrinter {
+  inline static void print( TJP *tjp ) {
+    IdxPrinter<TJP, D-1>::print( tjp );
+    cout << "[" << tjp->template idx<D-1>() << "|" << TJP::template Dim<D-1>::Size << "]";
+  }
+};
+template <typename TJP> struct IdxPrinter<TJP,0> {
+  inline static void print( TJP *tjp ) {}
+};
+template<typename T> struct ValPrinter {
+  inline static void print( T e ) { cout << " < " << e << " >"; }
+};
+template<typename T, unsigned int D> struct ValPrinter<T[D]> {
+  inline static void print( T a[D] ) { cout << " < "; NameMap::mangle_arraypart( a ); cout << "[" << D << "] >"; }
+};
+template<typename T> struct ValPrinter<T*> {
+  inline static void print( T* p ) { cout << " < ~~ADDR~~ >"; }
+};
+template<> struct ValPrinter< map<int,char> > {
+  inline static void print( map<int,char> &m ) { cout << " < ~~OBJ~~ >"; }
+};
+
+aspect Tracer {
+  template<typename M> struct is_arraymember {
+    static const bool result = false;
+  };
+  template<typename T, typename E, unsigned int D> struct is_arraymember<E (T::*)[D]> {
+    static const bool result = true;
+  };
+  template<typename TJP> inline void print_indices( TJP *tjp ) {
+    IdxPrinter<TJP,TJP::DIMS>::print( tjp );
+  }
+  template<typename TJP> inline void print_entity( TJP *tjp ) {
+    cout << tjp->signature() << " @ "; NameMap::mangle_arraypart( tjp->entity() );
+    ValPrinter<typename TJP::Entity>::print( *tjp->entity() );
+    if( tjp->target() ) {
+      const char * name = NameMap::objs[ tjp->target() ].first;
+      cout << " -> " << ( name ? name : "<unknown>" );
+      cout << " ? " << ( is_arraymember<typename TJP::MemberPtr>::result ? "true" : "false" ) << " | " << tjp->memberptr();
+    }
+    if( tjp->array() ) {
+      const char * name = NameMap::arrays[ tjp->array() ].first;
+      cout << " | " << ( name ? name : "<unknown>" );
+      print_indices( tjp );
+    }
+  }
+#define INCTJP tjp->entity(); tjp->signature(); tjp->target(); tjp->memberptr(); tjp->array(); tjp->idx<0>();
+
+  pointcut ignore() = within( "NameMap" );
+
+  advice get( "% ...::%" ) && ! ignore() : before() {
+    INCTJP
+
+    cout << "~~~ Get: ";
+    print_entity( tjp );
+    cout << endl;
+  }
+
+  advice set( "% ...::%" ) && ! ignore() : before() {
+    INCTJP
+
+    cout << "~~~ Set: ";
+    print_entity( tjp );
+    cout << " := " << *( tjp->template arg<0>() );
+    cout << endl;
+  }
+
+  advice ref( "% ...::%" ) && ! ignore() : before() {
+    INCTJP
+
+    cout << "~~~ Ref: ";
+    print_entity( tjp );
+    cout << endl;
+  }
+
+  advice get( alias( "% ...::%" ) ) && ! ignore() : before() {
+    INCTJP
+
+    cout << "~~~ Get (alias): ";
+    print_entity( tjp );
+    cout << endl;
+  }
+
+  advice set( alias( "% ...::%" ) ) && ! ignore() : before() {
+    INCTJP
+
+    cout << "~~~ Set (alias): ";
+    print_entity( tjp );
+    cout << " := " << *( tjp->template arg<0>() );
+    cout << endl;
+  }
+
+  advice construction( "CTest" ) : before() {
+    cout << "~~~ Construct: " << tjp->signature() << endl;
+  }
+};
+#endif

@@ -1,0 +1,524 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __CCLookAhead_ah__
+#define __CCLookAhead_ah__
+
+#include <bitset>
+#include <iostream>
+
+aspect CCLookAhead {
+
+  // FIRST sets and init functions
+  advice "Puma::CCSyntax": slice struct {
+  protected:
+
+    // FIRST sets
+    tokenset _class_name_1;
+    tokenset _enum_name_1;
+    tokenset _template_name_1;
+    tokenset _class_template_name_1;
+    tokenset _namespace_name_1;
+    tokenset _original_ns_name_1;
+    tokenset _namespace_alias_1;
+    tokenset _qual_id_1;
+    tokenset _unqual_id_1;
+    tokenset _colon_colon_1;
+    tokenset _nested_name_spec_1;
+    tokenset _nested_name_spec1_1;
+    tokenset _class_or_ns_name_1;
+    tokenset _construct_expr_1;
+    tokenset _type_trait_expr_1;
+    tokenset _new_expr_1;
+    tokenset _new_placement_1;
+    tokenset _direct_new_declarator_1;
+    tokenset _direct_new_declarator1_1;
+    tokenset _new_init_1;
+    tokenset _delete_expr_1;
+    tokenset _namespace_def_1;
+    tokenset _named_ns_def_1;
+    tokenset _original_ns_def_1;
+
+    tokenset _explicit_instantiation_1;
+    tokenset _explicit_specialization_1;
+    tokenset _access_spec_1;
+    tokenset _conv_fct_id_1;
+    tokenset _oper_fct_id_1;
+    tokenset _template_key_1;
+    tokenset _template_id_1;
+    tokenset _extension_ns_def_1;
+    tokenset _unnamed_ns_def_1;
+
+    virtual void init_class_name () {
+      init_class_template_id ();
+      _class_name_1 = _template_id_1;
+      _class_name_1.set (TOK_ID);
+    }
+
+    virtual void init_enum_name () {
+      _enum_name_1.set (TOK_ID);
+    }
+
+    virtual void init_template_name () {
+      _template_name_1.set (TOK_ID);
+    }
+
+    virtual void init_class_template_name () {
+      _class_template_name_1.set (TOK_ID);
+    }
+
+   virtual void init_namespace_name () {
+      init_original_ns_name ();
+      init_namespace_alias ();
+      _namespace_name_1 = _original_ns_name_1;
+      _namespace_name_1 |= _namespace_alias_1;
+    }
+
+    virtual void init_original_ns_name () {
+      _original_ns_name_1.set (TOK_ID);
+    }
+
+    virtual void init_namespace_alias () {
+      _namespace_alias_1.set (TOK_ID);
+    }
+
+    virtual void init_literal () {
+      CSyntax::init_literal ();
+      _literal_1.set (TOK_BOOL_VAL);
+    }
+
+    virtual void init_prim_expr () {
+      CSyntax::init_prim_expr ();
+      _prim_expr_1.set (TOK_THIS);
+    }
+    
+    virtual void init_id_expr () {
+      // no call to CSyntax::init_id_expr()! This is completely different
+      init_qual_id ();
+      init_unqual_id ();
+      _id_expr_1 = _qual_id_1;
+      _id_expr_1 |= _unqual_id_1;
+    }
+
+    virtual void init_qual_id () {
+      init_colon_colon ();
+      init_nested_name_spec ();
+      _qual_id_1 = _colon_colon_1;
+      _qual_id_1 |= _nested_name_spec_1;
+    }
+    
+    virtual void init_unqual_id () {
+      init_identifier ();
+      init_oper_fct_id ();
+      init_conv_fct_id ();
+      init_template_id ();
+      _unqual_id_1 = _identifier_1;
+      _unqual_id_1 |= _oper_fct_id_1;
+      _unqual_id_1 |= _conv_fct_id_1;
+      _unqual_id_1 |= _template_id_1;
+      _unqual_id_1.set (TOK_TILDE);
+    }
+    
+    virtual void init_colon_colon () {
+      _colon_colon_1.set (TOK_COLON_COLON);
+    }
+
+    virtual void init_nested_name_spec () {
+      init_nested_name_spec1 ();
+      _nested_name_spec_1 = _nested_name_spec1_1;
+    }
+
+    virtual void init_nested_name_spec1 () {
+      init_class_or_ns_name (),
+      init_template_key ();
+      _nested_name_spec1_1 = _class_or_ns_name_1;
+      _nested_name_spec1_1 |= _template_key_1;
+    }
+
+    virtual void init_class_or_ns_name () {
+      init_class_name ();
+      init_namespace_name ();
+      _class_or_ns_name_1 = _class_name_1;
+      _class_or_ns_name_1 |= _namespace_name_1;
+    }
+
+    virtual void init_postfix_expr1 () {
+      CSyntax::init_postfix_expr1 ();
+    }
+
+    virtual void init_simple_type_spec () {
+      init_prim_types ();
+      init_type_name ();
+      init_nested_name_spec ();
+      init_colon_colon ();
+      _simple_type_spec_1 = _prim_types;
+      _simple_type_spec_1 |= _type_name_1;
+      _simple_type_spec_1 |= _nested_name_spec_1;
+      _simple_type_spec_1 |= _colon_colon_1;
+    }
+
+    virtual void init_construct_expr () {
+      init_simple_type_spec ();
+      _construct_expr_1 = _simple_type_spec_1;
+      _construct_expr_1.set (TOK_TYPENAME);
+    }
+
+    virtual void init_type_trait_expr () {
+      _type_trait_expr_1.set (TOK_HAS_NOTHROW_ASSIGN);
+      _type_trait_expr_1.set (TOK_HAS_NOTHROW_COPY);
+      _type_trait_expr_1.set (TOK_HAS_NOTHROW_CTOR);
+      _type_trait_expr_1.set (TOK_HAS_TRIVIAL_ASSIGN);
+      _type_trait_expr_1.set (TOK_HAS_TRIVIAL_COPY);
+      _type_trait_expr_1.set (TOK_HAS_TRIVIAL_CTOR);
+      _type_trait_expr_1.set (TOK_HAS_TRIVIAL_DTOR);
+      _type_trait_expr_1.set (TOK_HAS_VIRTUAL_DTOR);
+      _type_trait_expr_1.set (TOK_IS_ABSTRACT);
+      _type_trait_expr_1.set (TOK_IS_CLASS);
+      _type_trait_expr_1.set (TOK_IS_EMPTY);
+      _type_trait_expr_1.set (TOK_IS_ENUM);
+      _type_trait_expr_1.set (TOK_IS_POD);
+      _type_trait_expr_1.set (TOK_IS_TRIVIAL);
+      _type_trait_expr_1.set (TOK_IS_POLYMORPHIC);
+      _type_trait_expr_1.set (TOK_IS_UNION);
+      _type_trait_expr_1.set (TOK_IS_BASE_OF);
+    }
+
+    virtual void init_new_expr () {
+      _new_expr_1.set (TOK_NEW);
+      _new_expr_1.set (TOK_COLON_COLON);
+    }
+
+    virtual void init_new_placement () {
+      _new_placement_1.set (TOK_OPEN_ROUND);
+    }
+
+    virtual void init_direct_new_declarator () {
+      _direct_new_declarator_1.set (TOK_OPEN_SQUARE);
+    }
+
+    virtual void init_direct_new_declarator1 () {
+      _direct_new_declarator1_1.set (TOK_OPEN_SQUARE);
+    }
+
+    virtual void init_new_init () {
+      _new_init_1.set (TOK_OPEN_ROUND);
+    }
+
+    virtual void init_delete_expr () {
+      _delete_expr_1.set (TOK_DELETE);
+      _delete_expr_1.set (TOK_COLON_COLON);
+    }
+
+    virtual void init_misc_spec () {
+      CSyntax::init_misc_spec ();
+      _misc_spec_1.set (TOK_FRIEND);
+    }
+
+    virtual void init_storage_class_spec () {
+      CSyntax::init_storage_class_spec ();
+      _storage_class_spec_1.set (TOK_MUTABLE);
+    }
+
+    virtual void init_fct_spec () {
+      CSyntax::init_fct_spec ();
+      _fct_spec_1.set (TOK_VIRTUAL);
+      _fct_spec_1.set (TOK_EXPLICIT);
+    }
+
+    virtual void init_type_name () {
+      init_class_name ();
+      init_enum_name ();
+      init_typedef_name ();
+      _type_name_1 = _class_name_1;
+      _type_name_1 |= _enum_name_1;
+      _type_name_1 |= _typedef_name_1;
+    }
+
+    virtual void init_elaborated_type_spec () {
+      init_class_key ();
+      _elaborated_type_spec_1 = _class_key_1;
+      _elaborated_type_spec_1.set (TOK_ENUM);
+      _elaborated_type_spec_1.set (TOK_TYPENAME);
+    }
+
+    virtual void init_namespace_def () {
+      init_named_ns_def ();
+      init_unnamed_ns_def ();
+      _namespace_def_1 = _named_ns_def_1;
+      _namespace_def_1 |= _unnamed_ns_def_1;
+    }
+
+    virtual void init_named_ns_def () {
+      init_original_ns_def ();
+      init_extension_ns_def ();
+      _named_ns_def_1 = _original_ns_def_1;
+      _named_ns_def_1 |= _extension_ns_def_1;
+    }
+
+    // TODO: should call init_original_ns_def1
+    virtual void init_original_ns_def () {
+      _original_ns_def_1.set (TOK_NAMESPACE);
+      _original_ns_def_1.set (TOK_INLINE);
+    }
+
+    // TODO: should call init_extension_ns_def1
+    virtual void init_extension_ns_def () {
+      _extension_ns_def_1.set (TOK_NAMESPACE);
+      _extension_ns_def_1.set (TOK_INLINE);
+    }
+
+    // TODO: should call init_extension_ns_def1
+    virtual void init_unnamed_ns_def () {
+      _unnamed_ns_def_1.set (TOK_NAMESPACE);
+      _unnamed_ns_def_1.set (TOK_INLINE);
+    }
+
+    virtual void init_class_key () {
+      CSyntax::init_class_key ();
+      _class_key_1.set (TOK_CLASS);
+    }
+
+    virtual void init_conv_fct_id () {
+      _conv_fct_id_1.set (TOK_OPERATOR);
+    }
+
+};
+
+  // dedicated lookahead rules
+  advice "Puma::CCSyntax::ClassName": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_class_name_1);
+    }
+  };
+  advice "Puma::CCSyntax::EnumName": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_enum_name_1);
+    }
+  };
+  advice "Puma::CCSyntax::TemplateName": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_template_name_1);
+    }
+  };
+  advice "Puma::CCSyntax::ClassTemplateName": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_class_template_name_1);
+    }
+  };
+  advice "Puma::CCSyntax::NamespaceName": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_namespace_name_1);
+    }
+  };
+  advice "Puma::CCSyntax::OriginalNsName": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_original_ns_name_1);
+    }
+  };
+  advice "Puma::CCSyntax::NamespaceAlias": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_namespace_alias_1);
+    }
+  };
+  advice "Puma::CCSyntax::Literal": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_literal_1);
+    }
+  };
+  advice "Puma::CCSyntax::PrimExpr": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_prim_expr_1);
+    }
+  };
+  advice "Puma::CCSyntax::IdExpr": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_id_expr_1);
+    }
+  };
+  advice "Puma::CCSyntax::QualId": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_qual_id_1);
+    }
+  };
+  advice "Puma::CCSyntax::UnqualId": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_unqual_id_1);
+    }
+  };
+  advice "Puma::CCSyntax::ColonColon": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_colon_colon_1);
+    }
+  };
+  advice "Puma::CCSyntax::NestedNameSpec": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->is_nested_name ();
+    }
+  };
+  advice "Puma::CCSyntax::NestedNameSpec1": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->is_nested_name ();
+    }
+  };
+  advice "Puma::CCSyntax::ClassOrNsName": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_class_or_ns_name_1);
+    }
+  };
+  advice "Puma::CCSyntax::PostfixExpr1": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_postfix_expr1_1);
+    }
+  };
+  advice "Puma::CCSyntax::ConstructExpr": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_construct_expr_1);
+    }
+  };
+  advice "Puma::CCSyntax::TypeTraitExpr": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_type_trait_expr_1);
+    }
+  };
+  advice "Puma::CCSyntax::NewExpr": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_new_expr_1);
+    }
+  };
+  advice "Puma::CCSyntax::NewPlacement": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_new_placement_1);
+    }
+  };
+  advice "Puma::CCSyntax::DirectNewDeclarator": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_direct_new_declarator_1);
+    }
+  };
+  advice "Puma::CCSyntax::DirectNewDeclarator1": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_direct_new_declarator1_1);
+    }
+  };
+  advice "Puma::CCSyntax::NewInit": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_new_init_1);
+    }
+  };
+  advice "Puma::CCSyntax::DeleteExpr": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_delete_expr_1);
+    }
+  };
+  advice "Puma::CCSyntax::MiscSpec": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_misc_spec_1);
+    }
+  };
+  advice "Puma::CCSyntax::StorageClassSpec": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_storage_class_spec_1);
+    }
+  };
+  advice "Puma::CCSyntax::FctSpec": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_fct_spec_1);
+    }
+  };
+  advice "Puma::CCSyntax::TypeName": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_type_name_1);
+    }
+  };
+  advice "Puma::CCSyntax::ElaboratedTypeSpec": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_elaborated_type_spec_1);
+    }
+  };
+  advice "Puma::CCSyntax::NamespaceDef": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_namespace_def_1);
+    }
+  };
+  advice "Puma::CCSyntax::NamedNsDef": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_named_ns_def_1);
+    }
+  };
+  advice "Puma::CCSyntax::OriginalNsDef": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_original_ns_def_1);
+    }
+  };
+  advice "Puma::CCSyntax::ExtensionNsDef": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_extension_ns_def_1);
+    }
+  };
+  advice "Puma::CCSyntax::UnnamedNsDef": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_unnamed_ns_def_1);
+    }
+  };
+  advice "Puma::CCSyntax::DirectDeclarator1": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_direct_declarator1_1);
+    }
+  };
+  advice "Puma::CCSyntax::ClassHead": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_class_head_1);
+    }
+  };
+  advice "Puma::CCSyntax::ConvFctId": slice struct {
+    static inline bool lookahead(CCSyntax *s) {
+      return s->predict_1 (s->_conv_fct_id_1);
+    }
+  };
+
+  // default lookahead -> yields true for all rules
+  advice "Puma::CCSyntax::%" : slice struct {
+    static inline bool lookahead(void *) { return true; }
+  };
+
+  // make sure the FIRST sets are properly initialized
+  advice execution ("void Puma::CCSyntax::configure(...)") : after() {
+    // FIRST set initialization
+    tjp->that()->init_namespace_def ();
+    tjp->that()->init_explicit_instantiation ();
+    tjp->that()->init_explicit_specialization ();
+    tjp->that()->init_qual_id ();
+    tjp->that()->init_unqual_id ();
+    tjp->that()->init_access_spec ();
+    tjp->that()->init_enum_name();
+    tjp->that()->init_template_name();
+    tjp->that()->init_class_template_name();
+    tjp->that()->init_colon_colon();
+    tjp->that()->init_class_or_ns_name();
+    tjp->that()->init_construct_expr();
+    tjp->that()->init_type_trait_expr();
+    tjp->that()->init_new_expr();
+    tjp->that()->init_new_placement();
+    tjp->that()->init_direct_new_declarator();
+    tjp->that()->init_direct_new_declarator1();
+    tjp->that()->init_new_init();
+    tjp->that()->init_delete_expr();
+  }
+};
+
+#endif /* __CCLookAhead_ah__ */

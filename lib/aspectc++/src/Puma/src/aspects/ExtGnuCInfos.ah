@@ -1,0 +1,95 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//
+// This program is free software;  you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 2 of
+// the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this program; if not, write to the Free
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+// MA  02111-1307  USA
+
+#ifndef __ext_gnu_cinfos_ah__
+#define __ext_gnu_cinfos_ah__
+
+#include <map>
+#include <string>
+
+namespace Puma {
+
+slice class ExtGnuLocalLabelInfo {
+  CStructure *_LocalScope;
+public:
+  void LocalScope (CStructure *ls) { _LocalScope = ls; }
+  CStructure *LocalScope () const { return _LocalScope; }
+};
+
+class CStructure;
+class CLabelInfo;
+
+slice class ExtGnuLocalLabelStmtInfo {
+public:
+  typedef std::pair<std::string, CStructure*> LabelKey;
+  typedef std::map<LabelKey, CLabelInfo*> LabelMap;
+private:
+  LabelMap _LocalLabels;
+public:
+
+  /** Find a local label declaration of a subscope of this function
+   *  \param name The name of the local label
+   *  \param scope The local scope, which should be searched
+   *  \param recursive Search enclosing scopes until the function scope is reached
+   *  \return NULL if the label has not been found, label info otherwise */
+  CLabelInfo *findLocalLabel (std::string name, CStructure *scope,
+      bool recursive = false) const;
+
+  /** Remember a local label declaration of a subscope in this function
+   *  \param name The name of the local label
+   *  \param scope The local scope, in which the label is declared
+   *  \return pointer to the created label object or NULL of there is no sem-db */
+  CLabelInfo *registerLocalLabel (std::string name, CStructure *scope);
+
+  /** Remove a local label declaration of a subscope in this function
+   *  \param name The name of the local label
+   *  \param scope The local scope, in which the label is declared */
+  void unregisterLocalLabel (std::string name, CStructure *scope);
+};
+
+} // namespace Puma
+
+slice
+Puma::CLabelInfo *Puma::ExtGnuLocalLabelStmtInfo::findLocalLabel (std::string name, CStructure *scope,
+    bool recursive) const {
+  LabelMap::const_iterator iter = _LocalLabels.find (LabelKey (name, scope));
+  if (iter != _LocalLabels.end ())
+    return iter->second;
+  if (recursive && scope != this && scope->Parent () && scope->Parent ()->Structure ())
+    return findLocalLabel (name, scope->Parent()->Structure (), recursive);
+  return 0;
+}
+
+slice
+Puma::CLabelInfo *Puma::ExtGnuLocalLabelStmtInfo::registerLocalLabel (std::string name, CStructure *scope) {
+  if (!SemDB ())
+    return 0;
+  CLabelInfo *info = SemDB()->newLabel();
+  info->Scope (this);
+  info->LocalScope (scope);
+  info->Name (name.c_str ());
+  _LocalLabels.insert (LabelMap::value_type (LabelKey (name, scope), info));
+  return info;
+}
+
+slice
+void Puma::ExtGnuLocalLabelStmtInfo::unregisterLocalLabel (std::string name, CStructure *scope) {
+  _LocalLabels.erase (LabelKey (name, scope));
+}
+
+#endif /* __ext_gnu_cinfos_ah__ */

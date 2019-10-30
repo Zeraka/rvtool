@@ -1,0 +1,14 @@
+#ifndef __mysingletonmonitor_ah__
+#define __mysingletonmonitor_ah__
+
+#include "singletonmonitor.ah"
+
+// Example for a specialization of the GenericSingletonMonitor
+// Use the pointcut singleton() to specify which classes should
+// obey the singleton pattern.
+
+aspect MySingletonMonitor : public GenericSingletonMonitor {
+  pointcut virtual singleton() = "Singleton";
+};
+
+#endif

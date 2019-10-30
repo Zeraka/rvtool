@@ -1,0 +1,19 @@
+#ifndef __PADDING_AH__
+#define __PADDING_AH__
+
+#include "OutputStream.h"
+ 
+aspect Padding {
+  
+  // this introduction leads to an 'include "Padding.ah"' in OutputStream.h in
+  // the first phase
+  advice "OutputStream" : char _fill;
+  
+  // here the type OutputStream is used
+  advice construction("OutputStream") && that(os) :
+  before(OutputStream& os) {
+    os._fill = '_';
+  }
+};
+
+#endif // __PADDING_AH__  

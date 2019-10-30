@@ -1,0 +1,14 @@
+#ifndef __target_ah__
+#define __target_ah__
+
+#include <cstdio>
+#include "SaveStack.h"
+
+aspect _Target {
+  advice that("Callee") && call("void CalleeBase::callee()") : around () {
+    SAVESP;
+    tjp->proceed ();
+  }
+};
+
+#endif //  __target_ah__

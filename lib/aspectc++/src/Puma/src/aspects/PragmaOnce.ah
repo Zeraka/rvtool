@@ -1,0 +1,98 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __PragmaOnce__
+#define __PragmaOnce__
+
+/********************************************************/
+/* Win #pragma once support aspect                      */
+/********************************************************/
+
+#include <string.h>
+#include <iostream>
+
+#include "Puma/Unit.h"
+#include "Puma/Token.h"
+
+
+aspect PragmaOnce {
+  /******************************************************/
+  /* detect #pragma once in the token stream of cpp     */
+  /******************************************************/
+
+  // pointcut definitions
+  pointcut preparser ()   = "Puma::PreprocessorParser";
+  pointcut preincluder () = "Puma::PreFileIncluder";
+  
+  // extend the preprocessor parser by the filter state
+  advice preparser () : slice class { Puma::Token * _pragma_token; };
+
+  // initialize the filter state
+  advice execution ("% Puma::PreprocessorParser::configure (...)") : after () {
+    // TODO: it would be better to have construction advice -> but in lem file
+    tjp->that ()->_pragma_token = 0;
+  }
+  
+  // filter #pragma once
+  advice call ("% Puma::PreprocessorParser::parseToken ()") : after () {
+    Puma::Token *tok = *tjp->result ();
+    JoinPoint::That &that = *tjp->that ();
+    if (!tok || !tok->is_directive ()) {
+      that._pragma_token = 0;
+      return;
+    }
+    if (strcmp ("#pragma", tok->text ()) == 0) {
+      that._pragma_token = tok;
+    }
+    else if (that._pragma_token && strcmp ("once", tok->text ()) == 0) {
+      Puma::Unit *unit = (Puma::Unit*)tok->belonging_to ();
+      assert (unit);
+      unit->state ().onlyOnce (true);
+    }
+  }
+  
+  /********************************************************/
+  /* block the handling of pragma once files              */
+  /********************************************************/
+
+  // don't let file includer include files twice
+  // to be precise: the file is included again, but the inclusion produces
+  // no tokens
+  advice args (unit) && within (preincluder ()) &&
+    execution ("void ...::pushOnStack(...)") : 
+   around (Puma::Unit *unit) {
+    if (! unit || ! unit->state ().onlyOnce ())
+      tjp->proceed ();
+  }
+
+  // includeFile shall return 0 if the file was not included
+  advice within (preincluder ()) &&
+  execution ("Puma::Unit * ...::includeFile(...)") : after () {
+    Puma::Unit *&unit = *tjp->result ();
+    if (unit && unit->state ().onlyOnce ())
+      //unit = 0;
+      tjp->that ()->_guarded = true;
+  }
+    
+protected:
+  // this aspect should never be instantiated directly
+  PragmaOnce () {}
+};
+
+
+#endif /* __PragmaOnce__ */

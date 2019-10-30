@@ -1,0 +1,11 @@
+execution: int main()
+Bug484: va_list improperly weaved
+=================================
+call: int add(int,...)
+36
+call: int add(int,...)
+231
+call: int add(int,...)
+call: int add(int,...)
+62
+=================================

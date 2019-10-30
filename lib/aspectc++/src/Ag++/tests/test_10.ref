@@ -1,0 +1,7 @@
+--skip-bodies-non-prj
+-D __puma
+-D __STDC__
+-D "test_10_file_1"
+-D "test_10_file_2=a string"
+-D "test_10_file_3=\"a string\""
+--gnu

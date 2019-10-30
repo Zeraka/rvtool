@@ -1,0 +1,14 @@
+Result: checks if the result pointcut function works
+====================================================
+  call to 'void *h()'
+  executed 'void *h()' -> 0x1
+  call to 'int *i()'
+  executed 'int *i()' -> 0x2
+  call to 'long int **j()'
+  executed 'long int **j()' -> 0x3
+  result after call: 0x3
+  call to 'C::operator int *() const'
+  executed 'C::operator int *() const' -> 0x4
+  changing result! now: 4711
+  changed result reference refers to: 815
+====================================================

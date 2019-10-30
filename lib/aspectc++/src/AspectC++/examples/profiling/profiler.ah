@@ -1,0 +1,42 @@
+#ifndef __profiler_ah__
+#define __profiler_ah__
+
+#include "genericprofiler.ah"
+#include <iostream>
+using namespace std;
+
+
+//------------------------------------------------------------
+// Specialized profiling aspect
+// 
+// Here the specialization is used to add all functions
+// to the profiling and to replace the default summary by a summary
+// that uses the csv format
+
+aspect CSVProfiler : public GenericProfiler {
+
+  // Gather profiling information for all functions
+  pointcut virtual measureFct () = "% ...::% (...)" &&
+    !"% CSVProfiler::%(...)";
+
+
+  // Print summary using the csv format 
+  static void csv_stat () {
+    cout << "function ; number of executions ; total time (clock cycles)"
+	 << endl;
+    for (Profiler::Data *curr = Profiler::Data::first ();
+	 curr; curr = curr->_next) {
+      cout << curr->_name << " ; "
+	   << curr->_calls << " ; "
+	   << curr->_time << endl;
+    }
+  }
+
+  // Register the specialized function that prints the summary
+  virtual void (*summary())() {
+    return &csv_stat;
+  }
+
+};
+
+#endif

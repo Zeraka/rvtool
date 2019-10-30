@@ -1,0 +1,144 @@
+TODO
+====
+
+General
+-------
+
+* documentation
+* parse way optimization
+* implement member access control
+* improve expression evaluation
+* improve template support
+* RTTI support
+* better management of different targets for size and alignment of types
+* shared type objects => faster type comparison, less memory consumption...
+* GNU C/C++ extensions:
+  - generalized lvalues => less restrictive isLvalue()
+  - introduce variable name after initializer instead of before
+
+
+Preprocessor
+------------
+- change macro expansion scheme to fit the standard, e.g.
+  --- 
+  #define hash_hash # ## #
+  #define mkstr(a) # a 
+  #define in_between(a) mkstr(a)
+  #define join(c, d) in_between(c hash_hash d)
+  join(x, y);
+  ---
+  should result in `"x ## y"' not in `" xy "'
+- GNU extensions, e.g.
+  ---
+  #define FILE(x) <a/b/x>
+  #include FILE(bar.h)
+  ---
+  results in `#include <a/b/ bar.h >' but GNU's cpp produces 
+  `#include <a/b/bar.h>'
+
+
+GNU Parser Extensions
+---------------------
+
+1. Thread-Local Storage
+storage-class __thread
+
+2. more built-in functions for C/C++
+
+3. C/C++ offsetof
+Calculation of real offset is not yet implemented.
+Currently always returns 0.
+
+4. __alignof__, with same syntax as for sizeof
+Calculation of real alignment is not yet implemented.
+Currently always returns 1.
+
+5. Getting the Return or Frame Address of a Function
+void * __builtin_return_address (unsigned int level);
+void * __builtin_frame_address (unsigned int level);
+
+6. Function Names as Strings
+static const char __func__[] = "function-name";
+__FUNCTION__ = __func__
+__PRETTY_FUNCTION__ = void a::sub(int)
+
+7. Case Ranges
+switch (1) {
+  case 1 ... 9: break;
+}
+
+8. Cast to a Union Type
+union foo { int i; double d; };
+int x;
+double y;
+union foo u;
+u = (union foo) x;
+u = (union foo) y;
+
+9. Designated Initializers
+int whitespace[256]
+  = { [' '] = 1, ['\t'] = 1, ['\h'] = 1,
+      ['\f'] = 1, ['\n'] = 1, ['\r'] = 1 };
+struct point ptarray[10] = { [2].y = yv2, [2].x = xv2, [0].x = xv0 };
+
+10. Compound Literals
+structure = ((struct foo) {x + y, 'a', 0});
+
+11. C: Non-Constant Initializers
+void foo (float f, float g) {
+  float beat_freqs[2] = { f-g, f+g };
+}
+
+12. Arithmetic on void- and Function-Pointers
+In GNU C, addition and subtraction operations are supported on pointers to void and on 
+pointers to functions. This is done by treating the size of a void or of a function as 1.
+A consequence of this is that sizeof is also allowed on void and on function types, and 
+returns 1. 
+
+13. Non-Lvalue Arrays May Have Subscripts
+struct foo {int a[4];};
+struct foo f();
+bar (int index){
+ return f().a[index];
+}
+
+14. Slightly Looser Rules for Escaped Newlines
+Recently, the preprocessor has relaxed its treatment of escaped newlines. Previously, 
+the newline had to immediately follow a backslash. The current implementation allows 
+whitespace in the form of spaces, horizontal and vertical tabs, and form feeds between 
+the backslash and the subsequent newline.
+
+15. Arrays of Variable Length, or Zero, in C/C++
+
+16. Complex Numbers
+
+17. Conditionals with Omitted Operands
+x ? : y
+
+18. Referring to a Type with typeof
+
+19. Constructing Function Calls (done)
+void * __builtin_apply_args ()
+void * __builtin_apply (void (*function)(), void *arguments, size_t size)
+void __builtin_return (void *result)
+
+20. Nested Functions
+foo (double a, double b) {
+  double square (double z) { return z * z; }
+  return square (a) + square (b);
+}
+
+21. Labels as Values
+void *ptr;
+ptr = &&foo;
+goto *ptr;
+
+22. C: Statements and Declarations in Expressions
+({ int y = foo (); int z;
+   if (y > 0) z = y;
+   else z = - y;
+   z; })
+
+23. Locally Declared Labels
+__label__ label;
+__label__ label1, label2, /* ... */;

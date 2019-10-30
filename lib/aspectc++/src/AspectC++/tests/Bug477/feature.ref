@@ -1,0 +1,12 @@
+Bug477: Templates muddle base() and derived() pointcut functions
+================================================================
+derived("A"): void C<char>::foo()
+base("E"): void C<char>::foo()
+derived("A"): void C<char>::bar()
+base("E"): void C<char>::bar()
+derived("A"): void A::foo()
+base("E"): void A::foo()
+derived("A"): void D::moo()
+base("E"): void D::moo()
+derived("A"): void E::bla()
+================================================================

@@ -1,0 +1,19 @@
+#ifndef __IDXMARKER_AH__
+#define __IDXMARKER_AH__
+
+#include <iostream>
+#include "namemap.h"
+
+using namespace std;
+
+aspect IdxMarker {
+  pointcut weave() =
+       builtin( "% operator [](...)" )                 && within( "void check_dual()" )
+    || builtin( "% operator []( int (*)[3][2], ...)" ) && within( "void check_dual_partial1()" )
+    || builtin( "% operator []( int (*)[2], ...)" )    && within( "void check_dual_partial2()" )
+    || builtin( "% operator []( int *, ...)" )         && within( "void check_dual_partial3()" );
+  advice weave() : before() {
+    cout << "  ~~ Idx: "; NameMap::mangle_arraypart( *( tjp->template arg<0>() ) ); cout << " [ " << *( tjp->template arg<1>() ) << " ]" << endl;
+  }
+};
+#endif

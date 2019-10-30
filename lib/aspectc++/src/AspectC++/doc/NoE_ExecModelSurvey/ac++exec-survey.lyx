@@ -1,0 +1,455 @@
+#LyX 1.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 221
+\textclass article
+\begin_preamble
+
+%--------------------------------------------------------------------
+% PDF related
+%--------------------------------------------------------------------
+\newif\ifpdf 
+\ifx\pdfoutput\undefined 
+  \pdffalse                     % we are not running PDFLaTeX 
+\else 
+  \pdfoutput=1                % we are running PDFLaTeX 
+  \pdftrue 
+\fi
+
+%--------------------------------------------------------------------
+% setup hyperref
+%--------------------------------------------------------------------
+\ifpdf
+  \usepackage{color}
+  \pagecolor{white}
+  \usepackage{hyperref}  
+  \hypersetup{% 
+    %
+    %% general document information
+    pdftitle          = {AspectC++ Language Reference}, 
+    pdfsubject     = {Dokumentation}, 
+    pdfkeywords  = {AOP, AspectC++, pure-systems}, 
+    pdfauthor      = {\textcopyright\ pure-systems GmbH and Olaf Spinczyk}, 
+    pdfcreator     = {\LaTeX\ with package \flqq hyperref\frqq},
+    pdfproducer  = {pdfTeX-0.\the\pdftexversion\pdftexrevision},
+    %
+    %% document style
+    colorlinks=true,                  % colored link
+    urlcolor=blue,                    % blue URL links
+    bookmarks=true,                % generate bookmarks
+    bookmarksnumbered=true,  % generate section numbers
+    pdfpagemode=None           % don't open bookmarks
+  } 
+  
+  %% set document creation date to 10.7.2003 00:00
+  \pdfinfo {/CreationDate (D:20040628000000)}
+\fi
+
+%--------------------------------------------------------------------
+% create hyperrefs depending on the use of pdflatex
+%--------------------------------------------------------------------
+\newcommand\depref[2]{%
+  \ifpdf
+    \href{#1}{#2}
+  \else  
+    {#2}
+  \fi
+}
+
+\rhead{AspectC++ Execution Model Overview}
+\lfoot{\copyright 2005 Olaf Spinczyk}
+\end_preamble
+\language english
+\inputencoding auto
+\fontscheme pslatex
+\graphics default
+\paperfontsize default
+\spacing single 
+\papersize a4paper
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\use_natbib 0
+\use_numerical_citations 0
+\paperorientation portrait
+\leftmargin 1cm
+\topmargin 0.7cm
+\rightmargin 2.5cm
+\bottommargin 0.7cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle fancy
+
+\layout Title
+\noindent 
+
+\series bold 
+\emph on 
+AspectC++ -- Execution Model Overview
+\layout Author
+
+
+\begin_inset ERT
+status Collapsed
+
+\layout Standard
+
+\backslash 
+copyright
+\end_inset 
+
+ 2005 Olaf Spinczyk <os@aspectc.org>
+\newline 
+Friedrich-Alexander University Erlangen-Nuremberg
+\newline 
+Computer Science 4
+\layout Standard
+
+This is an overview about the AspectC++ execution model prepared for the
+ European AOSD Network of Excellence.
+ Detailed information on AspectC++ including manuals and tutorial slides
+ with lots of examples is available from 
+\begin_inset ERT
+status Collapsed
+
+\layout Standard
+
+\backslash 
+depref{http://www.aspectc.org/}{
+\backslash 
+emph{the AspectC++ Project Homepage}}
+\backslash 
+hspace{-4pt}
+\end_inset 
+
+.
+\layout Standard
+
+The overview is based on the documentation for AspectC++ 0.9.3.
+ The execution model is still 
+\begin_inset Quotes eld
+\end_inset 
+
+work in progress
+\begin_inset Quotes erd
+\end_inset 
+
+.
+\layout Standard
+\added_space_top bigskip \line_bottom \noindent 
+
+\size largest 
+Models
+\layout Section*
+
+Architectural Characteristics
+\layout Standard
+
+The following objectives of the AspectC++ development effort are responsible
+ for the design of the AspectC++ execution model:
+\layout Itemize
+
+The resource consumption of AspectC++ applications should be minimal.
+ Compared to a tangled implementation of the same functionality there should
+ be 
+\emph on 
+no overhead
+\emph default 
+.
+\layout Itemize
+
+AspectC++ should fit into the 
+\begin_inset Quotes eld
+\end_inset 
+
+philosophy
+\begin_inset Quotes erd
+\end_inset 
+
+ of C++, i.e.
+ as much as possible is done at compile-time.
+\layout Itemize
+
+AspectC++ should not rely on any runtime infrastructure provided by C++
+ such as a heap or RTTI.
+ These features are often not available in embedded systems projects or
+ system software.
+\layout Standard
+
+AspectC++ is implemented by a static source to source transformation from
+ AspectC++ to C++.
+ A version that is able to generate pure C code if the component code language
+ is C will be available in the near future.
+\layout Standard
+
+A separate AOP run-time infrastructure is not needed by the generated applicatio
+ns.
+ A small number of helper functions, classes, and templates is woven directly
+ into the application code modules.
+\layout Section*
+
+Aspect Model
+\layout Standard
+
+The AspectC++ weaver transforms aspects into ordinary C++ classes.
+ The generated aspect classes do not inherited from a specific (common)
+ base class.
+ Therefore, the object layout is not affected by the tranformation.
+\layout Section*
+
+Advice Model
+\layout Standard
+
+After the transformation, advice becomes an aspect (class) member function.
+ If the system is compiled with optimizations enabled, the advice code will
+ typically be inlined into the component code.
+ The argument list of the advice (function) contains the context variables
+ that are passed from the join point to the advice and an optional 
+\family typewriter 
+\size small 
+JoinPoint *tjp
+\family default 
+\size default 
+ pointer.
+ This pointer is only passed if the advice code actually uses 
+\family typewriter 
+\size small 
+tjp
+\family default 
+\size default 
+.
+\layout Standard
+
+In the case that the advice uses 
+\family typewriter 
+\size small 
+tjp
+\family default 
+\size default 
+, static members, or types defined in 
+\family typewriter 
+\size small 
+JoinPoint
+\family default 
+\size default 
+ the advice is transformed into a template function with 
+\family typewriter 
+\size small 
+JoinPoint
+\family default 
+\size default 
+ as a template parameter type.
+ Due to the template instantiation mechanism of C++, multiple instances
+ of the advice code might exist at runtime.
+\layout Section*
+
+Pointcut Model
+\layout Standard
+
+Pointcuts have no runtime representation.
+\layout Standard
+\added_space_top bigskip \line_bottom \noindent 
+
+\size largest 
+Functionality
+\layout Section*
+
+Joinpoint Shadow Retrieval
+\layout Standard
+
+In the static AspectC++ weaver
+\family typewriter 
+\size small 
+ ac++
+\family default 
+\size default 
+ , joinpoints are retrieved only at compile time.
+ A complete syntactical and semantical analysis has to be performed on the
+ AspectC++ code.
+ The result is a syntax tree representation with links to symbol tables,
+ which in include the results of the semantic analysis, and links to tokens
+ in the input file.
+ The token links are needed for the code transformation.
+ Based on the symbol tables the set of static joinpoints (see language descripti
+on), execution joinpoints, construction joinpoints, and destruction joinpoints
+ is constructed.
+ A visitor is used to find all call joinpoint shadows in the syntax tree.
+\layout Section*
+
+Weaving Approach
+\layout Standard
+
+Our weaver 
+\family typewriter 
+\size small 
+ac++
+\family default 
+\size default 
+ is usually applied directly before calling the C++ compiler.
+ With the 
+\family typewriter 
+\size small 
+ag++
+\family default 
+\size default 
+ front-end both steps are even integrated into one tool.
+ Depending on the advice defined in the program, the weaver performs the
+ following manipulations:
+\layout Itemize
+
+function calls are replaced with calls to wrapper functions that call the
+ advice chain
+\layout Itemize
+
+function implementations are replaced with wrapper functions
+\layout Itemize
+
+new members are inserted into classes
+\layout Itemize
+
+
+\family typewriter 
+\size small 
+#include
+\family default 
+\size default 
+ directives are generated
+\layout Itemize
+
+
+\family typewriter 
+\size small 
+#include
+\family default 
+\size default 
+ directives are expanded (only in the so-called "single translation unit"
+ mode)
+\layout Itemize
+
+aspects are transformed into classes
+\layout Itemize
+
+the 
+\family typewriter 
+\size small 
+aspectof()
+\family default 
+\size default 
+ function is generated if there is no user defined one
+\layout Itemize
+
+code for the instantiation of singleton aspects is generated
+\layout Itemize
+
+code for cflow management is generated (enter, exit, check, state instance)
+\layout Itemize
+
+helper functions for runtime type condition checks on objects are generated
+ (for 
+\family typewriter 
+\size small 
+that
+\family default 
+\size default 
+, 
+\family typewriter 
+\size small 
+target
+\family default 
+\size default 
+, and combinations) 
+\layout Standard
+
+Currently, all aspects of the project become 
+\begin_inset Quotes eld
+\end_inset 
+
+friends
+\begin_inset Quotes erd
+\end_inset 
+
+ of all classes and other aspects of the project.
+ A more sophisticated access control mechanism is future work.
+\layout Standard
+
+Introduced members become ordinary members.
+ Their visibility (private, public, or protected) is taken from the visibility
+ of the advice declaration in the aspect body.
+\layout Standard
+
+Advice code and the generated wrapper functions, which call the advice,
+ can normally be inlined.
+ Only in case of around advice the 
+\family typewriter 
+\size small 
+tjp->proceed()
+\family default 
+\size default 
+ is implemented by an indirect call using a function pointer.
+ Therefore, this operation is currently not inlined, which leads to a noticeably
+ higher resource consumption than for a combined before and after advice.
+ We are currently working on a better code transformation pattern to avoid
+ this problem.
+\layout Section*
+
+Special Treatment of Dynamic Pointcuts
+\layout Standard
+
+Currently, the cflow in AspectC++ does not support pointcuts with context
+ variables in the cflow argument.
+ Therefore, a cflow can easily be implemented by a counter that is incremented
+ when the cflow is entered and decremented when the cflow is left.
+ An improved cflow implementation that allows context variables is under
+ development.
+ Here the context will be stored on the call stack.
+\layout Standard
+
+For the 
+\family typewriter 
+\size small 
+that()
+\family default 
+\size default 
+ and 
+\family typewriter 
+\size small 
+target()
+\family default 
+\size default 
+ pointcut functions it is sometimes necessary to generate runtime type checks.
+ As we do not require the application code to be compiled with enabled runtime
+ type information, 
+\family typewriter 
+\size small 
+ac++
+\family default 
+\size default 
+ generates virtual type condition check functions wherever needed.
+ This operation might change the object layout if the corresponding class
+ had no associated virtual function table before.
+\layout Section*
+
+Advice Instance Management
+\layout Standard
+
+Advice code is instantiated at compile time.
+ If the advice depends on the type 
+\family typewriter 
+\size small 
+JoinPoint
+\family default 
+\size default 
+, a join point specific class that implements the required types and functions
+ is generated and used as a template parameter for the advice code.
+\layout Section*
+
+Deployment and Undeployment
+\layout Standard
+
+There is no dynamic deployment or undeployment of aspects.
+ 
+\the_end

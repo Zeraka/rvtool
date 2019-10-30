@@ -1,0 +1,15 @@
+Bug567: target() pointcut function defect for get/set advice
+============================================================
+set/args int FooBar::z 3
+call/target void FooBar::f()
+set/that int FooBar::y
+set/args int FooBar::y 6
+get/that int FooBar::y
+get/result int FooBar::y 6
+set/that int FooBar::z
+set/args int FooBar::z 6
+set/args int FooBar::y 4
+set/args int FooBar::y 5
+set/target int FooBar::z
+set/args int FooBar::z 7
+============================================================

@@ -1,0 +1,23 @@
+PrivateResult: advice for functions returning object with
+               non-public default constructor/assignment op.
+============================================================
+call result 3: 4711
+* incrementing result id
+call result 2: 4712
+call result 1: 4712
+call result 3: 4711
+* incrementing result id
+call result 2: 4712
+call result 1: 4712
+execution result 3: 4712
+* incrementing result id
+execution result 2: 4713
+execution result 1: 4713
+------------------------------------------------------------
+problem with private inner types:
+execution ("Safe::Inner Safe::uses_private_inner1()")
+execution ("const Safe::Inner &Safe::uses_private_inner2()")
+------------------------------------------------------------
+return a union:
+execution ("AUnion h()")
+============================================================

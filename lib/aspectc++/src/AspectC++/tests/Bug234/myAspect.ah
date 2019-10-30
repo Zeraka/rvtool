@@ -1,0 +1,21 @@
+#ifndef __myAspect_ah__
+#define __myAspect_ah__
+
+#include "anotherAspect.ah"
+#include "mySlice.ah"
+
+aspect myAspect {
+  advice "introTarget" : slice mySlice;
+
+  advice construction("introTarget") : after() {
+    tjp->that()->a_func = 0;
+  }
+
+  advice execution("introTarget") && args(i) : after(int i) {
+    if(tjp->that()->a_func != 0) {
+      *tjp->result() = tjp->that()->a_func(i);
+    }
+  }
+};
+
+#endif /* __myAspect_ah__ */

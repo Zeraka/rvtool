@@ -1,0 +1,72 @@
+#ifndef __a_ah__
+#define __a_ah__
+
+#include <stdio.h>
+
+namespace coveragemonitor {
+  // data structure used to gather information about a joinpoint
+  struct Data {
+    unsigned _id;
+  };
+
+  // data structure used to link the joinpoint data elements
+  struct Chain {
+    static Chain *&_first () { static Chain *chain = 0; return chain; }
+    Data *_data;
+    Chain *_next;
+    Chain (Data *data) : _data (data) {
+      Chain *head = _first ();
+      _first () = this;
+      _next = head;
+    }
+  };
+
+  // data structure used to combine data and chain elements
+  template <unsigned ID>
+  struct Collector {
+    static Data _data;
+    static Chain _chain;
+  };
+
+  template <unsigned ID> Data Collector<ID>::_data = { ID };
+  template <unsigned ID> Chain Collector<ID>::_chain (&_data);
+
+} // coveragemonitor
+
+
+
+aspect IdChecker {
+  advice execution ("% ...::%(...)" && !("% IdChecker::%(...)" || "% coveragemonitor::...::%(...)") ) : after () {
+    using namespace coveragemonitor;
+    typedef Collector<JoinPoint::JPID> Collector;
+
+    // As the compiler recognizes the access to the elements of
+    // Collector<JoinPoint::JPID> it will create a template instance
+    // for all joinpoints - even for those that will never be
+    // visited.
+    // It is necessary to explicitly mention the _chain element
+    // here otherwise the compiler will not instantiate
+    // any Chain elements.
+    Collector::_chain._data->_id = JoinPoint::JPID;
+  }
+  
+  advice execution ("% main(...)") : after() {
+    coveragemonitor::Chain *first = coveragemonitor::Chain::_first(); // remember starting point
+    unsigned count = 0;
+    
+    for (coveragemonitor::Chain *i = first; i; i = i->_next) {
+      count++;
+      for (coveragemonitor::Chain *j = first; j; j = j->_next) {
+        if( (i != j) && (i->_data->_id == j->_data->_id) ) {
+          printf("Error: duplicate JPID found: %u\n", j->_data->_id);
+        }
+      }
+    }
+    if(count < 4) {
+      printf("Error: only %u disjoint JPID(s) found (min 4 required)\n", count);
+    }
+  }
+
+};
+
+#endif //  __a_ah__

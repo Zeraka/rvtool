@@ -1,0 +1,18 @@
+Introspection: Test AC::TypeInfo<typename>
+==================================================
+{ public i=42 public j=3.14 public k="Hallo" }
+-> { public mutable foo=true public id=42 public size=1.8 public name="Olaf" public c=-> -> { public i=43 public j=2.1 public k=<null> } public i={ public inner=42 } public array={ [0]=1 [1]=2 [2]=3 [3]=0 [4]=0 } public static dd=3.14 public b=false public same_as_member_0=false }
+-> { no type info }
+{ no type info }
+42
+{ public _pad={ [0]=0 [1]=0 } }
+--------------------------------------------------
+{{ baseclass public: public i=31}{ baseclass public virtual: public j=2.71} public k="Christoph" public c2=-889275714 }
+-Bug-469------------------------------------------
+{ public a=123 }
+-Bug-525------------------------------------------
+#members of Bug525_1: 2
+#members of Bug525_2: 0
+Bug524: must be 1: 1
+Bug524: must be 4: 4
+==================================================

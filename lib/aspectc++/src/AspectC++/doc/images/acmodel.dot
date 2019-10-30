@@ -1,0 +1,121 @@
+digraph ACModel {
+  node [fontname = "Helvetica"];
+  edge [fontname = "Helvetica"];
+  File [shape=record label="{File|filename: string\nlen: int\ntime: int\n}"]
+  TUnit [shape=record label="{TUnit|}"]
+  File -> TUnit [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Header [shape=record label="{Header|}"]
+  File -> Header [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Header -> TUnit [label="in" headlabel="0..N"];
+  Source [shape=record label="{Source|kind: SourceLocKind\nline: int\nlen: int\n}"]
+  Source -> File [label="file"];
+  MemberIntro [shape=record label="{MemberIntro|}"]
+  MemberIntro -> Introduction [label="intro"];
+  MemberIntro -> Name [label="members" headlabel="0..N"];
+  BaseIntro [shape=record label="{BaseIntro|}"]
+  BaseIntro -> Introduction [label="intro"];
+  BaseIntro -> Class [label="bases" headlabel="0..N"];
+  ClassPlan [shape=record label="{ClassPlan|}"]
+  ClassPlan -> BaseIntro [label="base_intros" dir=back arrowtail="diamond" headlabel="0..N"];
+  ClassPlan -> MemberIntro [label="member_intros" dir=back arrowtail="diamond" headlabel="0..N"];
+  CodeAdvice [shape=record label="{CodeAdvice|conditional: bool\n}"]
+  CodeAdvice -> AdviceCode [label="advice"];
+  CodePlan [shape=record label="{CodePlan|}"]
+  CodePlan -> CodeAdvice [label="before" dir=back arrowtail="diamond" headlabel="0..N"];
+  CodePlan -> CodeAdvice [label="around" dir=back arrowtail="diamond" headlabel="0..1"];
+  CodePlan -> CodeAdvice [label="after" dir=back arrowtail="diamond" headlabel="0..N"];
+  CodePlan -> CodePlan [label="next_level" dir=back arrowtail="diamond" headlabel="0..1"];
+  Any [shape=record label="{Any|jpid: int\n}"]
+  Any -> Source [label="source" dir=back arrowtail="diamond" headlabel="0..N"];
+  Type [shape=record label="{Type|signature: string\n}"]
+  Any -> Type [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Arg [shape=record label="{Arg|type: string\nname: string\n}"]
+  Any -> Arg [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Name [shape=record label="{Name|name: string\nbuiltin: bool\n}"]
+  Any -> Name [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Name -> Any [label="children" dir=back arrowtail="diamond" headlabel="0..N"];
+  Name -> TUnit [label="tunits" headlabel="0..N"];
+  Namespace [shape=record label="{Namespace|}"]
+  Name -> Namespace [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Function [shape=record label="{Function|kind: FunctionType\nvariadic_args: bool\ncv_qualifiers: CVQualifiers\n}"]
+  Name -> Function [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Function -> Type [label="result_type" dir=back arrowtail="diamond" headlabel="0..1"];
+  Function -> Type [label="arg_types" dir=back arrowtail="diamond" headlabel="0..N"];
+  Function -> TUnit [label="static_in" headlabel="0..1"];
+  Variable [shape=record label="{Variable|kind: VariableType\n}"]
+  Name -> Variable [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Variable -> Type [label="type" dir=back arrowtail="diamond"];
+  Class [shape=record label="{Class|}"]
+  Name -> Class [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Class -> Class [label="bases" headlabel="0..N"];
+  Class -> Class [label="derived" headlabel="0..N"];
+  Class -> ClassPlan [label="plan" dir=back arrowtail="diamond" headlabel="0..1"];
+  ClassSlice [shape=record label="{ClassSlice|is_struct: bool\n}"]
+  Name -> ClassSlice [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Code [shape=record label="{Code|}"]
+  Any -> Code [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Code -> CodePlan [label="plan" dir=back arrowtail="diamond" headlabel="0..1"];
+  Access [shape=record label="{Access|lid: int\ntarget_object_lid: int\ncfg_block_lid: int\n}"]
+  Code -> Access [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Access -> Class [label="target_class" headlabel="0..1"];
+  Get [shape=record label="{Get|}"]
+  Access -> Get [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Get -> Variable [label="variable" headlabel="0..1"];
+  Set [shape=record label="{Set|}"]
+  Access -> Set [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Set -> Variable [label="variable" headlabel="0..1"];
+  Call [shape=record label="{Call|default_args: int\n}"]
+  Access -> Call [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Call -> Function [label="target"];
+  Call -> Type [label="variadic_arg_types" dir=back arrowtail="diamond" headlabel="0..N"];
+  Call -> Access [label="implicit_access" dir=back arrowtail="diamond" headlabel="0..N"];
+  Builtin [shape=record label="{Builtin|}"]
+  Access -> Builtin [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Builtin -> Function [label="target"];
+  Builtin -> Access [label="implicit_access" dir=back arrowtail="diamond" headlabel="0..N"];
+  Ref [shape=record label="{Ref|}"]
+  Access -> Ref [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Ref -> Variable [label="variable"];
+  Ref -> Type [label="type" dir=back arrowtail="diamond"];
+  GetRef [shape=record label="{GetRef|kind: VariableType\n}"]
+  Access -> GetRef [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  GetRef -> Type [label="type" dir=back arrowtail="diamond"];
+  SetRef [shape=record label="{SetRef|kind: VariableType\n}"]
+  Access -> SetRef [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  SetRef -> Type [label="type" dir=back arrowtail="diamond"];
+  CallRef [shape=record label="{CallRef|kind: VariableType\n}"]
+  Access -> CallRef [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  CallRef -> Type [label="type" dir=back arrowtail="diamond"];
+  Execution [shape=record label="{Execution|}"]
+  Code -> Execution [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Construction [shape=record label="{Construction|}"]
+  Code -> Construction [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Destruction [shape=record label="{Destruction|}"]
+  Code -> Destruction [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Pointcut [shape=record label="{Pointcut|expr: string\nkind: PointcutType\n}"]
+  Name -> Pointcut [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Pointcut -> Arg [label="args" dir=back arrowtail="diamond" headlabel="0..N"];
+  Advice [shape=record label="{Advice|lid: int\n}"]
+  Any -> Advice [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Advice -> Pointcut [label="pointcut" dir=back arrowtail="diamond"];
+  AdviceCode [shape=record label="{AdviceCode|kind: AdviceCodeType\ncontext: AdviceCodeContext\n}"]
+  Advice -> AdviceCode [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Introduction [shape=record label="{Introduction|}"]
+  Advice -> Introduction [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Introduction -> ClassSlice [label="named_slice" headlabel="0..1"];
+  Introduction -> ClassSlice [label="anon_slice" dir=back arrowtail="diamond" headlabel="0..1"];
+  Order [shape=record label="{Order|}"]
+  Advice -> Order [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Order -> Pointcut [label="aspect_exprs" dir=back arrowtail="diamond" headlabel="0..N"];
+  Aspect [shape=record label="{Aspect|}"]
+  Class -> Aspect [dir=back arrowsize=1.5 arrowtail=empty weight=1.0];
+  Aspect -> Introduction [label="intros" dir=back arrowtail="diamond" headlabel="0..N"];
+  Aspect -> AdviceCode [label="advices" dir=back arrowtail="diamond" headlabel="0..N"];
+  Aspect -> Order [label="orders" dir=back arrowtail="diamond" headlabel="0..N"];
+  Model [shape=record label="{Model|version: string\n}"]
+  Model -> File [label="files" dir=back arrowtail="diamond" headlabel="0..N"];
+  Model -> Namespace [label="root" dir=back arrowtail="diamond"];
+  { rank=same Name Code }
+  { rank=min Any }
+  
+}

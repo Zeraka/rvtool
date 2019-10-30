@@ -1,0 +1,13 @@
+Check the match mechanism for 'virtual' in match expressions
+============================================================
+call to void BAR::barMethod()
+  NON-VIRTUAL method
+call to void BAR::fooBarMethod()
+  VIRTUAL method
+call to void BAR::fooBarMethod(int)
+  NON-VIRTUAL method
+call to void FOO::fooBarMethod()
+  VIRTUAL method
+call to void FOOBAR::other()
+  NON-VIRTUAL method
+============================================================

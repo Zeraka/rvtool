@@ -1,0 +1,18 @@
+#ifndef __abstractTrace_ah__
+#define __abstractTrace_ah__
+
+#include <stdio.h>
+
+aspect abstractTrace {
+  pointcut virtual methods() = 0;
+
+  advice execution(methods()) : before() {
+    printf("ENTRY: %s\n",tjp->signature());
+  }
+
+  advice execution(methods()) : after() {
+    printf("EXIT: %s\n",tjp->signature());
+  }
+};
+
+#endif /* __abstractTrace_ah__ */

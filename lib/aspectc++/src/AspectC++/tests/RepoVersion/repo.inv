@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<ac-model version="0.0.1" ids="1">
+  <files>
+    <TUnit filename="main.cc" len="3" time="1299160153" id="0"/>
+  </files>
+  <root>
+    <Namespace name="::">
+      <children>
+        <Function kind="1" cv_qualifiers="0" name="main">
+          <result_type>
+            <Type signature="int"/>
+          </result_type>
+          <children>
+            <Execution/>
+          </children>
+          <source>
+            <Source kind="1" file="0" line="3" len="1"/>
+          </source>
+        </Function>
+      </children>
+    </Namespace>
+  </root>
+</ac-model>

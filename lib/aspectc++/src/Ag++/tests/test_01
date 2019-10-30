@@ -1,0 +1,14 @@
+DESC="Check if executable is at the right place"
+
+main()
+{
+  if [ ! \( \( -x ${AGCC} \) -o \( -x ${AGCC}.exe \) \) ];then
+    ERR_MSG="Executable '${AGCC}' not found";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+  true;
+}

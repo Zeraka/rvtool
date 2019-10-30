@@ -1,0 +1,9 @@
+Bug427: args() keyword ignores __attribute__ on types
+====================================================================
+sizeof arg<0>: 1
+sizeof ARG<0>: 1
+sizeof a: 1
+sizeof b: 2
+sizeof c: 4
+sizeof d: 8
+====================================================================

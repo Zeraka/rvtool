@@ -1,0 +1,3 @@
+m( 5 )
+after execution void B::m(A<int>)
+after call void B::m(A<int>)

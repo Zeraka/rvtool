@@ -1,0 +1,4 @@
+int *operator &(int &) at line 8
+int operator +(int) at line 9
+int operator +(int,int) at line 10
+int &operator ++(int &) at line 11

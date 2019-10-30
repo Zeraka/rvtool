@@ -1,0 +1,212 @@
+#! /bin/sh
+# -*- coding: utf-8 -*-
+# Copyright (C) 2017, 2019 Laboratoire de Recherche et Développement
+# de l'Epita (LRDE).
+#
+# This file is part of Spot, a model checking library.
+#
+# Spot is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Spot is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+# License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+. ./defs || exit 1
+
+set -e
+
+cat >exp <<EOF
+parity 17;
+0 1 0 1,2 "INIT";
+2 1 1 3;
+3 2 0 4,5;
+5 1 1 3,6;
+6 3 0 4,5;
+4 1 1 7,8;
+8 1 0 9,10;
+10 1 1 11,12;
+12 1 0 9,10;
+9 3 1 3,6;
+11 2 0 9,10;
+7 1 0 13,14;
+14 1 1 7,11;
+13 2 1 3,6;
+1 1 1 3,15;
+15 1 0 2,1;
+EOF
+ltlsynt --ins=a --outs=b -f 'GFa <-> GFb' --print-pg >out
+diff out exp
+
+cat >exp <<EOF
+REALIZABLE
+aag 23 1 2 1 16
+2
+4 3
+6 45
+47
+8 5 7
+12 2 8
+14 4 7
+16 2 14
+20 5 6
+22 3 20
+24 2 20
+26 4 6
+28 2 26
+30 3 26
+36 17 23
+38 13 36
+40 29 31
+42 25 40
+44 38 42
+46 25 29
+i0 a
+o0 b
+EOF
+ltlsynt --ins=a --outs=b -f 'GFa <-> GFb' --aiger >out
+diff out exp
+
+cat >exp <<EOF
+REALIZABLE
+aag 16 1 2 2 13
+2
+4 29
+6 33
+31
+31
+8 5 7
+10 3 8
+12 2 8
+14 4 7
+16 3 14
+18 2 14
+20 5 6
+22 2 20
+24 3 20
+26 17 25
+28 11 26
+30 19 23
+32 13 30
+i0 a
+o0 b
+o1 c
+EOF
+ltlsynt --ins=a --outs=b,c -f 'GFa <-> (GFb & GFc)' --aiger >out
+diff out exp
+
+cat >exp <<EOF
+translating formula done
+split inputs and outputs done
+automaton has 9 states
+determinization done
+DPA has 14 states, 4 colors
+simplification done
+DPA has 11 states
+parity game built
+EOF
+ltlsynt --ins='a' --outs='b' -f 'GFa <-> GFb' --verbose --realizability 2> out
+diff out exp
+
+F0='(G ((((req) -> (X ((grant) && (X ((grant) && (X (grant))))))) && ((grant)
+-> (X (! (grant))))) && ((cancel) -> (X ((! (grant)) U (go))))))'
+IN0='cancel, go, req'
+OUT0='grant'
+EXP0='UNREALIZABLE'
+F1='(G ((((req) -> (X ((grant) || (X ((grant) || (X (grant))))))) && ((grant)
+-> (X (! (grant))))) && ((cancel) -> (X ((! (grant)) U (go))))))'
+IN1='cancel, go, req'
+OUT1='grant'
+EXP1='UNREALIZABLE'
+F2='((G ((cancel) -> (X (go)))) -> (G ((((req) -> (X ((grant) || (X ((grant) ||
+(X (grant))))))) && ((grant) -> (X (! (grant))))) && ((cancel) -> (X ((!
+(grant)) U (go)))))))'
+IN2='cancel, go, req'
+OUT2='grant'
+EXP2='REALIZABLE'
+F3='((G ((cancel) -> (X ((go) || (X (go)))))) -> (G ((((req) -> (X ((grant) ||
+(X ((grant) || (X (grant))))))) && ((grant) -> (X (! (grant))))) && ((cancel)
+-> (X ((! (grant)) U (go)))))))'
+IN3='cancel, go, req'
+OUT3='grant'
+EXP3='REALIZABLE'
+F4='((G ((cancel) -> (X ((go) || (X (go)))))) -> (G ((((req) -> (X (((grant) ||
+(cancel)) || (X (((grant) || (cancel)) || (X ((grant) || (cancel)))))))) &&
+((grant) -> (X (! (grant))))) && ((cancel) -> (X ((! (grant)) U (go)))))))'
+IN4='cancel, go, req'
+OUT4='grant'
+EXP4='REALIZABLE'
+F5='((G ((cancel) -> (X ((go) || (X ((go) || (X (go)))))))) -> (G ((((req) ->
+(X (((grant) || (cancel)) || (X (((grant) || (cancel)) || (X ((grant) ||
+(cancel)))))))) && ((grant) -> (X (! (grant))))) && ((cancel) -> (X ((!
+(grant)) U (go)))))))'
+IN5='cancel, go, req'
+OUT5='grant'
+EXP5='REALIZABLE'
+F6='((G ((cancel) -> (X ((go) || (X (go)))))) -> (G ((((cancel) -> (X ((!
+(grant)) U (go)))) && ((grant) -> (X (! (grant))))) && ((req) -> (((grant) ||
+(cancel)) || (X (((grant) || (cancel)) || (X (((grant) || (cancel)) || (X
+((grant) || (cancel))))))))))))'
+IN6='cancel, go, req'
+OUT6='grant'
+EXP6='REALIZABLE'
+F7='(! ((G ((req) -> (F (ack)))) && (G ((go) -> (F (grant))))))'
+IN7='go, req'
+OUT7='ack, grant'
+EXP7='UNREALIZABLE'
+F8='(((G ((((r1) -> (F (a1))) && ((r2) -> (F (a2)))) && (! ((a1) && (a2))))) &&
+(((a1) U (r1)) || (G (a1)))) && (((a2) U (r2)) || (G (a2))))'
+IN8='r1, r2'
+OUT8='a1, a2'
+EXP8='UNREALIZABLE'
+F9='((((G (((((((r0) -> (F (a0))) && ((r1) -> (F (a1)))) && ((r2) -> (F (a2))))
+&& (! ((a0) && (a1)))) && (! ((a0) && (a2)))) && (! ((a1) && (a2))))) && (((a0)
+U (r0)) || (G (a0)))) && (((a1) U (r1)) || (G (a1)))) && (((a2) U (r2)) || (G
+(a2))))'
+IN9='r0, r1, r2'
+OUT9='a0, a1, a2'
+EXP9='UNREALIZABLE'
+IN10='a, b, c'
+OUT10='p0, p1, p2'
+F10='G (p0 && ! p1 && ! p2 || (! p0 && p1 && ! p2) || (! p0 && ! p1 && p2)) &&
+  (F (G a) || F (G b) || G (F c) <-> (G (F p0) || (G (F p1) && ! G (F p2))))'
+EXP10='REALIZABLE'
+
+for i in 0 1 7 8 9; do
+  F=$(eval echo \$F$i)
+  IN=$(eval echo \$IN$i)
+  OUT=$(eval echo \$OUT$i)
+  EXP=$(eval echo \$EXP$i)
+
+  for algo in sd ds lar; do
+    test $EXP = $(ltlsynt -f "$F" --ins="$IN" --outs="$OUT" --realizability \
+    --algo=$algo)
+  done
+done
+
+for i in 2 3 4 5 6 10; do
+  F=$(eval echo \$F$i)
+  IN=$(eval echo \$IN$i)
+  OUT=$(eval echo \$OUT$i)
+  EXP=$(eval echo \$EXP$i)
+
+  ltl2tgba -f "!($F)" > negf_aut$i
+
+  # test ltlsynt
+  for algo in sd ds lar; do
+    ltlsynt -f "$F" --ins="$IN" --outs="$OUT" --algo=$algo > out$i || true
+    REAL=`head -1 out$i`
+    test $REAL = $EXP
+    tail -n +2 out$i > res$i
+    # check that the L(strategy) is included in L(F)
+    autfilt -q -v --intersect=negf_aut$i res$i
+    # check that all environment actions are possible
+    autfilt --remove-ap="$OUT" res$i | autfilt --dualize | autfilt --is-empty -q
+  done
+done

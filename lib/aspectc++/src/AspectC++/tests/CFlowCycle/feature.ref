@@ -1,0 +1,7 @@
+CFlowCycle: cflow generation and cycle problem check
+====================================================
+executing void C::f()
+... and D::f()
+now calling C::f() directly from main():
+the execution advice shall print nothing above this line
+====================================================

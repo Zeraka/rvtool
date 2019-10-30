@@ -1,0 +1,16 @@
+Check the match mechanism for 'static' in match expressions
+============================================================
+call to void Test::static_func()
+  STATIC function
+call to void Test::static_func()
+  STATIC function
+call to void Test::non_static_func()
+  NON-STATIC function
+call to void Test::virtual_func()
+  NON-STATIC function
+------------------------------------------------------------
+call to void static_func()
+  STATIC function
+call to void non_static_func()
+  NON-STATIC function
+============================================================

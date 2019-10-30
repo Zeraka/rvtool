@@ -1,0 +1,34 @@
+#ifndef __Derived_ah__
+#define __Derived_ah__
+
+#include <stdio.h>
+
+#include "Base.ah"
+#include "C.h"
+
+aspect Derived : public Base {
+    // make the base aspect introduce something into "C"
+    pointcut target_class () = "C";
+    pointcut virtual late_target_class_copy () = 0;
+
+    advice execution (target_class ()) : before () {
+	printf ("before %s\n", JoinPoint::signature ());
+    }
+    // advice execution (late_target_class_copy ()) : after () {
+    // 	printf ("after %s\n", JoinPoint::signature ());
+    // }
+};
+
+struct Confusion {
+    pointcut target_class() = "DoesNotExists";
+};
+
+aspect Derived2 : public Confusion, public Derived {
+    // make the base aspect introduce something into "C"
+    pointcut late_target_class_copy () = "C";
+    // advice late_target_class_copy() : slice struct {
+    //   void func() { _something = 42; }
+    // };
+};
+
+#endif // __Derived_ah__

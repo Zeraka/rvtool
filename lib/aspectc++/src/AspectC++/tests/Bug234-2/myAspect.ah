@@ -1,0 +1,34 @@
+/* -*- c++ -*- */
+#ifndef __myAspect_ah__
+#define __myAspect_ah__
+
+typedef int (*my_func)(int);
+
+aspect myAspect {
+  advice "introTarget" : slice struct { my_func a_func; };
+
+ public:
+  advice "introTarget" : slice struct {
+    void set_a_func(my_func b_func) {
+      a_func = b_func;
+    }
+  };
+
+  advice "introTarget" : slice struct {
+    my_func get_a_func() {
+      return a_func;
+    }
+  };
+
+  advice construction("introTarget") : after() {
+    tjp->that()->a_func = 0;
+  }
+
+  advice execution("introTarget") && args(i) : after(int i) {
+    if(tjp->that()->a_func != 0) {
+      *tjp->result() = tjp->that()->a_func(i);
+    }
+  }
+};
+
+#endif /* __myAspect_ah__ */

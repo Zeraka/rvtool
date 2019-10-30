@@ -1,0 +1,15 @@
+#ifndef __MODULE_1_AH__
+#define __MODULE_1_AH__
+
+#include "Module1.h"
+
+aspect Module1Initializer {
+
+  //bind to init function and initialize Module1
+  advice execution("void Modules::init()") : after() {
+    Modules::Module1::init();
+  }
+
+};
+
+#endif

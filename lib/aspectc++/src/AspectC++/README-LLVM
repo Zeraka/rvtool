@@ -1,0 +1,51 @@
+Installation
+============
+
+1. Install the libclang 3.4 development package, which contains clang and llvm
+   header files as well as the static llvm and clang libraries. Remember the
+   installation path (here referred to as <clang-path>).
+
+   - On Debian and Ubuntu you can use the package libclang-3.4-dev. The
+     installation path is typically /usr/lib/llvm-3.4.
+
+   - On other Linux systems you can download binary packages from llvm.org.
+     The tarballs can be installed anywhere.
+
+2. Compile AspectC++ as usual, but define the make variables LLVMCONF and
+   FRONTEND:
+
+   make LLVMCONF=<llvm-config-command-path> FRONTEND=Clang
+
+   In most cases you also want to add SHARED=1 and -j<N>.
+
+   Please note that the Puma library is still needed for compiling
+   AspectC++. In the Clang configuration we no longer need the Puma C++
+   parser, but some other Puma functions are still referenced.
+   Therefore, the "mini" configuration of the Puma library is sufficient. You
+   can build in the "mini" configuration with:
+
+   make MINI=1
+
+   In this configuration Puma needs no aspect weaver for compilation.
+
+
+Installation on Mac OS X
+========================
+
+Currently it is not possible to use AspectC++ with an unpatched version of clang
+3.4 on OS X due to a problem parsing system headers. We provide a patch to the
+source distribution of clang to work around this issue.
+
+  - Download and unpack the clang 3.4 tarball from llvm.org
+
+  - cd tools/clang
+    patch -p0 < /path/to/aspectc++/clang-3.4-disable-modules.patch
+    cd ../..
+    ./configure <yourarguments> --prefix=/some/path
+    make && make install
+
+  - Now AspectC++ can be built as described in step #2 and linked against the
+    patched clang.
+
+    make LLVMCONF=/some/path/bin/llvm-config FRONTEND=Clang TARGET=macosx-release
+

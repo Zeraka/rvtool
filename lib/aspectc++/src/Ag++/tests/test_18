@@ -1,0 +1,40 @@
+DESC="Match a pointcut from a Aspect C++ repository"
+
+REPOSDIR="src/repos dir"
+REPOS="${REPOSDIR}/test18_repos.acp"
+OBJDIR="src/obj dir"
+OBJ="${OBJDIR}/Test03.o"
+
+main()
+{
+  mkdir "${OBJDIR}"
+  mkdir "${REPOSDIR}"
+
+  EXEC="${AGCC} -v2 --repository \"${REPOS}\" --path src -c -o \"${OBJ}\" src/Test.cc"
+  if  (eval ${EXEC});then true;else
+    ERR_MSG="Execution failed: '${EXEC}'";
+    return 1;
+  fi;
+
+  if [ ! -f "${OBJ}" ];then
+    ERR_MSG="Object file '${OBJ}' was not created";
+    return 1;
+  fi;
+
+  if [ ! -f "${REPOS}"  ];then
+    return 1;
+    ERR_MSG="Repository file '${REPOS}' has not been created";
+  fi
+
+  EXEC="${AGCC} -v2 --repository \"${REPOS}\" --expr'\"% Test::%(...)\" && \"%\"'"
+  if  (eval ${EXEC});then true;else
+    ERR_MSG="Execution failed: '${EXEC}'";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+  rm -rf "${REPOSDIR}"
+  rm -rf "${OBJDIR}"
+}

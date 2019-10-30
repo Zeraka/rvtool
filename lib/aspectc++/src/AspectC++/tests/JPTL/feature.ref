@@ -1,0 +1,13 @@
+*** BaseIterator ***
+Base1
+Base2
+Base3
+Derived
+BASES: 3
+*** MemberIterator ***
++ 8 = 8
++ 1 = 9
++ 8 = 17
+SIZE: 17
+*** FunctionIterator ***
+COUNT: 2

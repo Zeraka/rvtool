@@ -1,0 +1,113 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//
+// This program is free software;  you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 2 of
+// the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this program; if not, write to the Free
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+// MA  02111-1307  USA
+
+#ifndef __ext_gnu_csemantic_ah__
+#define __ext_gnu_csemantic_ah__
+
+#include "Puma/CTree.h"
+
+#ifndef HAVE_SEM_ERROR_MACROS
+#define HAVE_SEM_ERROR_MACROS
+
+#define ASPECT_SEM_MSG(loc__,mesg__) \
+  *_err << loc__->token ()->location () << mesg__ << endMessage
+
+#define ASPECT_SEM_ERROR(loc__,mesg__) \
+  ASPECT_SEM_MSG (loc__, sev_error << mesg__)
+
+#define ASPECT_SEM_ERROR__duplicate(token__,type__,name__) \
+  ASPECT_SEM_ERROR (token__, "duplicate " << type__ \
+    << " `" << name__->Text () << "'")
+
+#endif // HAVE_SEM_ERROR_MACROS
+
+namespace Puma {
+
+// C Semantic extension
+slice class ExtGnuLocalLabelStmtSemantic {
+public:
+  CTree *introduce_local_label ();
+  bool gnu_introduce_label (CTree *&);
+};
+
+slice Puma::CTree * Puma::ExtGnuLocalLabelStmtSemantic::introduce_local_label () {
+  Puma::CTree *tree = builder ().gnu_local_label_stmt ();
+  if (tree->NodeName () != CT_GnuLocalLabelStmt::NodeId ())
+    return tree;
+
+  if (! current_scope->LocalScope ()) {
+    ASPECT_SEM_ERROR (tree, "label declaration outside of function");
+    builder ().destroyNode (tree);
+    return (CTree*)0;
+  }
+
+  CFunctionInfo *fct = current_scope->LocalScope ()->Function ();
+  // be careful: tricky casts necessary, because of multiple inheritance!
+  CT_GnuLocalLabelStmt *ls = (CT_GnuLocalLabelStmt *)(CT_List*)tree;
+
+  for (int e = 0; e < ls->Entries (); e++) {
+    CT_SimpleName *sn = (CT_SimpleName*)ls->Entry (e);
+    const char *name = sn->Text ();
+    if (fct->findLocalLabel (name, current_scope)) {
+      ASPECT_SEM_ERROR__duplicate (tree, "local label declaration", sn);
+    }
+    else {
+      fct->registerLocalLabel (name, current_scope);
+    }
+  }
+  return tree;
+}
+
+slice bool Puma::ExtGnuLocalLabelStmtSemantic::gnu_introduce_label (CTree *&tree) {
+  CFunctionInfo *fct;
+  CLabelInfo *info;
+  const char *name;
+  CT_LabelStmt *ls;
+
+  ls = (CT_LabelStmt*) tree;
+  if (ls->NodeName () != CT_LabelStmt::NodeId ())
+    return true;
+
+  name = ls->Label ()->Text ();
+  if (! current_scope->LocalScope ()) {
+    ASPECT_SEM_ERROR (ls->Label (), "label `" << name << "' outside of function");
+    builder ().destroyNode (ls);
+    tree = (CTree*)0;
+    return true;
+  }
+
+  fct = current_scope->LocalScope ()->Function ();
+  if ((info = fct->findLocalLabel (name, current_scope, true)) != 0) {
+    if (info->Tree ()) {
+      ASPECT_SEM_ERROR__duplicate (ls, "local label", ls->Label ());
+      builder ().destroyNode (ls);
+      tree = (CTree*)0;
+      return true;
+    }
+    info->Tree (ls);
+  }
+  else {
+    // do the standard label handling
+    return false;
+  }
+  return true;
+}
+
+} // namespace Puma
+
+#endif /* __ext_gnu_csemantic_ah__ */

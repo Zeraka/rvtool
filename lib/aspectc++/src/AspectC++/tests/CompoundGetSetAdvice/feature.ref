@@ -1,0 +1,347 @@
+COMPOUND:
+
+<var> += <const>:
+Get: int a = 42
+Before: int a
+ent: 42
+new: 45
+Around: int a
+ent: 42
+new: 45
+ent (inner): 42
+new (inner): 90
+set (inner): 90
+set: 90
+After: int a
+set: 122
+Get: int a = 122
+122
+
+<var> += <var>:
+Get: int b = 3
+Get: int a = 122
+Before: int a
+ent: 122
+new: 125
+Around: int a
+ent: 122
+new: 125
+ent (inner): 122
+new (inner): 250
+set (inner): 250
+set: 250
+After: int a
+set: 282
+Get: int a = 282
+282
+
+<var>++:
+Get: int a = 282
+Before: int a
+ent: 282
+new: 283
+Around: int a
+ent: 282
+new: 283
+ent (inner): 282
+new (inner): 566
+set (inner): 566
+set: 566
+After: int a
+set: 598
+282
+
+++<var>:
+Hello Operator: int &operator ++(int &)
+Get: int a = 598
+Before: int a
+ent: 598
+new: 599
+Around: int a
+ent: 598
+new: 599
+ent (inner): 598
+new (inner): 1198
+set (inner): 1198
+set: 1198
+After: int a
+set: 1230
+Bye.
+Get: int a = 1230
+1230
+
+<var>--:
+Get: int a = 1230
+Before: int a
+ent: 1230
+new: 1229
+Around: int a
+ent: 1230
+new: 1229
+ent (inner): 1230
+new (inner): 2458
+set (inner): 2458
+set: 2458
+After: int a
+set: 2490
+1230
+
+--<var>:
+Get: int a = 2490
+Before: int a
+ent: 2490
+new: 2489
+Around: int a
+ent: 2490
+new: 2489
+ent (inner): 2490
+new (inner): 4978
+set (inner): 4978
+set: 4978
+After: int a
+set: 5010
+Get: int a = 5010
+5010
+
+<var> -= <var>:
+Get: int b = 3
+Get: int a = 5010
+Before: int a
+ent: 5010
+new: 5007
+Around: int a
+ent: 5010
+new: 5007
+ent (inner): 5010
+new (inner): 10014
+set (inner): 10014
+set: 10014
+After: int a
+set: 10046
+Get: int a = 10046
+10046
+
+<var> *= <var>:
+Get: int b = 3
+Get: int a = 10046
+Before: int a
+ent: 10046
+new: 30138
+Around: int a
+ent: 10046
+new: 30138
+ent (inner): 10046
+new (inner): 60276
+set (inner): 60276
+set: 60276
+After: int a
+set: 60308
+Get: int a = 60308
+60308
+
+<var> /= <var>:
+Get: int b = 3
+Get: int a = 60308
+Before: int a
+ent: 60308
+new: 20102
+Around: int a
+ent: 60308
+new: 20102
+ent (inner): 60308
+new (inner): 40204
+set (inner): 40204
+set: 40204
+After: int a
+set: 40236
+Get: int a = 40236
+40236
+
+<var> %= <var>:
+Get: int b = 3
+Get: int a = 40236
+Before: int a
+ent: 40236
+new: 0
+Around: int a
+ent: 40236
+new: 0
+ent (inner): 40236
+new (inner): 0
+set (inner): 0
+set: 0
+After: int a
+set: 32
+Get: int a = 32
+32
+
+<var> |= <var>:
+Get: int b = 3
+Get: int a = 32
+Before: int a
+ent: 32
+new: 35
+Around: int a
+ent: 32
+new: 35
+ent (inner): 32
+new (inner): 70
+set (inner): 70
+set: 70
+After: int a
+set: 102
+Get: int a = 102
+102
+
+<var> ^= <var>:
+Get: int b = 3
+Get: int a = 102
+Before: int a
+ent: 102
+new: 101
+Around: int a
+ent: 102
+new: 101
+ent (inner): 102
+new (inner): 202
+set (inner): 202
+set: 202
+After: int a
+set: 234
+Get: int a = 234
+234
+
+<var> &= <var>:
+Get: int b = 3
+Get: int a = 234
+Before: int a
+ent: 234
+new: 2
+Around: int a
+ent: 234
+new: 2
+ent (inner): 234
+new (inner): 4
+set (inner): 4
+set: 4
+After: int a
+set: 36
+Get: int a = 36
+36
+
+<var> <<= <var>:
+Get: int b = 3
+Get: int a = 36
+Before: int a
+ent: 36
+new: 288
+Around: int a
+ent: 36
+new: 288
+ent (inner): 36
+new (inner): 576
+set (inner): 576
+set: 576
+After: int a
+set: 608
+Get: int a = 608
+608
+
+<var> >>= <var>:
+Get: int b = 3
+Get: int a = 608
+Before: int a
+ent: 608
+new: 76
+Around: int a
+ent: 608
+new: 76
+ent (inner): 608
+new (inner): 152
+set (inner): 152
+set: 152
+After: int a
+set: 184
+Get: int a = 184
+184
+
+
+FORWARD:
+
+<var> = <const>:
+Ref: short int s _. PASSED
+5
+Ref: short int S::s .. PASSED
+16
+
+<var> += <const>:
+Ref: short int s _. PASSED
+7
+Ref: short int S::s .. PASSED
+18
+
+<var> -= <const>:
+Ref: short int s _. PASSED
+3
+Ref: short int S::s .. PASSED
+14
+
+<var> *= <const>:
+Ref: short int s _. PASSED
+15
+Ref: short int S::s .. PASSED
+70
+
+<var> /= <const>:
+Ref: short int s _. PASSED
+5
+Ref: short int S::s .. PASSED
+23
+
+<var> %= <const>:
+Ref: short int s _. PASSED
+5
+Ref: short int S::s .. PASSED
+2
+
+<var> ^= <const>:
+Ref: short int s _. PASSED
+6
+Ref: short int S::s .. PASSED
+1
+
+<var> |= <const>:
+Ref: short int s _. PASSED
+7
+Ref: short int S::s .. PASSED
+5
+
+<var> &= <const>:
+Ref: short int s _. PASSED
+3
+Ref: short int S::s .. PASSED
+1
+
+<var> <<= <const>:
+Ref: short int s _. PASSED
+24
+Ref: short int S::s .. PASSED
+8
+
+<var> >>= <const>:
+Ref: short int s _. PASSED
+6
+Ref: short int S::s .. PASSED
+2
+
+++<var>:
+Ref: short int s _. PASSED
+7
+Ref: short int S::s .. PASSED
+3
+
+--<var>:
+Ref: short int s _. PASSED
+6
+Ref: short int S::s .. PASSED
+2

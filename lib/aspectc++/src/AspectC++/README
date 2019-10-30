@@ -1,0 +1,36 @@
+Preparations:
+=============
+
+Install libxml2 sources from libxml.org. The versions we have used for ac++
+are 2.6.17, 2.7.2, and 2.9.2. Configure the sources with...
+
+./configure --prefix=<some target dir> --disable-shared --with-minimum --with-xpath --with-output --with-sax1 --with-tree
+
+For cross compiling a windows version on Linux you might add...
+
+--host=i586-mingw32msvc
+(or similar)
+
+Then run "make" and "make install". To make sure that the AspectC++
+Makefile find the right libxml2-config command put the bin directory
+from <some target dir> in your command search path.
+
+Build the Puma library with your desired TARGET, e.g. "make
+TARGET=linux-release".
+
+
+Build AspectC++:
+================
+
+Set the PUMA environment variable to PUMA root directory (if Puma is
+not located in ../Puma).
+
+Execute "make" with the right TARGET setting from your Puma build,
+e.g. "make TARGET=linux-release".
+
+To weave and compile, use "make".
+
+To run the test programs, use "make testclean testall".
+You need to set the environment variable PUMA_CONFIG to your local puma.cfg, eg. ../Puma/gen-release/puma.cfg
+
+The examples can be tested with "make exampleclean examplerun".

@@ -1,0 +1,22 @@
+#ifndef __AROUNDCHECK_AH__
+#define __AROUNDCHECK_AH__
+
+#include <iostream>
+
+using namespace std;
+
+aspect AroundCheck {
+  advice builtin( "% operator =(...)" || "% operator +=(...)" ) && within( "void check_tunnel()" ) : around() {
+    cout << " ## operator" << endl;
+    tjp->proceed();
+  }
+  advice ( get( "% ...::%" ) || set( "% ...::%" ) ) && within( "void check_proceed()" ) : around() {
+    cout << " ## proceed()" << endl;
+    tjp->proceed();
+  }
+  advice ( get( "% ...::%" ) || set( "% ...::%" ) ) && within( "void check_action()" ) : around() {
+    cout << " ## action()" << endl;
+    tjp->action().trigger();
+  }
+};
+#endif

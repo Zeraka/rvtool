@@ -1,0 +1,10 @@
+#ifndef __concreteTraceA_ah__
+#define __concreteTraceA_ah__
+
+#include "abstractTrace.ah"
+
+aspect concreteTraceA : public abstractTrace {
+  pointcut methods() = "classA";
+};
+
+#endif /* __concreteTraceA_ah__ */

@@ -1,0 +1,7 @@
+SET: void (*Container::foo)(int) at line 13
+SET of foo at line 13
+SET of any function pointer: void (*Container::foo)(int) at line 13
+GET: void (*Container::foo)(int) at line 17
+GET of foo at line 17
+GET of any function pointer: void (*Container::foo)(int) at line 17
+called with x=42

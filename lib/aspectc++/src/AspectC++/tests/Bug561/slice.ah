@@ -1,0 +1,15 @@
+#ifndef SLICE_AH__
+#define SLICE_AH__
+
+#include <stdio.h>
+
+slice class Test_Slice {
+  int i;
+public:
+  Test_Slice(int i) : i(i) { }
+  void print() const {
+    printf("i is %d\n", i);
+  }
+};
+
+#endif // SLICE_AH__

@@ -1,0 +1,1591 @@
+
+int operator +(int,int) (Line: 186)
+  int Arg1 = 0
+  int Arg2 = 5
+  int Result = 5
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+
+
+  ~~~ Simple checks ~~~
+
+a = 8
+b = 23
+m = 0
+n = 1
+x = 1
+
+int operator +(int) (Line: 21)
+  int Arg1 = 8
+  int Result = 8
+  void That = nullptr
+  void Target = nullptr
+>>>> 8
+
+int operator -(int) (Line: 22)
+  int Arg1 = 8
+  int Result = -8
+  void That = nullptr
+  void Target = nullptr
+>>>> -8
+
+int operator +(int,int) (Line: 23)
+  int Arg1 = 8
+  int Arg2 = 23
+  int Result = 31
+  void That = nullptr
+  void Target = nullptr
+>>>> 31
+
+int operator -(int,int) (Line: 24)
+  int Arg1 = 8
+  int Arg2 = 23
+  int Result = -15
+  void That = nullptr
+  void Target = nullptr
+>>>> -15
+
+int operator *(int,int) (Line: 25)
+  int Arg1 = 8
+  int Arg2 = 23
+  int Result = 184
+  void That = nullptr
+  void Target = nullptr
+>>>> 184
+
+int operator /(int,int) (Line: 26)
+  int Arg1 = 8
+  int Arg2 = 23
+  int Result = 0
+  void That = nullptr
+  void Target = nullptr
+>>>> 0
+
+int operator %(int,int) (Line: 27)
+  int Arg1 = 8
+  int Arg2 = 23
+  int Result = 8
+  void That = nullptr
+  void Target = nullptr
+>>>> 8
+
+int operator ~(int) (Line: 29)
+  int Arg1 = 8
+  int Result = -9
+  void That = nullptr
+  void Target = nullptr
+>>>> -9
+
+int operator &(int,int) (Line: 30)
+  int Arg1 = 8
+  int Arg2 = 23
+  int Result = 0
+  void That = nullptr
+  void Target = nullptr
+>>>> 0
+
+int operator |(int,int) (Line: 31)
+  int Arg1 = 8
+  int Arg2 = 23
+  int Result = 31
+  void That = nullptr
+  void Target = nullptr
+>>>> 31
+
+int operator ^(int,int) (Line: 32)
+  int Arg1 = 8
+  int Arg2 = 23
+  int Result = 31
+  void That = nullptr
+  void Target = nullptr
+>>>> 31
+
+int operator <<(int,int) (Line: 33)
+  int Arg1 = 8
+  int Arg2 = 23
+  int Result = 67108864
+  void That = nullptr
+  void Target = nullptr
+>>>> 67108864
+
+int operator >>(int,int) (Line: 34)
+  int Arg1 = 8
+  int Arg2 = 23
+  int Result = 0
+  void That = nullptr
+  void Target = nullptr
+>>>> 0
+
+bool operator ==(int,int) (Line: 36)
+  int Arg1 = 8
+  int Arg2 = 23
+  bool Result = false
+  void That = nullptr
+  void Target = nullptr
+>>>> 0
+
+bool operator !=(int,int) (Line: 37)
+  int Arg1 = 8
+  int Arg2 = 23
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> 1
+
+bool operator >=(int,int) (Line: 38)
+  int Arg1 = 8
+  int Arg2 = 23
+  bool Result = false
+  void That = nullptr
+  void Target = nullptr
+>>>> 0
+
+bool operator <=(int,int) (Line: 39)
+  int Arg1 = 8
+  int Arg2 = 23
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> 1
+
+bool operator <(int,int) (Line: 40)
+  int Arg1 = 8
+  int Arg2 = 23
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> 1
+
+bool operator >(int,int) (Line: 41)
+  int Arg1 = 8
+  int Arg2 = 23
+  bool Result = false
+  void That = nullptr
+  void Target = nullptr
+>>>> 0
+
+bool operator !(bool) (Line: 43)
+  bool Arg1 = false
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> 1
+
+<available short-circuit arg: <none>>
+bool operator &&(bool,bool) (Line: 44)
+  const bool Arg1 = false
+  bool Arg2 = <not available>
+  bool Result = false
+  void That = nullptr
+  void Target = nullptr
+>>>> 0
+
+<available short-circuit arg: second (true)>
+bool operator ||(bool,bool) (Line: 45)
+  const bool Arg1 = false
+  bool Arg2 = true
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> 1
+
+int &operator =(int &,int) (Line: 47)
+  int & Arg1 = 1
+  int Arg2 = 8
+  int * const Result = ptr<8>
+  void That = nullptr
+  void Target = nullptr
+>>>> 8
+Var: 8
+
+int &operator +=(int &,int) (Line: 50)
+  int & Arg1 = 8
+  int Arg2 = 23
+  int * const Result = ptr<31>
+  void That = nullptr
+  void Target = nullptr
+>>>> 31
+Var: 31
+
+int &operator -=(int &,int) (Line: 52)
+  int & Arg1 = 31
+  int Arg2 = 8
+  int * const Result = ptr<23>
+  void That = nullptr
+  void Target = nullptr
+>>>> 23
+Var: 23
+
+int &operator *=(int &,int) (Line: 54)
+  int & Arg1 = 23
+  int Arg2 = 23
+  int * const Result = ptr<529>
+  void That = nullptr
+  void Target = nullptr
+>>>> 529
+Var: 529
+
+int &operator /=(int &,int) (Line: 56)
+  int & Arg1 = 529
+  int Arg2 = 8
+  int * const Result = ptr<66>
+  void That = nullptr
+  void Target = nullptr
+>>>> 66
+Var: 66
+
+int &operator %=(int &,int) (Line: 58)
+  int & Arg1 = 66
+  int Arg2 = 23
+  int * const Result = ptr<20>
+  void That = nullptr
+  void Target = nullptr
+>>>> 20
+Var: 20
+
+int &operator &=(int &,int) (Line: 60)
+  int & Arg1 = 20
+  int Arg2 = 23
+  int * const Result = ptr<20>
+  void That = nullptr
+  void Target = nullptr
+>>>> 20
+Var: 20
+
+int &operator |=(int &,int) (Line: 62)
+  int & Arg1 = 20
+  int Arg2 = 8
+  int * const Result = ptr<28>
+  void That = nullptr
+  void Target = nullptr
+>>>> 28
+Var: 28
+
+int &operator ^=(int &,int) (Line: 64)
+  int & Arg1 = 28
+  int Arg2 = 23
+  int * const Result = ptr<11>
+  void That = nullptr
+  void Target = nullptr
+>>>> 11
+Var: 11
+
+int &operator <<=(int &,int) (Line: 66)
+  int & Arg1 = 11
+  int Arg2 = 8
+  int * const Result = ptr<2816>
+  void That = nullptr
+  void Target = nullptr
+>>>> 2816
+Var: 2816
+
+int &operator >>=(int &,int) (Line: 68)
+  int & Arg1 = 2816
+  int Arg2 = 23
+  int * const Result = ptr<0>
+  void That = nullptr
+  void Target = nullptr
+>>>> 0
+Var: 0
+
+int operator ++(int &,int) (Line: 71)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  void That = nullptr
+  void Target = nullptr
+>>>> 0
+Var: 1
+
+int operator --(int &,int) (Line: 73)
+  int & Arg1 = 1
+  int Arg2 = 0
+  int Result = 1
+  void That = nullptr
+  void Target = nullptr
+>>>> 1
+Var: 0
+
+int &operator --(int &) (Line: 75)
+  int & Arg1 = 0
+  int * const Result = ptr<-1>
+  void That = nullptr
+  void Target = nullptr
+>>>> -1
+Var: -1
+
+int &operator ++(int &) (Line: 77)
+  int & Arg1 = -1
+  int * const Result = ptr<0>
+  void That = nullptr
+  void Target = nullptr
+>>>> 0
+Var: 0
+
+int &operator *(int *) (Line: 81)
+  int * Arg1 = ptr<13>
+  int * Result = ptr<13>
+  void That = nullptr
+  void Target = nullptr
+>>>> 13
+
+int &operator [](int *,int) (Line: 82)
+  int * const Arg1 = ptr<13>
+  int Arg2 = 3
+  int * const Result = ptr<43>
+  void That = nullptr
+  void Target = nullptr
+>>>> 43
+
+int &operator [](int *,unsigned int) (Line: 83)
+  int * const Arg1 = ptr<13>
+  unsigned int Arg2 = 1
+  int * const Result = ptr<23>
+  void That = nullptr
+  void Target = nullptr
+>>>> 23
+8
+
+<available short-circuit  arg: third (23)>
+int &operator ?:(bool,int &,int &) (Line: 86)
+  const bool Arg1 = false
+  int & Arg2 = <not available>
+  int & Arg3 = 23
+  int * Result = ptr<23>
+  void That = nullptr
+  void Target = nullptr
+>>>> 23
+
+<available short-circuit  arg: second (8)>
+int &operator ?:(bool,int &,int &) (Line: 87)
+  const bool Arg1 = true
+  int & Arg2 = 8
+  int & Arg3 = <not available>
+  int * Result = ptr<8>
+  void That = nullptr
+  void Target = nullptr
+>>>> 8
+
+
+
+  ~~~ Complex checks ~~~
+
+
+int operator +(int,int) (Line: 199)
+  int Arg1 = 1
+  int Arg2 = 4
+  int Result = 5
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 199)
+  int & Arg1 = 32767
+  int Arg2 = 5
+  int * const Result = ptr<5>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+void (**operator &(void (*&)()))() (Line: 210)
+  void (*&)() Arg1 = fptr<nothing_to_do>
+  void (**)() Result = ptr<fptr<nothing_to_do>>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+void (*&operator [](void (**)(),int))() (Line: 211)
+  void (** const)() Arg1 = ptr<fptr<nothing_to_do>>
+  int Arg2 = 0
+  void (** const)() Result = ptr<fptr<nothing_to_do>>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+void (&operator *(void (*)(int)))(int) (Line: 214)
+  void (*)(int) Arg1 = fptr<func>
+  void (*)(int) Result = fptr<func>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+bool operator !=(int,int) (Line: 96)
+  int Arg1 = 1
+  int Arg2 = 0
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: second (3)>
+int operator ?:(bool,int,int) (Line: 96)
+  const bool Arg1 = true
+  int Arg2 = 3
+  int Arg3 = <not available>
+  int Result = 3
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 96)
+  int & Arg1 = 0
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+~~~TestClass init >>>
+int &operator =(int &,int) (Line: 113)
+  int & Arg1 = 424242
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: second (false)>
+bool operator &&(bool,bool) (Line: 115)
+  const bool Arg1 = true
+  bool Arg2 = false
+  bool Result = false
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: third (5)>
+int operator ?:(bool,int,int) (Line: 115)
+  const bool Arg1 = false
+  int Arg2 = <not available>
+  int Arg3 = 5
+  int Result = 5
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 115)
+  int & Arg1 = 422142
+  int Arg2 = 5
+  int * const Result = ptr<5>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+const int *operator &(const int &) (Line: 118)
+  const int & Arg1 = 3
+  const int * Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 119)
+  int & Arg1 = 212121
+  int Arg2 = 1
+  int * const Result = ptr<1>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 124)
+  int & Arg1 = 214221
+  int Arg2 = 4
+  int * const Result = ptr<4>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator +(int,int) (Line: 125)
+  int Arg1 = 4
+  int Arg2 = 21
+  int Result = 25
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 125)
+  int & Arg1 = 4
+  int Arg2 = 25
+  int * const Result = ptr<25>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 126)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator <(int,int) (Line: 126)
+  int Arg1 = 0
+  int Arg2 = 10
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator --(int &) (Line: 127)
+  int & Arg1 = 1
+  int * const Result = ptr<0>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 129)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator >(int,int) (Line: 129)
+  int Arg1 = 10
+  int Arg2 = 0
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator --(int &,int) (Line: 130)
+  int & Arg1 = 1
+  int Arg2 = 0
+  int Result = 1
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+TestClass *&operator =(TestClass *&,TestClass *) (Line: 132)
+  TestClass *& Arg1 = nullptr
+  TestClass * Arg2 = nullptr
+  TestClass ** const Result = ptr<nullptr>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+void (*&operator =(void (*&)(int),void (*)(int)))(int) (Line: 133)
+  void (*&)(int) Arg1 = nullfptr
+  void (*)(int) Arg2 = fptr<func>
+  void (** const)(int) Result = ptr<fptr<func>>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+~~~TestClass init <<<
+TestClass *TestClass::*&operator =(TestClass *TestClass::*&,TestClass *TestClass::*) (Line: 217)
+  TestClass * TestClass::*& Arg1 = memptr<invalid>
+  TestClass * TestClass::* Arg2 = memptr<TestClass::member>
+  TestClass * TestClass::** const Result = ptr<memptr<TestClass::member>>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+TestClass *&operator .*(TestClass &,TestClass *TestClass::*) (Line: 218)
+  TestClass & Arg1 = <obj>
+  TestClass * TestClass::* Arg2 = memptr<TestClass::member>
+  TestClass ** Result = ptr<nullptr>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+TestClass *operator &(TestClass &) (Line: 219)
+  TestClass & Arg1 = <obj>
+  TestClass * Result = objptr<{TestClass}>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+TestClass *&operator ->*(TestClass *,TestClass *TestClass::*) (Line: 219)
+  TestClass * Arg1 = objptr<{TestClass}>
+  TestClass * TestClass::* Arg2 = memptr<TestClass::member>
+  TestClass ** Result = ptr<nullptr>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+TestClass *&operator =(TestClass *&,TestClass *) (Line: 219)
+  TestClass *& Arg1 = nullptr
+  TestClass * Arg2 = nullptr
+  TestClass ** const Result = ptr<nullptr>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+~~~TestClass init >>>
+int &operator =(int &,int) (Line: 113)
+  int & Arg1 = 424242
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: second (false)>
+bool operator &&(bool,bool) (Line: 115)
+  const bool Arg1 = true
+  bool Arg2 = false
+  bool Result = false
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: third (5)>
+int operator ?:(bool,int,int) (Line: 115)
+  const bool Arg1 = false
+  int Arg2 = <not available>
+  int Arg3 = 5
+  int Result = 5
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 115)
+  int & Arg1 = 422142
+  int Arg2 = 5
+  int * const Result = ptr<5>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+const int *operator &(const int &) (Line: 118)
+  const int & Arg1 = 3
+  const int * Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 119)
+  int & Arg1 = 212121
+  int Arg2 = 1
+  int * const Result = ptr<1>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 124)
+  int & Arg1 = 214221
+  int Arg2 = 4
+  int * const Result = ptr<4>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator +(int,int) (Line: 125)
+  int Arg1 = 4
+  int Arg2 = 21
+  int Result = 25
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 125)
+  int & Arg1 = 4
+  int Arg2 = 25
+  int * const Result = ptr<25>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 126)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator <(int,int) (Line: 126)
+  int Arg1 = 0
+  int Arg2 = 10
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator --(int &) (Line: 127)
+  int & Arg1 = 1
+  int * const Result = ptr<0>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 129)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator >(int,int) (Line: 129)
+  int Arg1 = 10
+  int Arg2 = 0
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator --(int &,int) (Line: 130)
+  int & Arg1 = 1
+  int Arg2 = 0
+  int Result = 1
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+TestClass *&operator =(TestClass *&,TestClass *) (Line: 132)
+  TestClass *& Arg1 = nullptr
+  TestClass * Arg2 = nullptr
+  TestClass ** const Result = ptr<nullptr>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+void (*&operator =(void (*&)(int),void (*)(int)))(int) (Line: 133)
+  void (*&)(int) Arg1 = nullfptr
+  void (*)(int) Arg2 = fptr<func>
+  void (** const)(int) Result = ptr<fptr<func>>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+~~~TestClass init <<<
+int TestClass::*&operator =(int TestClass::*&,int TestClass::*) (Line: 223)
+  int TestClass::*& Arg1 = memptr<invalid>
+  int TestClass::* Arg2 = memptr<TestClass::intmember>
+  int TestClass::** const Result = ptr<memptr<TestClass::intmember>>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator .*(TestClass &,int TestClass::*) (Line: 224)
+  TestClass & Arg1 = <obj>
+  int TestClass::* Arg2 = memptr<TestClass::intmember>
+  int * Result = ptr<3>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+TestClass *operator &(TestClass &) (Line: 225)
+  TestClass & Arg1 = <obj>
+  TestClass * Result = objptr<{TestClass}>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator ->*(TestClass *,int TestClass::*) (Line: 225)
+  TestClass * Arg1 = objptr<{TestClass}>
+  int TestClass::* Arg2 = memptr<TestClass::intmember>
+  int * Result = ptr<3>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 225)
+  int & Arg1 = 3
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+Begin: Obj-Copy-Test
+~~~TestClass init >>>
+int &operator =(int &,int) (Line: 113)
+  int & Arg1 = 424242
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: second (false)>
+bool operator &&(bool,bool) (Line: 115)
+  const bool Arg1 = true
+  bool Arg2 = false
+  bool Result = false
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: third (5)>
+int operator ?:(bool,int,int) (Line: 115)
+  const bool Arg1 = false
+  int Arg2 = <not available>
+  int Arg3 = 5
+  int Result = 5
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 115)
+  int & Arg1 = 422142
+  int Arg2 = 5
+  int * const Result = ptr<5>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+const int *operator &(const int &) (Line: 118)
+  const int & Arg1 = 3
+  const int * Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 119)
+  int & Arg1 = 212121
+  int Arg2 = 1
+  int * const Result = ptr<1>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 124)
+  int & Arg1 = 214221
+  int Arg2 = 4
+  int * const Result = ptr<4>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator +(int,int) (Line: 125)
+  int Arg1 = 4
+  int Arg2 = 21
+  int Result = 25
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 125)
+  int & Arg1 = 4
+  int Arg2 = 25
+  int * const Result = ptr<25>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 126)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator <(int,int) (Line: 126)
+  int Arg1 = 0
+  int Arg2 = 10
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator --(int &) (Line: 127)
+  int & Arg1 = 1
+  int * const Result = ptr<0>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 129)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator >(int,int) (Line: 129)
+  int Arg1 = 10
+  int Arg2 = 0
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator --(int &,int) (Line: 130)
+  int & Arg1 = 1
+  int Arg2 = 0
+  int Result = 1
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+TestClass *&operator =(TestClass *&,TestClass *) (Line: 132)
+  TestClass *& Arg1 = nullptr
+  TestClass * Arg2 = nullptr
+  TestClass ** const Result = ptr<nullptr>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+void (*&operator =(void (*&)(int),void (*)(int)))(int) (Line: 133)
+  void (*&)(int) Arg1 = nullfptr
+  void (*)(int) Arg2 = fptr<func>
+  void (** const)(int) Result = ptr<fptr<func>>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+~~~TestClass init <<<
+TestClass &operator *(TestClass *) (Line: 167)
+  TestClass * Arg1 = objptr<{TestClass}>
+  TestClass * Result = objptr<{TestClass}>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+~~~TestClass init >>>
+~~~TestClass init <<<
+TestClass *&operator =(TestClass *&,TestClass *) (Line: 167)
+  TestClass *& Arg1 = nullptr
+  TestClass * Arg2 = objptr<{TestClass}>
+  TestClass ** const Result = ptr<objptr<{TestClass}>>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+~~~TestClass init >>>
+int &operator =(int &,int) (Line: 113)
+  int & Arg1 = 424242
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: second (false)>
+bool operator &&(bool,bool) (Line: 115)
+  const bool Arg1 = true
+  bool Arg2 = false
+  bool Result = false
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: third (5)>
+int operator ?:(bool,int,int) (Line: 115)
+  const bool Arg1 = false
+  int Arg2 = <not available>
+  int Arg3 = 5
+  int Result = 5
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 115)
+  int & Arg1 = 422142
+  int Arg2 = 5
+  int * const Result = ptr<5>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+const int *operator &(const int &) (Line: 118)
+  const int & Arg1 = 3
+  const int * Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 119)
+  int & Arg1 = 212121
+  int Arg2 = 1
+  int * const Result = ptr<1>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 124)
+  int & Arg1 = 214221
+  int Arg2 = 4
+  int * const Result = ptr<4>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator +(int,int) (Line: 125)
+  int Arg1 = 4
+  int Arg2 = 21
+  int Result = 25
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 125)
+  int & Arg1 = 4
+  int Arg2 = 25
+  int * const Result = ptr<25>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 126)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator <(int,int) (Line: 126)
+  int Arg1 = 0
+  int Arg2 = 10
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator --(int &) (Line: 127)
+  int & Arg1 = 1
+  int * const Result = ptr<0>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 129)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator >(int,int) (Line: 129)
+  int Arg1 = 10
+  int Arg2 = 0
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator --(int &,int) (Line: 130)
+  int & Arg1 = 1
+  int Arg2 = 0
+  int Result = 1
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+TestClass *&operator =(TestClass *&,TestClass *) (Line: 132)
+  TestClass *& Arg1 = nullptr
+  TestClass * Arg2 = nullptr
+  TestClass ** const Result = ptr<nullptr>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+void (*&operator =(void (*&)(int),void (*)(int)))(int) (Line: 133)
+  void (*&)(int) Arg1 = nullfptr
+  void (*)(int) Arg2 = fptr<func>
+  void (** const)(int) Result = ptr<fptr<func>>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+~~~TestClass init <<<
+~~~TestClass init >>>
+int &operator =(int &,int) (Line: 113)
+  int & Arg1 = 424242
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: second (false)>
+bool operator &&(bool,bool) (Line: 115)
+  const bool Arg1 = true
+  bool Arg2 = false
+  bool Result = false
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: third (5)>
+int operator ?:(bool,int,int) (Line: 115)
+  const bool Arg1 = false
+  int Arg2 = <not available>
+  int Arg3 = 5
+  int Result = 5
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 115)
+  int & Arg1 = 422142
+  int Arg2 = 5
+  int * const Result = ptr<5>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+const int *operator &(const int &) (Line: 118)
+  const int & Arg1 = 3
+  const int * Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 119)
+  int & Arg1 = 212121
+  int Arg2 = 1
+  int * const Result = ptr<1>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 124)
+  int & Arg1 = 214221
+  int Arg2 = 4
+  int * const Result = ptr<4>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator +(int,int) (Line: 125)
+  int Arg1 = 4
+  int Arg2 = 21
+  int Result = 25
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 125)
+  int & Arg1 = 4
+  int Arg2 = 25
+  int * const Result = ptr<25>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 126)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator <(int,int) (Line: 126)
+  int Arg1 = 0
+  int Arg2 = 10
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator --(int &) (Line: 127)
+  int & Arg1 = 1
+  int * const Result = ptr<0>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 129)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator >(int,int) (Line: 129)
+  int Arg1 = 10
+  int Arg2 = 0
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator --(int &,int) (Line: 130)
+  int & Arg1 = 1
+  int Arg2 = 0
+  int Result = 1
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+TestClass *&operator =(TestClass *&,TestClass *) (Line: 132)
+  TestClass *& Arg1 = nullptr
+  TestClass * Arg2 = nullptr
+  TestClass ** const Result = ptr<nullptr>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+void (*&operator =(void (*&)(int),void (*)(int)))(int) (Line: 133)
+  void (*&)(int) Arg1 = nullfptr
+  void (*)(int) Arg2 = fptr<func>
+  void (** const)(int) Result = ptr<fptr<func>>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+~~~TestClass init <<<
+~~~TestClass init >>>
+~~~TestClass init <<<
+~~~TestClass init >>>
+~~~TestClass init <<<
+~~~TestClass init >>>
+int &operator =(int &,int) (Line: 113)
+  int & Arg1 = 424242
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: second (false)>
+bool operator &&(bool,bool) (Line: 115)
+  const bool Arg1 = true
+  bool Arg2 = false
+  bool Result = false
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: third (5)>
+int operator ?:(bool,int,int) (Line: 115)
+  const bool Arg1 = false
+  int Arg2 = <not available>
+  int Arg3 = 5
+  int Result = 5
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 115)
+  int & Arg1 = 422142
+  int Arg2 = 5
+  int * const Result = ptr<5>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+const int *operator &(const int &) (Line: 118)
+  const int & Arg1 = 3
+  const int * Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 119)
+  int & Arg1 = 212121
+  int Arg2 = 1
+  int * const Result = ptr<1>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 124)
+  int & Arg1 = 214221
+  int Arg2 = 4
+  int * const Result = ptr<4>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator +(int,int) (Line: 125)
+  int Arg1 = 4
+  int Arg2 = 21
+  int Result = 25
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 125)
+  int & Arg1 = 4
+  int Arg2 = 25
+  int * const Result = ptr<25>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 126)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator <(int,int) (Line: 126)
+  int Arg1 = 0
+  int Arg2 = 10
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator --(int &) (Line: 127)
+  int & Arg1 = 1
+  int * const Result = ptr<0>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator ++(int &,int) (Line: 129)
+  int & Arg1 = 0
+  int Arg2 = 0
+  int Result = 0
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator >(int,int) (Line: 129)
+  int Arg1 = 10
+  int Arg2 = 0
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int operator --(int &,int) (Line: 130)
+  int & Arg1 = 1
+  int Arg2 = 0
+  int Result = 1
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+TestClass *&operator =(TestClass *&,TestClass *) (Line: 132)
+  TestClass *& Arg1 = nullptr
+  TestClass * Arg2 = nullptr
+  TestClass ** const Result = ptr<nullptr>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+void (*&operator =(void (*&)(int),void (*)(int)))(int) (Line: 133)
+  void (*&)(int) Arg1 = nullfptr
+  void (*)(int) Arg2 = fptr<func>
+  void (** const)(int) Result = ptr<fptr<func>>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+~~~TestClass init <<<
+End: Obj-Copy-Test
+void (&operator *(void (*)(int)))(int) (Line: 139)
+  void (*)(int) Arg1 = fptr<func>
+  void (*)(int) Result = fptr<func>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator !=(int,int) (Line: 96)
+  int Arg1 = 1
+  int Arg2 = 0
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: second (3)>
+int operator ?:(bool,int,int) (Line: 96)
+  const bool Arg1 = true
+  int Arg2 = 3
+  int Arg3 = <not available>
+  int Result = 3
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 96)
+  int & Arg1 = 0
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+void (&operator *(void (*)(int)))(int) (Line: 140)
+  void (*)(int) Arg1 = fptr<func>
+  void (*)(int) Result = fptr<func>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator !=(int,int) (Line: 96)
+  int Arg1 = 1
+  int Arg2 = 0
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: second (3)>
+int operator ?:(bool,int,int) (Line: 96)
+  const bool Arg1 = true
+  int Arg2 = 3
+  int Arg3 = <not available>
+  int Result = 3
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 96)
+  int & Arg1 = 0
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator [](int *,int) (Line: 142)
+  int * const Arg1 = ptr<0>
+  int Arg2 = 5
+  int * const Result = ptr<0>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: second (false)>
+bool operator &&(bool,bool) (Line: 146)
+  const bool Arg1 = true
+  bool Arg2 = false
+  bool Result = false
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: <none>>
+bool operator &&(bool,bool) (Line: 147)
+  const bool Arg1 = false
+  bool Arg2 = <not available>
+  bool Result = false
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool &operator =(bool &,bool) (Line: 147)
+  bool & Arg1 = false
+  bool Arg2 = false
+  bool * const Result = ptr<false>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: <none>>
+bool operator ||(bool,bool) (Line: 148)
+  const bool Arg1 = true
+  bool Arg2 = <not available>
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool &operator =(bool &,bool) (Line: 148)
+  bool & Arg1 = false
+  bool Arg2 = true
+  bool * const Result = ptr<true>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: second (true)>
+bool operator ||(bool,bool) (Line: 149)
+  const bool Arg1 = false
+  bool Arg2 = true
+  bool Result = true
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool &operator =(bool &,bool) (Line: 149)
+  bool & Arg1 = true
+  bool Arg2 = true
+  bool * const Result = ptr<true>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: second (-1)>
+int &operator ?:(bool,int &,int &) (Line: 151)
+  const bool Arg1 = true
+  int & Arg2 = -1
+  int & Arg3 = <not available>
+  int * Result = ptr<-1>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+bool operator !(bool) (Line: 152)
+  bool Arg1 = true
+  bool Result = false
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: third (3)>
+int &operator ?:(bool,int &,int &) (Line: 152)
+  const bool Arg1 = false
+  int & Arg2 = <not available>
+  int & Arg3 = 3
+  int * Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 152)
+  int & Arg1 = -1
+  int Arg2 = 3
+  int * const Result = ptr<3>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+~~~TestClass init >>>
+~~~TestClass init <<<
+<available short-circuit  arg: 
+~~~TestClass init >>>
+~~~TestClass init <<<second ([TestClass])>
+TestClass operator ?:(bool,TestClass,TestClass) (Line: 153)
+  const bool Arg1 = true
+  TestClass Arg2 = <obj>
+  TestClass Arg3 = <not available>
+
+~~~TestClass init >>>
+~~~TestClass init <<<  TestClass Result = <obj>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+~~~TestClass init >>>
+~~~TestClass init <<<
+~~~TestClass init >>>
+~~~TestClass init <<<
+~~~TestClass init >>>
+~~~TestClass init <<<
+<available short-circuit  arg: second ([TestClass-reference])>
+TestClass &operator ?:(bool,TestClass &,TestClass &) (Line: 155)
+  const bool Arg1 = true
+  TestClass & Arg2 = <obj>
+  TestClass & Arg3 = <not available>
+  TestClass * Result = objptr<{TestClass}>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+~~~TestClass init >>>
+~~~TestClass init <<<
+<available short-circuit  arg: second ([TestClass-pointer])>
+TestClass *operator ?:(bool,TestClass *,TestClass *) (Line: 156)
+  const bool Arg1 = true
+  TestClass * Arg2 = objptr<{TestClass}>
+  TestClass * Arg3 = <not available>
+  TestClass * Result = objptr<{TestClass}>
+  TestClass That = <obj>
+  void Target = nullptr
+>>>> 
+TestClass *operator &(TestClass &) (Line: 232)
+  TestClass & Arg1 = <obj>
+  TestClass * Result = objptr<{TestClass}>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+<available short-circuit  arg: third ([void-pointer])>
+void *operator ?:(bool,void *,void *) (Line: 232)
+  const bool Arg1 = false
+  void * Arg2 = <not available>
+  void * Arg3 = ptr<void>
+  void * Result = ptr<void>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int *operator &(int &) (Line: 232)
+  int & Arg1 = 3
+  int * Result = ptr<3>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+bool operator !=(void *,void *) (Line: 232)
+  void * Arg1 = ptr<void>
+  void * Arg2 = ptr<void>
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: second (true)>
+bool operator &&(bool,bool) (Line: 234)
+  const bool Arg1 = true
+  bool Arg2 = true
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+TestClass *operator &(TestClass &) (Line: 234)
+  TestClass & Arg1 = <obj>
+  TestClass * Result = objptr<{TestClass}>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+<available short-circuit arg: second (true)>
+bool operator &&(bool,bool) (Line: 234)
+  const bool Arg1 = true
+  bool Arg2 = true
+  bool Result = true
+  void That = nullptr
+  void Target = nullptr
+>>>> hello
+
+<available short-circuit  arg: second (4)>
+int operator ?:(bool,int,int) (Line: 235)
+  const bool Arg1 = true
+  int Arg2 = 4
+  int Arg3 = <not available>
+  int Result = 4
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int *operator &(int &) (Line: 237)
+  int & Arg1 = 4
+  int * Result = ptr<4>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int *&operator =(int *&,int *) (Line: 237)
+  int *& Arg1 = nullptr
+  int * Arg2 = ptr<4>
+  int ** const Result = ptr<ptr<4>>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator *(int *) (Line: 237)
+  int * Arg1 = ptr<4>
+  int * Result = ptr<4>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int *operator &(int &) (Line: 240)
+  int & Arg1 = 1
+  int * Result = ptr<1>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int *&operator =(int *&,int *) (Line: 240)
+  int *& Arg1 = nullptr
+  int * Arg2 = ptr<1>
+  int ** const Result = ptr<ptr<1>>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator *(int *) (Line: 240)
+  int * Arg1 = ptr<1>
+  int * Result = ptr<1>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int *operator &(int &) (Line: 246)
+  int & Arg1 = 3
+  int * Result = ptr<3>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator *(int *) (Line: 246)
+  int * Arg1 = ptr<3>
+  int * Result = ptr<3>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator *(int *) (Line: 246)
+  int * Arg1 = ptr<7>
+  int * Result = ptr<7>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int operator +(int,int) (Line: 246)
+  int Arg1 = 7
+  int Arg2 = 3
+  int Result = 10
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 246)
+  int & Arg1 = 3
+  int Arg2 = 10
+  int * const Result = ptr<10>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator *(int *) (Line: 247)
+  int * Arg1 = ptr<9>
+  int * Result = ptr<9>
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int operator +(int,int) (Line: 247)
+  int Arg1 = 9
+  int Arg2 = 5
+  int Result = 14
+  void That = nullptr
+  void Target = nullptr
+>>>> 
+int &operator =(int &,int) (Line: 247)
+  int & Arg1 = 5
+  int Arg2 = 14
+  int * const Result = ptr<14>
+  void That = nullptr
+  void Target = nullptr
+>>>> 10, 14

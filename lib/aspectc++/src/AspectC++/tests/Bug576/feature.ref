@@ -1,0 +1,4 @@
+int Cyg_Interrupt::vector
+unsigned int *volatile hal_interrupt_handlers[224]
+int Cyg_Interrupt::vector
+unsigned int *volatile hal_interrupt_handlers[224]

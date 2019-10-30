@@ -1,0 +1,30 @@
+#ifndef __PointerTracker_ah__
+#define __PointerTracker_ah__
+
+#include <stdio.h>
+
+aspect PointerTracker {
+  advice call ("% ...::%(...)") && result("% *") : before () {
+    printf ("  call to '%s'\n", tjp->signature ());
+  }
+
+  advice execution ("% ...::%(...)") && result("% *") : after () {
+    printf ("  executed '%s' -> 0x%lu\n", tjp->signature (),
+                                     (unsigned long)(size_t)*(void**)tjp->result ());
+  }
+
+  advice call ("% %(...)") && result(res) : after (long **res) {
+    printf ("  result after call: 0x%lu\n", (unsigned long)(size_t)res);
+  }
+};
+
+aspect ResultManipulator {
+  advice call ("% select_v()") && result ("int &") : after () {
+    static int new_result = 815;
+    JoinPoint::Result * result = tjp->result ();
+    printf ("  changing result! now: %d\n", **result);
+    *result = &new_result;
+  }
+};
+
+#endif // __PointerTracker_ah__

@@ -1,0 +1,12 @@
+Bug561: intro into macro-generated class
+========================================
+called void Class_C::intro() const
+called void Class_C::stuff() const
+called void Class_C::intro() const
+called void A_Foo::doStuff()
+called void A_Foo::print() const
+i is 5
+called int A_Bar::doStuff(int,int,int)
+called void A_Bar::print() const
+i is 6
+========================================

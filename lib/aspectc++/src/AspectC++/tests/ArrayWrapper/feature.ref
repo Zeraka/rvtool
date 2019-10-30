@@ -1,0 +1,7 @@
+ArrayWrapper: tests if wrapped arrays behave like arrays
+========================================================
+before C::C()
+after C::C()
+before C::C(const C &)
+after C::C(const C &)
+========================================================

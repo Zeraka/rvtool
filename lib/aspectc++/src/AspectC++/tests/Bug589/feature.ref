@@ -1,0 +1,4 @@
+Bug589: Entity type uses private types instead of deduced types
+===============================================================
+Fine if it compiles without errors
+===============================================================

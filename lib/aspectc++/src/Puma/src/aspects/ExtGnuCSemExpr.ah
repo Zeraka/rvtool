@@ -1,0 +1,214 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//
+// This program is free software;  you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 2 of
+// the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this program; if not, write to the Free
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+// MA  02111-1307  USA
+
+#ifndef __ext_gnu_csemexpr_ah__
+#define __ext_gnu_csemexpr_ah__
+
+#include "Puma/GnuCTree.h"
+#include "Puma/CLabelInfo.h"
+#include "Puma/CLocalScope.h"
+
+#ifndef HAVE_SEMEXPR_ERROR_MACROS
+#define HAVE_SEMEXPR_ERROR_MACROS
+
+#define ASPECT_SEMEXPR_MSG(node__,mesg__) \
+  {if (node__->token ()) err << node__->token ()->location (); err << mesg__ << endMessage;}
+
+#define ASPECT_SEMEXPR_ERROR(node__, mesg__) \
+  ASPECT_SEMEXPR_MSG (node__, sev_error << mesg__)
+
+#endif // HAVE_SEMEXPR_ERROR_MACROS
+
+namespace Puma {
+
+class CTypeInfo;
+
+// gnu statement expression extension
+
+// C semantic extension
+slice class ExtGnuStmtExprsCSemExpr {
+public:
+  Puma::CTypeInfo *resolve (Puma::CT_GnuStatementExpr *, Puma::CTree *);
+  Puma::CTypeInfo *resolveLabelAddr (Puma::CT_UnaryExpr *);
+};
+
+// C++ semantic extension
+slice class ExtGnuStmtExprsCCSemExpr {
+public:
+  Puma::CTypeInfo *resolve (Puma::CT_GnuStatementExpr *, Puma::CTree *);
+  Puma::CTypeInfo *resolveLabelAddr (Puma::CT_UnaryExpr *);
+};
+
+// gnu conditional expressions with two operands
+slice class ExtGnuCondExprCSemExpr {
+public:
+  Puma::CTypeInfo *resolve_gnu (Puma::CT_IfThenExpr *, Puma::CTree *);
+};
+
+} // namespace Puma
+
+slice Puma::CTypeInfo *Puma::ExtGnuStmtExprsCSemExpr::resolve (
+  Puma::CT_GnuStatementExpr *node, Puma::CTree *) {
+
+  Puma::CTypeInfo *result = &Puma::CTYPE_UNDEFINED;
+
+  if (! current_scope->LocalScope ()) {
+    ASPECT_SEMEXPR_ERROR (node,
+               "braced-group within expression allowed only inside a function");
+  } else {
+
+    // first analyse the compound statement in this expression
+    Puma::CSemVisitor csv (err);
+    csv.run (node->Son (1), current_scope);
+
+    // check the compound statement semantically
+    Puma::CT_CmpdStmt *cmpd = node->CmpdStmt ();
+    if (cmpd->Entries () >= 1 &&
+        cmpd->Entry (cmpd->Entries () - 1)->NodeName () ==
+        Puma::CT_ExprStmt::NodeId ()) {
+      Puma::CT_ExprStmt *expr_stmt = (Puma::CT_ExprStmt*)cmpd->Entry (cmpd->Entries () - 1);
+      result = expr_stmt->Expr ()->Type ();
+    }
+    else
+      // an empty statement expression or one that does not end with a
+      // statement expression has type void!
+      result = &Puma::CTYPE_VOID;
+  }
+
+  node->setTypeRef (result);
+  return result;
+}
+
+slice Puma::CTypeInfo *Puma::ExtGnuStmtExprsCSemExpr::resolveLabelAddr (
+    CT_UnaryExpr *expr) {
+  Puma::CFunctionInfo *finfo = current_scope->LocalScope ()->Function ();
+  if (finfo) {
+    Puma::CT_SimpleName *label = (Puma::CT_SimpleName*) expr->Son (1);
+    Puma::CObjectInfo *linfo = finfo->Label (label->Text ());
+    if (! linfo) {
+      ASPECT_SEMEXPR_ERROR (label, "label `" << label->Text () << "' used but not defined");
+    } else {
+      label->Object (linfo);
+      label->setTypeRef (linfo->TypeInfo ());
+    }
+  }
+  Puma::CTypeInfo *type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  expr->setType (type);
+  return type;
+}
+
+slice Puma::CTypeInfo *Puma::ExtGnuStmtExprsCCSemExpr::resolve (
+  Puma::CT_GnuStatementExpr *node, Puma::CTree *) {
+
+  Puma::CTypeInfo *result = &Puma::CTYPE_UNDEFINED;
+
+  if (! current_scope->LocalScope ()) {
+    ASPECT_SEMEXPR_ERROR (node,
+               "braced-group within expression allowed only inside a function");
+  } else {
+
+    // first analyse the compound statement in this expression
+    Puma::CCSemVisitor csv (err);
+    csv.run (node->Son (1), current_scope);
+
+    // check the compound statement semantically
+    Puma::CT_CmpdStmt *cmpd = node->CmpdStmt ();
+    if (cmpd->Entries () >= 1 &&
+        cmpd->Entry (cmpd->Entries () - 1)->NodeName () ==
+        Puma::CT_ExprStmt::NodeId ()) {
+      Puma::CT_ExprStmt *expr_stmt = (Puma::CT_ExprStmt*)cmpd->Entry (cmpd->Entries () - 1);
+      result = expr_stmt->Expr ()->Type ();
+    }
+    else
+      // an empty statement expression or one that does not end with a
+      // statement expression has type void!
+      result = &Puma::CTYPE_VOID;
+  }
+
+  node->setTypeRef (result);
+  return result;
+}
+
+slice Puma::CTypeInfo *Puma::ExtGnuStmtExprsCCSemExpr::resolveLabelAddr (
+    CT_UnaryExpr *expr) {
+  Puma::CFunctionInfo *finfo = current_scope->LocalScope ()->Function ();
+  if (finfo) {
+    Puma::CT_SimpleName *label = (Puma::CT_SimpleName*) expr->Son (1);
+    Puma::CObjectInfo *linfo = finfo->Label (label->Text ());
+    if (! linfo) {
+      ASPECT_SEMEXPR_ERROR (label, "label `" << label->Text () << "' used but not defined");
+    } else {
+      label->Object (linfo);
+      label->setTypeRef (linfo->TypeInfo ());
+    }
+  }
+  Puma::CTypeInfo *type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  expr->setType (type);
+  return type;
+}
+
+slice Puma::CTypeInfo *Puma::ExtGnuCondExprCSemExpr::resolve_gnu (CT_IfThenExpr *node, CTree *base) {
+  CTypeInfo *result, *t1, *t2, *t3;
+  CTree *op1, *op2, *op3;
+  CConstant *v1;
+
+  conv_to_ptr = 1;
+
+  // resolve operands
+  t1 = resolveExpr (node->Condition (), node);
+  t2 = t1;
+  t3 = resolveExpr (node->RightOperand (), node);
+  op1 = node->Condition ();
+  op2 = op1;
+  op3 = node->RightOperand ();
+
+  // determine the result type
+  result = cond_expr_type (node, t1, op1, t2, op2, t3, op3);
+
+  // apply arithmetic conversions if needed
+  if (t2->isArithmetic () && t3->isArithmetic ()) {
+    if (*t2 > *t3) {
+      result = cast_to (t2, op3, node);
+      op3 = node->RightOperand ();
+    } else if (*t2 < *t3) {
+      result = t3;
+    } else
+      result = t2;
+  }
+
+  // handle constants
+  v1 = op1->Value () ? op1->Value ()->Constant () : 0;
+  if (v1) {
+    if (v1->isNull ()) {
+      if (op3->Value ())
+        node->setValueRef (op3->Value ());
+    } else {
+      if (op2->Value ())
+        node->setValue (op2->Value ()->Constant ()->cast_to (t2));
+    }
+  }
+
+  if (!result || result == t2 || result == t3 || *result == CTYPE_UNDEFINED)
+    node->setTypeRef (result);
+  else
+    node->setType (result);
+  return result;
+}
+
+
+#endif /* __ext_gnu_csemexpr_ah__ */

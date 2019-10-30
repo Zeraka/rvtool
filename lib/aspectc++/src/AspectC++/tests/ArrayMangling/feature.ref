@@ -1,0 +1,5 @@
+ArrayMangling
+=============================================================
+this is a quite complicated signature with array types
+void f(int *,int *,int **,int (*)[4],int (*)[10],int (*(*)())[3],int (**)[14],double (C::*)(long int *(*)[64]))
+=============================================================

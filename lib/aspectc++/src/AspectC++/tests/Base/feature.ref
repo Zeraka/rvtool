@@ -1,0 +1,22 @@
+Base: test the 'base' pointcut function:
+========================================
+  before base("C3")
+  before base("% C3::f(double)")
+  void C1::f(double)
+----------------------------------------
+  before base("C3")
+  void C1::f()
+----------------------------------------
+  before base("C3")
+  before base("% C3::f(double)")
+  void C2::f(double)
+----------------------------------------
+  before base("C3")
+  before base("% C3::f(X&)")
+  void C2::f(X&)
+----------------------------------------
+  before base("C3")
+  void C2::x()
+----------------------------------------
+  void C3::f()
+========================================

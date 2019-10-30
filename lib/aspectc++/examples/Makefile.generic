@@ -1,0 +1,44 @@
+CXX ?= g++
+ACXX ?= ag++
+
+PROG:=$(shell basename $$PWD)
+
+SOURCES := $(wildcard *.cc)
+
+JUNK    := Junk
+OBJECTS := $(addprefix $(JUNK)/,$(patsubst %.cc,%.o,$(SOURCES)))
+DEPS    := $(addprefix $(JUNK)/,$(patsubst %.cc,%.d,$(SOURCES)))
+HEADERS := $(wildcard *.h)
+ASPECTS := $(wildcard *.ah)
+INCLUDE_LIST := $(patsubst %.ah,-include %.ah,$(ASPECTS))
+
+all: $(PROG)
+
+run: all
+	./$(PROG)
+
+$(PROG): $(OBJECTS)
+	@echo Linking $@
+	@$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS) $(LDFLAGS)
+
+clean:
+	@rm -rf *.o $(JUNK) $(PROG)
+
+$(JUNK)/%.o : %.cc
+	@echo Compiling $<
+	@$(ACXX) $(CXXFLAGS) -x c++ -c $< -o $@
+
+$(JUNK)/%.d : %.cc
+	@mkdir -p $(JUNK)
+	@$(CXX) $(CXXFLAGS) -x c++ -MM $(INCLUDE_LIST) $< | \
+        sed -e "s/$*\.o/$(JUNK)\/& $(JUNK)\/$*.d/g" > $@
+
+
+ifneq ($(MAKECMDGOALS),clean)
+-include $(DEPS)
+endif
+
+.PHONY: clean all
+
+# don't remove any intermediate files
+.SECONDARY:

@@ -1,0 +1,30 @@
+DESC="Generate dependencies"
+main()
+{
+  mkdir src/dep
+
+  EXEC="${AGCC} --path src -v2  -MF src/dep/dep.ag -M src/*.cc"
+  if  ( ${EXEC} );then true;else
+    ERR_MSG="Failed executing  '${EXEC}'";
+    return 1;
+  fi;
+
+  if [ ! -f src/dep/dep.ag ];then
+    ERR_MSG="File with dependency information was not generated";
+    return 1;
+  fi;
+
+  g++ -include src/trace.ah -M -MF src/dep/dep.g  src/*.cc;
+
+  echo -e "\nDIFF BETWEEN FILES 'dep.g' and 'dep.ag': \n"
+  if ( diff src/dep/dep.g src/dep/dep.ag );then true;else
+    ERR_MSG="Dependency information differs between 'g++' and 'ag++' (files: 'src/dep/dep.g' and 'src/dep/dep.ag')";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+  rm -rf src/dep;
+}
+

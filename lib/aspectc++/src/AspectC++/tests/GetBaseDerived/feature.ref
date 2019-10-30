@@ -1,0 +1,11 @@
+get: int A::a = 1
+get: int B::b = 2
+derived from "B": int B::b = 2
+derived from "B::b": int B::b = 2
+get: int C::c = 3
+derived from "B": int C::c = 3
+get: int D::d = 4
+derived from "B": int D::d = 4
+get: int D::b = 5
+derived from "B": int D::b = 5
+derived from "B::b": int D::b = 5

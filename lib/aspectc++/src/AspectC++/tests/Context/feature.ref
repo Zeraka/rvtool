@@ -1,0 +1,7 @@
+Context information is requested by advice in arbitrary order:
+==============================================================
+that: main()::t, int 10, Complex(2.000000,0.500000)
+that: main()::t, int 10, Complex(2.000000,0.500000)
+that: main()::t, int 10, Complex(2.000000,0.500000)
+that: main()::t, int 10, Complex(2.000000,0.500000)
+==============================================================

@@ -1,0 +1,52 @@
+#ifndef __MARKER_AH__
+#define __MARKER_AH__
+
+#include <iostream>
+
+using namespace std;
+
+aspect Marker {
+  advice call( "% ...::%(...)" ) : before() {
+    cout << endl << "All: " << tjp->signature() << endl;
+  }
+  advice call( "% %(...)" ) : before() {
+    cout << "Root (long): " << tjp->signature() << endl;
+  }
+  advice call( member( "::" ) ) : before() {
+    cout << "Root (rec,new): " << tjp->signature() << endl;
+  }
+  advice call( member( "::" ) && ! member( member( "::" ) ) ) : before() {
+    cout << "Root (norec,new): " << tjp->signature() << endl;
+  }
+  advice call( member( "%" ) ) : before() {
+    cout << "WCard (rec,new): " << tjp->signature() << endl;
+  }
+  advice call( member( "%" ) && ! member( member( "%" ) ) ) : before() {
+    cout << "WCard (norec,new): " << tjp->signature() << endl;
+  }
+  advice call( "% T::%(...)" ) : before() {
+    cout << "T (long): " << tjp->signature() << endl;
+  }
+  advice call( member( "T" ) ) : before() {
+    cout << "T (new): " << tjp->signature() << endl;
+  }
+  advice call( "% Q::%(...)" ) : before() {
+    cout << "Q (long): " << tjp->signature() << endl;
+  }
+  advice call( member( "Q" ) && ! member( member( "Q" ) ) ) : before() {
+    cout << "Q (norec,new): " << tjp->signature() << endl;
+  }
+  advice call( "% Q::...::%(...)" ) : before() {
+    cout << "Q (rec,long): " << tjp->signature() << endl;
+  }
+  advice call( member( "Q" ) ) : before() {
+    cout << "Q (rec,new): " << tjp->signature() << endl;
+  }
+  advice call( "% Q::R::%(...)" ) : before() {
+    cout << "Q::R (long): " << tjp->signature() << endl;
+  }
+  advice call( member( "Q::R" ) ) : before() {
+    cout << "Q::R (new): " << tjp->signature() << endl;
+  }
+};
+#endif

@@ -1,0 +1,27 @@
+#ifndef __SynchronizedLog_ah__
+#define __SynchronizedLog_ah__
+
+#include <pthread.h>
+
+aspect SynchronizedLog {
+  // introduce a mutex into the Log class
+  // -> there is one mutex instance per log object
+  advice "Log": slice struct {
+    pthread_mutex_t _mutex;
+  };
+
+  // initialize the mutex upon Log construction
+  advice construction("Log") : before () {
+    pthread_mutex_t helper = PTHREAD_MUTEX_INITIALIZER;
+    tjp->that ()->_mutex = helper;
+  }
+
+  // protect the critical section
+  advice execution("% Log::print(...)") : around () {
+    pthread_mutex_lock(&tjp->that ()->_mutex);
+    tjp->proceed ();
+    pthread_mutex_unlock(&tjp->that ()->_mutex);
+  }
+};
+
+#endif // __SynchronizedLog_ah__

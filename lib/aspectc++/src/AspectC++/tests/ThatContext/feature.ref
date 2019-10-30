@@ -1,0 +1,10 @@
+ThatContext: checks 'that' with context variables
+=================================================
+a.call() should yield nothing:
+-------------------------------------------------
+c.call() should yield two invocations of foo() within serve():
+before serve()
+in Client_B::foo()
+in Client_B::foo()
+after serve()
+=================================================

@@ -1,0 +1,1726 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+// C Compatible Compiler Preprocessor Syntax Parser.
+
+%name PreParser
+
+%token_type {PreTree*}
+
+%left TOK_PRE_COMMA.
+
+%include {
+#include "Puma/List.h"
+#include "Puma/Token.h"
+#include "Puma/StrCol.h"
+#include "Puma/PreExpr.h"
+#include "Puma/CScanner.h"
+#include "Puma/PreMacro.h"
+#include "Puma/CTokens.h"
+#include "Puma/PreParser.h"
+#include "Puma/PreTree.h"
+#include "Puma/MacroUnit.h"
+#include "Puma/UnitManager.h"
+#include "Puma/TokenStream.h"
+#include "Puma/ErrorStream.h"
+#include "Puma/PrePredicate.h"
+#include "Puma/ImportHandler.h"
+#include "Puma/PreLevelState.h"
+#include "Puma/CCommentTokens.h"
+#include "Puma/PreParserState.h"
+#include "Puma/PreMacroManager.h"
+#include "Puma/PreFileIncluder.h"
+#include "Puma/PreTreeToken.h"
+#include "Puma/PreMacroExpander.h"
+#include "Puma/PreprocessorParser.h"
+#include "Puma/PreTreeNodes.h"
+#include "Puma/PrePredicateManager.h"
+#include <stdlib.h>
+#include <sstream>
+#include <string>
+
+
+using namespace Puma;
+
+// Definition of the Lemon generated parser interface.
+void *PreParserAlloc (void *(*mallocProc)(size_t));
+void PreParser       (void *pParser, int TokenID, PreTree *TokenValue);
+void PreParserFree   (void *pParser, void (*freeProc)(void*));
+void PreParserTrace  (FILE *TraceFILE, char *zTracePrompt);
+
+namespace Puma {
+
+int TRACE_CPP = 0;                            // Tracing
+
+static PreprocessorParser*  parser;           // Current preprocessor parser.
+static PreParserState*      state;            // Current parser.
+static PreLevelState*       level;            // Current level state.
+static ErrorStream*         err;              // Current error stream.
+
+// Build a string from a subtree of the preprocessor syntax tree.
+char* buildString (const PreTree* node)
+ {
+    if (! node) return (char*) 0;
+
+    char *result;
+    std::ostringstream s;
+    Token* token;
+
+    // If subtree isn't empty concatenate all tokens to a single string.
+    if (node->sons ()) {
+        PreTokenListPart* list = (PreTokenListPart*) node->son (0);
+
+        // Fill the buffer.
+        for (unsigned int i = 0; i < (unsigned int) list->sons (); i++) {
+            token = ((PreTreeToken*) list->son (i))->token ();
+            if (token->is_comment ())
+                s << " "; // reduce a comment to a single space
+            else
+                s << token->text ();
+        }
+    }
+
+    std::string str = s.str();
+
+    // Skip leading white spaces.
+    int offset = 0;
+    while (StrCol::isSpace(str[offset])) offset++;
+
+    // Skip trailing white spaces.
+    int len = str.length();
+    while (len > 0 && StrCol::isSpace(str[len-1])) len--;
+
+    // Create the return string buffer.
+    result = new char[1 + ((len-offset) < 0 ? 0 : (len-offset))];
+
+    // Copy the buffer into the return buffer but skip newlines.
+    int copied = 0;
+    for (int i = offset; i < len; i++)
+        if (str[i] != '\n')
+            result[copied++] = str[i];
+
+    // Finish return buffer.
+    result[copied] = '\0';
+
+    return result;
+ }
+
+
+// Evaluate a special answer string.
+char* evalAnswerString (char* string, bool mode, PreParserState& state)
+ {
+    if (! string) return (char*) 0;
+
+    // Scan the token string and build an unit.
+    Unit *unit = new Unit ();
+    parser->cscanner ().allow_macro_ops ();
+    parser->cscanner ().fill_unit (string, *unit);
+    parser->cscanner ().allow_macro_ops (false);
+
+    // The call to an #assert (#unassert) directive expects the
+    // form: #assert PREDICATENAME (ANSWERTEXT). This function
+    // evaluates the answer token text to get the real answer text.
+
+    Token* token;
+
+    // Search the right parenthesis.
+    for (token = (Token*) unit->first (); token;
+         token = (Token*) unit->next (token))
+        if (token->is_core () && token->type () == TOK_OPEN_ROUND)
+            break;
+
+    // No right parenthesis found -> parse error.
+    if (! token) {
+        if (mode) {
+            *(state.err) << state.currToken->location () << sev_error
+                << "Missing token list in `#assert'"
+                << endMessage;
+            return (char*) 0;
+        } else {
+            string = new char[1];
+            *string = '\0';
+            return string;
+        }
+    }
+
+    // Delete all tokens before the right parenthesis.
+    unit->kill ((Token*) unit->first (), token);
+
+    // Search the left parenthesis.
+    for (token = (Token*) unit->first (); token;
+         token = (Token*) unit->next (token))
+        if (token->is_core () && token->type () == TOK_CLOSE_ROUND)
+            break;
+
+    // No left parenthesis found -> parse error.
+    if (! token) {
+        *(state.err) << state.currToken->location ()
+                     << sev_error << "Unterminated token list in ";
+        if (mode) *(state.err) << "`#assert'";
+        else      *(state.err) << "`#unassert'";
+        *(state.err) << endMessage;
+        return (char*)0;
+    }
+
+    // Delete all tokens after the left parenthesis.
+    unit->kill (token, (Token*) unit->last ());
+
+    // Get the text between the parenthesis.
+    char* answer = unit->toString ();
+    delete unit;
+
+    // An empty answer causes a parse error.
+    if (StrCol::onlySpaces (answer)) {
+        *(state.err) << state.currToken->location ()
+                     << sev_error << "Empty token list in ";
+        if (mode) *(state.err) << "`#assert'";
+        else      *(state.err) << "`#unassert'";
+        *(state.err) << endMessage;
+        delete[] answer;
+        return (char*) 0;
+    }
+
+    // Return the real answer text.
+    return answer;
+ }
+
+
+// Update the bodies of some predefined macros.
+void updatePredefined ()
+ {
+    TokenStream*     scanner = parser->scanner ();
+    PreMacroManager* mm      = parser->macroManager ();
+
+    if (scanner->length ()) {
+        state->checkPredefined (mm->getIncLevelMacro (), scanner, *mm);
+        state->checkPredefined (mm->getLineMacro (), scanner, *mm);
+        state->checkPredefined (mm->getDateMacro (), scanner, *mm);
+        state->checkPredefined (mm->getTimeMacro (), scanner, *mm);
+        state->checkPredefined (mm->getFileMacro (), scanner, *mm);
+    }
+ }
+
+
+// Send a newline token to the parser.
+void sendNLToken ()
+ {
+    Token* token = state->newline;
+    token->location (state->lastToken->location ());
+    state->lastType = TOK_PRE_NEWLINE;
+    PreTreeToken* synToken = new PreTreeToken (token);
+    PreParser (state->pParser, state->lastType, synToken);
+    PreParser (state->pParser, TOK_PRE_DIRECTIVE_END, (PreTree*) 0);
+ }
+
+
+// Return true if we are at the end of a directive.
+bool atEndOfDirective (PreprocessorParser::PreMode mode)
+ {
+    int type = state->lastType;
+    if (mode != PreprocessorParser::DEFINING &&
+        mode != PreprocessorParser::ASSERT &&
+        mode != PreprocessorParser::DIRECTIVE &&
+        mode != PreprocessorParser::MACRO)
+      if (type == TOK_PRE_ELSE       || type == TOK_PRE_ENDIF   ||
+          type == TOK_PRE_ERROR      || type == TOK_PRE_WARNING ||
+          type == TOK_PRE_TOKEN_LIST || type == TOK_PRE_RPAREN  ||
+          type == TOK_PRE_ID)
+          return true;
+    return false;
+ }
+
+
+// Prevent a special kind of parse error.
+void preventEOFError (PreprocessorParser::PreMode mode)
+ {
+    // If the parser is parsing a directive and the next token
+    // isn't a preprocessor token like expected there may be an
+    // EOF at end of the directive. But the parser can't recognize
+    // EOFs within directives, it would cause a parse error. But
+    // it should be allowed to finish a directive with an EOF too
+    // and not only with a newline. So a newline is sent to the
+    // parser if such an EOF is suspected.
+    if (! state->currToken->is_comment () && state->lastToken)
+        if (atEndOfDirective (mode))
+            sendNLToken ();
+ }
+
+
+// Prevent a special kind of parse error.
+void preventInclEOFError (PreprocessorParser::PreMode mode)
+ {
+    // If an included file ends with a preprocessor directive the parser
+    // would expect that after the #include (that has included the file)
+    // is a newline. But if there is no newline but a new preprocessor
+    // directive a parse error would occur. In such a case we simply give
+    // the parser the expected newline token to prevent the error.
+    if (state->lastToken)
+        if (atEndOfDirective (mode))
+        {
+            int type = state->currType;
+            if (type == TOK_PRE_DEFINE  || type == TOK_PRE_UNDEF    ||
+                type == TOK_PRE_ASSERT  || type == TOK_PRE_UNASSERT ||
+                type == TOK_PRE_WARNING || type == TOK_PRE_ERROR    ||
+                type == TOK_PRE_IFDEF   || type == TOK_PRE_IFNDEF   ||
+                type == TOK_PRE_IF      || type == TOK_PRE_ELIF     ||
+                type == TOK_PRE_ELSE    || type == TOK_PRE_ENDIF    ||
+                type == TOK_PRE_INCLUDE || type == TOK_PRE_INCLUDE_NEXT)
+                sendNLToken ();
+        }
+ }
+
+
+// Prevent a special kind of parse error.
+bool directiveAtEOF ()
+ {
+    // An EOF within a directive is suspected. It's the same problem
+    // like above.
+    if (state->lastToken)
+        if (parser->pre_mode () != PreprocessorParser::INITIAL)
+        {
+            state->currToken = state->lastToken;
+            state->currType = state->lastType;
+            sendNLToken ();
+            if (((TokenStream*) parser->scanner ())->length ())
+            {
+                // The last token of the main input file belongs to an
+                // `#include' directive and nothing but EOF is following.
+                // And now it is one more file to parse so the parser has
+                // to be called again.
+                state->lastToken = state->newline;
+                state->lastToken->location (state->currToken->location ());
+                state->lastType = TOK_PRE_NEWLINE;
+                return true;
+            }
+        }
+    return false;
+ }
+
+
+// Constructor of the preprocessor parser class.
+PreprocessorParser::PreprocessorParser (ErrorStream* err, UnitManager* unitManager,
+    UnitManager* locals, std::ostream& out, int max_depth) : _scanner (*err)
+ {
+#ifndef NDEBUG
+    if (TRACE_CPP)
+      PreParserTrace (stdout, "CPP_TRACE: ");
+#endif
+    _parserState                  = new PreParserState ();
+    _parserState->maxIncludeDepth = max_depth;
+    _parserState->err             = err;
+    _parserState->pParser         = PreParserAlloc ((void* (*)(size_t))malloc);
+    _silentMode                   = false;
+    _out                          = &out;
+    _unitManager                  = unitManager;
+    _locals                       = locals;
+    _levelState                   = new PreLevelState ();
+    _macroStack                   = new Array<PreMacro*> ();
+    _predicateManager             = new PrePredicateManager ();
+    _macroManager                 = new PreMacroManager (err);
+    _fileIncluder                 = new PreFileIncluder (*this);
+    _pre_mode                     = INITIAL;
+    _support_gnu                  = true;
+    _importHandler                = 0;
+ }
+
+
+PreprocessorParser::~PreprocessorParser ()
+ {
+    // Free the lemon generated parser.
+    PreParserFree (_parserState->pParser, (void (*)(void*))::free);
+    delete _macroManager;
+    delete _fileIncluder;
+    delete _levelState;
+    delete _parserState;
+    delete _predicateManager;
+    delete _macroStack;
+    if (_importHandler)
+      delete[] _importHandler;
+ }
+
+
+// Constructor of the preprocessor parser class.
+void PreprocessorParser::reset (ErrorStream* err, UnitManager* unitManager,
+                        UnitManager* locals, std::ostream& out, int max_depth)
+ {
+    delete _macroManager;
+    delete _fileIncluder;
+    delete _levelState;
+    delete _parserState;
+    delete _predicateManager;
+    delete _macroStack;
+    if (_importHandler)
+      delete[] _importHandler;
+
+    _parserState                  = new PreParserState ();
+    _silentMode                   = false;
+    _out                          = &out;
+    _unitManager                  = unitManager;
+    _locals                       = locals;
+    _parserState->maxIncludeDepth = max_depth;
+    _parserState->err             = err;
+    _parserState->pParser         = PreParserAlloc ((void* (*)(size_t))malloc);
+    _macroManager                 = new PreMacroManager (err);
+    _fileIncluder                 = new PreFileIncluder (*this);
+    _levelState                   = new PreLevelState ();
+    _macroStack                   = new Array<PreMacro*> ();
+    _predicateManager             = new PrePredicateManager ();
+    _pre_mode                     = INITIAL;
+    _support_gnu                  = true;
+    _importHandler                = 0;
+ }
+
+
+// Map scanner token types to parser token types
+int PreprocessorParser::map_token (Token *token, bool &parse) {
+  // default:
+  int type = token->type ();
+  parse = true;
+
+  if (token->is_comment ()) {
+    parse = false;
+    return type;
+  }
+
+  // If the scope changes to another file, the mapping mode
+  // must be reset due to a missing NEWLINE at end of the
+  // previous file (In this case the mapping mode wouldn't
+  // change correctly).
+  if (state->lastToken)
+    if (token->location ().filename ().name () !=
+        state->lastToken->location ().filename ().name ())
+      _pre_mode = INITIAL;
+
+  if (_pre_mode == INITIAL) {
+    if (token->is_preprocessor ()) {
+      switch (type) {
+        case TOK_PRE_DEFINE:
+          _pre_mode = DEFINING;
+          break;
+        case TOK_PRE_ASSERT:
+        case TOK_PRE_UNASSERT:
+          _pre_mode = ASSERT;
+          break;
+        case TOK_PRE_IF:
+        case TOK_PRE_ELIF:
+        case TOK_PRE_WARNING:
+        case TOK_PRE_ERROR:
+        case TOK_PRE_INCLUDE:
+        case TOK_PRE_INCLUDE_NEXT:
+        case TOK_ELSE:
+        case TOK_PRE_ENDIF:
+          _pre_mode = TOKENLIST;
+          break;
+        case TOK_PRE_IFDEF:
+        case TOK_PRE_IFNDEF:
+        case TOK_PRE_UNDEF:
+          _pre_mode = DIRECTIVE;
+          break;
+      }
+    } else {
+      parse = false;
+    }
+  } else {
+    if (token->is_whitespace ()) {
+      const char *c = token->text ();
+      for (; *c && *c != '\n'; c++);
+
+      if (*c == '\n') {
+        type = TOK_PRE_NEWLINE;
+        _pre_mode = INITIAL;
+      } else if (_pre_mode == TOKENLIST) {
+        type = TOK_PRE_TOKEN_LIST;
+      } else if (_pre_mode == MAYBEMACRO) {
+        type = TOK_PRE_TOKEN_LIST;
+        _pre_mode = TOKENLIST;
+      } else {
+        parse = false;
+      }
+    } else {
+      bool is_id = token->is_identifier ();
+
+      type = Token::ID_UNKNOWN;
+      switch (_pre_mode) {
+        case TOKENLIST:
+          type = TOK_PRE_TOKEN_LIST;
+          break;
+        case ASSERT:
+        case DIRECTIVE:
+          if (! state->passOnToken) {
+            type = TOK_PRE_TOKEN_LIST;
+            _pre_mode = TOKENLIST;
+          } else if (is_id) {
+            type = TOK_PRE_ID;
+            _pre_mode = TOKENLIST;
+          }
+          break;
+        case DEFINING:
+          if (! state->passOnToken) {
+            type = TOK_PRE_TOKEN_LIST;
+            _pre_mode = TOKENLIST;
+          } else if (is_id) {
+            type = TOK_PRE_ID;
+            _pre_mode = MAYBEMACRO;
+          }
+          break;
+        case MAYBEMACRO:
+          if (token->is_open ()) {
+            type = TOK_PRE_LPAREN;
+            _pre_mode = MACRO;
+          }
+          break;
+        case MACRO:
+          if (is_id) {
+            type = TOK_PRE_ID;
+          } else if (token->is_comma ()) {
+            type = TOK_PRE_COMMA;
+          } else if (token->is_close ()) {
+            type = TOK_PRE_RPAREN;
+            _pre_mode = TOKENLIST;
+          } else if (token->type () == TOK_ELLIPSIS) {
+            if (supportGNU ()) {
+              type = TOK_PRE_REST;
+            }
+          }
+          break;
+        case INITIAL: // to avoid compiler warnings
+          break;
+      }
+      if (type == Token::ID_UNKNOWN) {
+        _pre_mode = INITIAL;
+      }
+    }
+  }
+  return type;
+}
+
+
+// Finish the parse process.
+void PreprocessorParser::finishParsing () {
+  // Create an EOF token needed if the EOF is within a directive
+  // and caused a parse error. So the parser can print a error
+  // message that report this error.
+  state->currToken = new Token (Token::ID_END_OF_FILE);
+
+  // Send the parser the signal to finish the parse process.
+  PreParser (state->pParser, 0, (PreTree*) 0);
+
+  delete state->currToken;
+}
+
+
+// Parse a generated single line comment.
+bool PreprocessorParser::parseGeneratedSingleLineCommentToken (Token*& sl_comment, Unit*& comment_unit, bool& last_in_expansion) {
+  TokenStream* stream = (TokenStream*) scanner ();
+  bool in_expansion = state->inMacroExpansion (*_macroStack);
+
+  if (last_in_expansion && ! in_expansion) {
+    // handle generated single line comments
+    if (! sl_comment && state->sl_token &&
+        (state->sl_token->type () == TOK_CCOMMENT ||
+         state->sl_token->type () == TOK_CCSINGLE)) {
+       sl_comment = state->sl_token;
+       comment_unit = new Unit;
+    }
+  }
+
+  last_in_expansion = in_expansion;
+
+  if (sl_comment) {
+    if (state->currToken->location ().line () > sl_comment->location ().line ()) {
+      // Single line comment finished, append the current token.
+      Token *token = (Token*)state->currToken->duplicate ();
+      comment_unit->append (*token);
+      sl_comment = 0;
+
+      // Push the unit containing the comment tokens on token stack.
+      stream->push (comment_unit);
+      // Add the unit to the unit manager.
+      _unitManager->add (comment_unit);
+    } else {
+      // Copy current token and mark it as comment token
+      Token *token = state->currToken;
+      token = new Token (TOK_CCOMMENT, Token::comment_id, token->text ());
+      token->location (sl_comment->location ());
+      comment_unit->append (*token);
+    }
+    return true;
+  }
+  return false;
+}
+
+
+// Check if the current token is a macro call
+bool PreprocessorParser::isMacroCall (bool specialDefinedMacro) {
+  // Get the top token source.
+  long pos = scanner ()->length () - 1;
+  UnitTokenSrc *src = scanner ()->lookup (pos);
+
+  // Get the unit and the current token.
+  Token* token = src->current ();
+  Unit* unit = src->unit ();
+
+  // Skip white spaces and comments.
+  do {
+    // If the end of an unit is reached get the next
+    // unit on stack and continue with that unit.
+    while (! (token = (Token*) unit->next (token))) {
+      // If there is no unit left on stack, it's not a macro call.
+      if (! ((--pos >= 0) && (src = scanner ()->lookup (pos))))
+        return false;
+
+      unit  = src->unit ();
+      token = src->current ();
+    }
+  } while (token->is_whitespace () || token->is_comment ());
+
+  // If there is a left parenthesis it is a function-like macro.
+  if (token->is_open ())
+    return true;
+
+  // After the `defined' keyword there can also be an identifier.
+  if (specialDefinedMacro && token->is_identifier ())
+    return true;
+
+  // This is not a call to a funtion-like macro.
+  return false;
+}
+
+
+// Collect the tokens of the macro call for expansion.
+bool PreprocessorParser::collectMacroCallTokens (PreMacro* macro) {
+  // Macro 'defined'?
+  bool specialDefinedMacro = strcmp (macro->getName (), "defined") == 0;
+
+  // Check if this is really a call to a function-like macro
+  if (macro->isFunction () && ! isMacroCall (specialDefinedMacro))
+    return false;
+
+  // Collect macro arguments
+  if (macro->isFunction ()) {
+    int depth = 0;
+    Token* token;
+
+    // Unit containing the macro call tokens
+    MacroUnit* call = new MacroUnit ();
+    call->MacroBegin (state->currToken);
+    call->CallingUnit (state->currToken->unit ());
+    call->append (*((Token*) state->currToken->duplicate ())); // the macro name
+
+    // Save old macro argument parsing parser state
+    bool oldParseMacroArgs = state->parseMacroArgs;
+    state->parseMacroArgs = true;
+
+    while ((token = parseToken ())) {
+      call->MacroEnd (token);
+      if (token->is_open ()) {
+        depth++;
+      } else if (token->is_close ()) {
+        depth--;
+        if (depth == 0) {
+          // End of argument list
+          call->append (*((Token*) token->duplicate ()));
+          break;
+        }
+      } else if (depth == 0 && specialDefinedMacro && token->is_identifier ()) {
+        // define MACRO_NAME
+        call->append (*((Token*) token->duplicate ()));
+        break;
+      }
+
+      if (token->is_comment ()) {
+        // Reduce a comment to a single space
+        parser->cscanner ().fill_unit (" ", *call);
+      } else {
+        // Copy argument token
+        call->append (*((Token*) token->duplicate ()));
+      }
+    }
+
+    state->parseMacroArgs = oldParseMacroArgs;
+
+    // Push the arguments unit on token stack
+    TokenStream* stream = (TokenStream*) scanner ();
+    stream->push (call);
+
+    // Add the unit to the unit manager
+    _unitManager->add (call);
+    
+    // all tokens in the generated unit are "macro generated"
+    // -> no longer needed: now automatically detected if a token is part of a MacroUnit!
+    // for (Token *curr = (Token*)call->first (); curr; curr = (Token*)call->next (curr))
+    //  curr->macro_generated ();
+  }
+
+  return true;
+}
+
+
+// Expand a macro call.
+bool PreprocessorParser::expandMacroCall (PreMacroExpander& expander) {
+  // If parsing macro arguments, don't expand macros in normal
+  // programm code.
+  if (state->parseMacroArgs && _pre_mode == INITIAL)
+    return false;
+
+  TokenStream* stream = (TokenStream*) scanner ();
+
+  // Get the macro definition if the current token is the name of a macro,
+  PreMacro* macro = _macroManager->getMacro (state->currToken->dtext ());
+  if (macro) {
+
+    // Check whether a special predefined macro was called
+    // and update it if necessary.
+    macro = state->checkPredefined (macro, scanner (), *_macroManager);
+
+    // Now it must be checked whether the macro is allowed
+    // to be expanded. If it is a `self-referential' macro
+    // call it will stay untouched.
+    if (! state->isSelfReferentialMacro (macro, *_macroStack)) {
+
+      // Try to expand the macro. It also could be that
+      // this isn't a macro call at all, if so ignore it.
+      if (collectMacroCallTokens (macro) && expander.expandMacro (macro)) {
+
+        // After expansion the expanded text is pushed
+        // on the input stream. Now we must ensure to
+        // not expand again this macro inside of the
+        // expanded text (self-referential macro call).
+        state->putMacroOnStack (*_macroStack, macro, stream->length ());
+
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+
+// Get and parse the next token.
+void PreprocessorParser::parseNextToken (Token*& sl_comment, Unit*& comment_unit, bool& last_in_expansion) {
+  TokenStream* stream = (TokenStream*) scanner ();
+  PreTreeToken* synToken;
+  PreMode mode;
+
+  while ((state->currToken = stream->next ())) {
+    // Recognize end of macro expansion and adjust macro stack accordingly.
+    state->updateMacroStack (*_macroStack, stream->length ());
+
+    // Parse single line comments
+    if (parseGeneratedSingleLineCommentToken (sl_comment, comment_unit, last_in_expansion))
+      continue;
+
+    // Recognize next preprocessor state
+    bool parse = true;
+    mode = parser->pre_mode ();
+    int type = map_token (state->currToken, parse);
+
+    state->sl_token = state->currToken;
+    state->currType = type;
+
+    // If the scanned token isn't a preprocessor token, or a macro
+    // is getting expanded and therefore preprocessor tokens have to
+    // be ignored, do not parse the token.
+    if (! parse || state->inMacroExpansion (*_macroStack)) {
+      preventEOFError (mode);
+      break;
+    }
+
+    // Allow an included file to end with a preprocessor directive
+    // and not only with a newline.
+    preventInclEOFError (mode);
+
+    // Remember the current token.
+    state->lastToken = state->currToken;
+    state->lastType = state->currType;
+
+    // Pass the current token to the parser.
+    synToken = new PreTreeToken (state->currToken);
+    if (TRACE_CPP)
+      printf ("%sToken '%s' %i\n", "CPP_TRACE: ", state->currToken->text (), state->currToken->type ());
+    PreParser (state->pParser, type, synToken);
+
+    // After a newline was parsed the parser has to wait until the
+    // next token was parsed to be able to decide whether the end
+    // of a directive really is reached (to be able to reduce the
+    // current rule). But we have to do our work now, for example
+    // after an #include directive we can't wait for the next
+    // directive to include the file, we have to include it now.
+    // Therefore a very special token will be send to the parser
+    // after parsing a newline token. The parser recognizes this
+    // very special token and the body of the #include-rule will
+    // be executed right now.
+    if (type == TOK_PRE_NEWLINE)
+      PreParser (state->pParser, TOK_PRE_DIRECTIVE_END, (PreTree*) 0);
+    // Same as above for EOF directly after a directive.
+    else if (stream->length () > 1 && ! stream->topHasMore ())
+      sendNLToken ();
+  }
+
+  // Recognize end of macro expansion and adjust macro stack accordingly.
+  state->updateMacroStack (*_macroStack, stream->length ());
+}
+
+
+// Parse a single token.
+Token* PreprocessorParser::parseToken () {
+  // Set the parser as the current parser.
+  parser = this;
+  state  = _parserState;
+  level  = _levelState;
+  err    = state->err;
+
+  Unit *comment_unit = 0;
+  Token *result = 0, *sl_comment = 0;
+  bool done = false, last_in_expansion = false;
+
+  // Macro call expander.
+  PreMacroExpander expander (parser);
+
+  while (! done) {
+    done = true; // default: run once
+
+    // Scan the input files. Get the next token.
+    parseNextToken (sl_comment, comment_unit, last_in_expansion);
+
+    if (state->currToken) {
+      // Go on only if not within a `false' conditional branch and
+      // no #error directive was parsed.
+      if (state->passOnToken && ! state->errorDirective) {
+        // Check every identifier for macro calls.
+        if (state->currToken->is_identifier () && expandMacroCall (expander)) {
+          // Skip the call and parse the expanded tokens.
+          done = false;
+        } else {
+          // Pass current token to the next parser.
+          result = state->currToken;
+        }
+      // Skip the current token.
+      } else
+        done = false;
+    }
+
+    // End of input. Check if there is a directive at EOF (missing newline).
+    else if ((done = ! directiveAtEOF ())) {
+      // Send the parser the signal to finish the parse process.
+      finishParsing ();
+
+      // Return NULL to signal all other parsers to finish their
+      // parse processes.
+      result = (Token*) 0;
+    }
+  }
+
+  return result;
+}
+
+
+} // namespace Puma
+}
+
+%stack_size 1000
+
+%stack_overflow {
+  state->syntaxError = true;
+  *err << state->lastToken->location () << sev_fatal 
+       << "Giving up. Preprocessor stack overflow (>1000)" << endMessage;
+}
+
+%syntax_error {
+    // Prevent the parser to report an error twice.
+    if (state->syntaxError) {
+        state->syntaxError = false;
+    }
+
+    // Report the syntax error.
+    else {
+        Unit u;
+        state->syntaxError = true;
+
+        if (state->currType == Token::ID_END_OF_FILE) {
+            *err << state->lastToken->location () << sev_error
+                 << "End of file within directive"
+                 << endMessage;
+        } else if (state->lastType == TOK_PRE_NEWLINE) {
+            Token* token = (Token*) (u.prev (state->lastToken));
+            while (! token->is_preprocessor ())
+                token = (Token*) (u.prev (token));
+            *err << state->lastToken->location () << sev_error
+                 << "Unterminated `" << token->text ()
+                 << "' directive" << endMessage;
+        } else {
+            *err << state->lastToken->location () << sev_error
+                 << "Unexpected token `"
+                 << state->lastToken->text () << "'" << endMessage;
+        }
+    }
+}
+
+
+/***********************************************************************/
+/*                        preprocessor_program                         */
+/***********************************************************************/
+
+preprocessor_program ::= directive_groups(dg).
+    {
+        state->syntaxTree = new PreProgram (dg);
+    }
+
+/***********************************************************************/
+/*                             directive_groups                        */
+/***********************************************************************/
+
+directive_groups(dg) ::= /* empty */.
+    {
+        dg = new PreDirectiveGroups ();
+    }
+directive_groups(dg) ::= directive_groups(odg) directive_group(d).
+    {
+        odg->add_son (d);
+        dg = odg;
+    }
+directive_groups(dg) ::= directive_groups(odg) error.
+    {
+        odg->add_son (new PreError ());
+        dg = odg;
+    }
+
+/***********************************************************************/
+/*                             directive_group                         */
+/***********************************************************************/
+
+directive_group(dg) ::= control_line(cl).
+    {
+        dg = cl;
+    }
+directive_group(dg) ::= conditional_group(cg).
+    {
+        dg = cg;
+    }
+
+/***********************************************************************/
+/*                            conditional_group                        */
+/***********************************************************************/
+
+conditional_group(cg) ::= if_part(ip) directive_groups(dg) endif_part(ep).
+    {
+        cg = new PreConditionalGroup (ip, dg, ep);
+    }
+conditional_group(cg) ::= if_part(ip) elif_part(eip) directive_groups(dg) 
+                          endif_part(ep).
+    {
+        cg = new PreConditionalGroup (ip, eip, dg, ep);
+    }
+conditional_group(cg) ::= if_part(ip) else_part(ep) directive_groups(dg) 
+                          endif_part(eip).
+    {
+        cg = new PreConditionalGroup (ip, ep, dg, eip);
+    }
+
+/***********************************************************************/
+/*                                if_part                              */
+/***********************************************************************/
+
+if_part(ip) ::= if_line(il) TOK_PRE_DIRECTIVE_END.
+    {
+        ip = il;
+    }
+if_part(ip) ::= ifdef_line(idl) TOK_PRE_DIRECTIVE_END.
+    {
+        ip = idl;
+    }
+if_part(ip) ::= ifndef_line(indl) TOK_PRE_DIRECTIVE_END.
+    {
+        ip = indl;
+    }
+
+/***********************************************************************/
+/*                               else_part                             */
+/***********************************************************************/
+
+else_part(ep) ::= directive_groups(dg) else_line(el) TOK_PRE_DIRECTIVE_END.
+    {
+        ep = new PreElsePart (dg, el);
+    }
+else_part(ep) ::= elif_part(eip) directive_groups(dg) else_line(el) 
+                  TOK_PRE_DIRECTIVE_END.
+    {
+        ep = new PreElsePart (eip, dg, el);
+    }
+
+/***********************************************************************/
+/*                               elif_part                             */
+/***********************************************************************/
+
+elif_part(eip) ::= directive_groups(dg) elif_line(eil) TOK_PRE_DIRECTIVE_END.
+    {
+        eip = new PreElifPart ();
+        ((PreElifPart*) (eip))->addSons (dg, eil);
+    }
+elif_part(eip) ::= elif_part(oeip) directive_groups(dg) elif_line(eil) 
+                   TOK_PRE_DIRECTIVE_END.
+    {
+        ((PreElifPart*) (oeip))->addSons (dg, eil);
+        eip = oeip;
+    }
+
+/***********************************************************************/
+/*                              endif_part                             */
+/***********************************************************************/
+
+endif_part(eip) ::= endif_line(eil) TOK_PRE_DIRECTIVE_END.
+    {
+        eip = eil;
+    }
+    
+/***********************************************************************/
+/*                                if_line                              */
+/***********************************************************************/
+
+if_line(il) ::= TOK_PRE_IF(i) token_list(tl).
+    {
+        il = new PreIfDirective (i, tl);
+        
+        // A new conditional group starts, so go one level deeper.
+        level->deeper ();
+
+        if (! state->errorDirective) {
+            if (state->passOnToken) 
+                {
+                // Create a new macro expander to expand the macros that could
+                // be part of the expression. 
+                PreMacroExpander expander (parser);
+
+                Location location = ((PreTreeToken*) i)->token ()->location ();
+
+                // Create a new expression evaluator.
+                PreExpr expr (err, location);
+
+                // Now add the special macro `defined' to the macro manager.
+                PreTree*  idl   = new PreIdentifierList (i);
+                PreMacro* macro = new PreMacro ("defined", idl, "\n");
+                delete idl;
+                macro->location (location);
+                parser->macroManager ()->addMacro (macro);
+
+                // Update the predefined macros.
+                updatePredefined ();
+
+                // Build the expression string and then expand all macros within it.
+                // Then we should have a string consisting only of 0s, 1s and some
+                // operators like || or &&. Evaluate the string.
+                char* str = buildString (tl);
+                char* exprstr = expander.expandMacros (str);
+                expr.evaluatePreExpr (exprstr);
+                    delete[] exprstr;
+                delete[] str;
+
+                // Remove the special macro `defined' from macro manager.
+                state->removeMacroFromStack (*parser->macroStack (), "defined");
+                parser->macroManager ()->removeMacro ("defined", location);
+
+                // Add a daughter node containing the value of the expression.
+                il->add_daughter (new PreCondSemNode (expr.value ()));
+
+                // Now decide whether to go on or to ignore following C++ code.
+                if (expr.value ()) level->setState (false);
+                else state->passOnToken = false;
+            } 
+            else // Ignore further tokens.
+            {
+                    level->setPassOn (false);
+                level->setState (false);
+            } 
+        }
+    }
+
+/***********************************************************************/
+/*                                ifdef_line                           */
+/***********************************************************************/
+
+ifdef_line(idl) ::= TOK_PRE_IFDEF(ifd) token_list(tl).
+    {
+        idl = new PreIfdefDirective (ifd, tl);
+        
+        // A new conditional group starts, so go one level deeper.
+        level->deeper ();
+
+        // Ignore further tokens.
+        if (! state->errorDirective)
+        {
+          level->setPassOn (false);
+          level->setState (false);
+        }
+    }
+ifdef_line(idl) ::= TOK_PRE_IFDEF(ifd) TOK_PRE_ID(id) token_list(tl).
+    {
+        idl = new PreIfdefDirective (ifd, id, tl);
+        
+        // A new conditional group starts, so go one level deeper.
+        level->deeper ();
+        
+        if (! state->errorDirective) {
+            if (state->passOnToken) 
+                {
+                const char* name  = ((PreTreeToken*) id)->token ()->text ();
+                PreMacro*   macro = parser->macroManager ()->getMacro (name);
+        
+                // Search the given macro name. If found the value of the 
+                // conditional is true else it's false. Add a daughter node 
+                // containing the value of the conditonal.
+                if (macro)
+                    idl->add_daughter (new PreCondSemNode (true));
+                else
+                    idl->add_daughter (new PreCondSemNode (false));
+            
+                // Now decide whether to go on or to ignore following C++ code.
+                if (macro) level->setState (false);
+                else state->passOnToken = false;
+            } 
+            else // Ignore further tokens.
+            {
+                    level->setPassOn (false);
+                level->setState (false);
+            } 
+        }
+    }
+
+/***********************************************************************/
+/*                                ifndef_line                          */
+/***********************************************************************/
+
+ifndef_line(indl) ::= TOK_PRE_IFNDEF(ind) token_list(tl).
+    {
+        indl = new PreIfndefDirective (ind, tl);
+        
+        // A new conditional group starts, so go one level deeper.
+        level->deeper ();
+
+        // Ignore further tokens.
+        if (! state->errorDirective)
+        {
+          level->setPassOn (false);
+          level->setState (false);
+        }
+    }
+ifndef_line(indl) ::= TOK_PRE_IFNDEF(ind) TOK_PRE_ID(id) token_list(tl).
+    {
+        indl = new PreIfndefDirective (ind, id, tl);
+        
+        // A new conditional group starts, so go one level deeper.
+        level->deeper ();
+        
+        if (! state->errorDirective) {
+            if (state->passOnToken) 
+                {
+                const char* name  = ((PreTreeToken*) id)->token ()->text ();
+                PreMacro* macro = parser->macroManager ()->getMacro (name);
+        
+                // Search the given macro name. If found the value of the 
+                // conditional is false else it's true. Add a daughter node 
+                // containing the value of the conditonal.
+                if (! macro)
+                    indl->add_daughter (new PreCondSemNode (true));
+                else
+                    indl->add_daughter (new PreCondSemNode (false));
+            
+                // Now decide whether to go on or to ignore following C++ code.
+                if (! macro) level->setState (false);
+                else state->passOnToken = false;
+            } 
+            else // Ignore further tokens.
+            {
+                    level->setPassOn (false);
+                level->setState (false);
+            } 
+        }
+    }
+
+/***********************************************************************/
+/*                                 elif_line                           */
+/***********************************************************************/
+
+elif_line(eil) ::= TOK_PRE_ELIF(ei) token_list(tl).
+    {
+        eil = new PreElifDirective (ei, tl);
+        
+        if (! state->errorDirective) {
+            if (state->passOnToken && ! level->state ())
+                state->passOnToken = false;
+            else if (! state->passOnToken && level->state ())
+            {
+                // Create a new macro expander to expand the macros that could
+                // be part of the expression. 
+                PreMacroExpander expander (parser);
+        
+                Location location = ((PreTreeToken*) ei)->token ()->location ();
+        
+                // Create a new expression evaluator.
+                PreExpr expr (err, location);
+        
+                // Now add the special macro `defined' to the macro manager.
+                PreTree* idl   = new PreIdentifierList (ei);
+                PreMacro*   macro = new PreMacro ("defined", idl, "\n");
+                delete idl;
+                macro->location (location);
+                parser->macroManager ()->addMacro (macro);
+
+                // Update the predefined macros.
+                updatePredefined ();
+
+                // Build the expression string and then expand all macros within it.
+                // Then we should have a string consisting only of 0s, 1s and some
+                // operators like || or &&. Evaluate the string.
+                char* str = buildString (tl);
+                char* exprstr = expander.expandMacros (str);
+                expr.evaluatePreExpr (exprstr);
+                    delete[] exprstr;
+                delete[] str;
+
+                // Remove the special macro `defined' from macro manager.
+                state->removeMacroFromStack (*parser->macroStack (), "defined");
+                parser->macroManager ()->removeMacro ("defined", location);
+
+                // Add a daughter node containing the value of the expression.
+                eil->add_daughter (new PreCondSemNode (expr.value ()));
+
+                // Now decide whether to go on or to ignore following C++ code.
+                if (expr.value ()) 
+                {
+                    state->passOnToken = true;
+                    level->setState (false);
+                } 
+            }
+        }
+    }
+
+/***********************************************************************/
+/*                                 else_line                           */
+/***********************************************************************/
+
+else_line(el) ::= TOK_PRE_ELSE(e) token_list(tl).
+    {
+        el = new PreElseDirective (e, tl);
+        
+        // Decide whether to go on or to ignore following C++ code.
+        if (! state->errorDirective) {
+            if (state->passOnToken && ! level->state ()) 
+                state->passOnToken = false;
+            else if (! state->passOnToken && level->state ()) {
+                state->passOnToken = true;
+                level->setState (false);
+            } 
+        }
+    }
+
+/***********************************************************************/
+/*                                endif_line                           */
+/***********************************************************************/
+
+endif_line(eil) ::= TOK_PRE_ENDIF(ei) token_list(tl).
+    {
+        eil = new PreEndifDirective (ei, tl);
+        
+        // A conditional group ends. If no #error was parsed befor
+        // go one level higher.
+        
+        // Decide whether to go on or to ignore following C++ code.
+        if (! state->errorDirective) {
+            if (level->passOn ())
+                state->passOnToken = true;
+            level->higher ();
+        }
+    }
+
+/***********************************************************************/
+/*                               control_line                          */
+/***********************************************************************/
+
+control_line(cl) ::= include_line(il) TOK_PRE_DIRECTIVE_END.
+    {
+        cl = il;
+    }
+control_line(cl) ::= include_next_line(inl) TOK_PRE_DIRECTIVE_END.
+    {
+        cl = inl;
+    }
+control_line(cl) ::= assert_line(al) TOK_PRE_DIRECTIVE_END.
+    {
+        cl = al;
+    }
+control_line(cl) ::= unassert_line(ual) TOK_PRE_DIRECTIVE_END.
+    {
+        cl = ual;
+    }
+control_line(cl) ::= define_line(dl) TOK_PRE_DIRECTIVE_END.
+    {
+        cl = dl;
+    }
+control_line(cl) ::= undef_line(udl) TOK_PRE_DIRECTIVE_END.
+    {
+        cl = udl;
+    }
+control_line(cl) ::= warning_line(el) TOK_PRE_DIRECTIVE_END.
+    {
+        cl = el;
+    }
+control_line(cl) ::= error_line(el) TOK_PRE_DIRECTIVE_END.
+    {
+        cl = el;
+    }
+
+/***********************************************************************/
+/*                               include_line                          */
+/***********************************************************************/
+
+include_line(il) ::= TOK_PRE_INCLUDE(i) token_list(tl).
+    {
+        il = new PreIncludeDirective (i, tl);
+
+        if (! state->errorDirective && state->passOnToken) 
+        { 
+            // Calculate the number of files included.
+            int num = state->getIncludeLevel ((TokenStream*)(parser->scanner ()));
+
+            if (((PreIncludeDirective*)il)->is_forced ())
+                state->forcedIncludes = true;
+            else if (!((PreIncludeDirective*)il)->is_forced () && num == 0)
+                state->forcedIncludes = false;
+
+            if (state->forcedIncludes && num > 0)
+                num--;
+
+            // Save current include depth.
+            ((PreIncludeDirective*)il)->depth (num);
+
+            // If the number of files included is higher than a maximal
+            // count of maxIncludeDepth we should report an error and 
+            // ignore the file to include.
+            if (num >= state->maxIncludeDepth) {
+                *err << ((PreTreeToken*) i)->token ()->location ()
+                     << sev_error << "Include recursion too deep ("
+                     << num << ")" << endMessage; 
+            }
+
+            // Include the given file.
+            else 
+            {        // Update the predefined macros.
+                updatePredefined ();
+
+                // Include the file and add a daughter node with a 
+                // reference to that file to the syntax tree.
+                char* str = buildString (tl);
+                Unit* unit = 0;
+                bool guarded = false;
+
+                const char *txt = ((PreTreeToken*)i)->token ()->text ();
+
+                // compare last character of directive token to decide
+                // whether this is an #include or #import directive
+                if (txt && txt[strlen (txt)-1] == 't') {
+                  // call the import handler with the arguments
+                  // given at the #import line
+                  ImportHandler ih (*parser, str);
+                  unit = ih.IncludeFile ();
+                // do an ordinary #include
+                } else {
+                  unit = parser->fileIncluder ()->includeFile (str);
+                  guarded = parser->fileIncluder ()->guarded ();
+                }
+
+                il->add_daughter (new PreInclSemNode (unit, guarded));
+                delete[] str;
+            }
+        }
+    }
+
+/***********************************************************************/
+/*                            include_next_line                        */
+/***********************************************************************/
+
+include_next_line(inl) ::= TOK_PRE_INCLUDE_NEXT(in) token_list(tl).
+    {
+        inl = new PreIncludeDirective (in, tl);
+
+        if (! state->errorDirective && state->passOnToken) 
+        { 
+            // Calculate the number of files included.
+            int num = state->getIncludeLevel ((TokenStream*)(parser->scanner ()));
+
+            // Save current include depth.
+            ((PreIncludeDirective*)inl)->depth (num);
+
+            // If the number of files included is higher than a maximal
+            // count of maxIncludeDepth we should report an error and 
+            // ignore the file to include.
+            if (num >= state->maxIncludeDepth) {
+                *err << ((PreTreeToken*) in)->token ()->location ()
+                     << sev_error << "Include recursion too deep ("
+                     << num << ")" << endMessage; 
+            } 
+
+            // Include the next file with the given filename.
+            else 
+            {   // Update the predefined macros.
+                updatePredefined ();
+
+                // Include the next file and add a daughter node with
+                // a reference to that file to the syntax tree.
+                char* str = buildString (tl);
+                Unit *unit = parser->fileIncluder ()->includeNextFile (str);
+                bool guarded = parser->fileIncluder ()->guarded ();
+                inl->add_daughter (new PreInclSemNode (unit, guarded));
+                delete[] str;
+            }
+        }
+    }
+
+/***********************************************************************/
+/*                               assert_line                           */
+/***********************************************************************/
+        
+assert_line(al) ::= TOK_PRE_ASSERT(a) token_list(tl).
+    {
+        al = new PreAssertDirective (a, tl);
+    }
+assert_line(al) ::= TOK_PRE_ASSERT(a) TOK_PRE_ID(id) token_list(tl).
+    {
+        al = new PreAssertDirective (a, id, tl);
+        
+        if (! state->errorDirective && state->passOnToken) 
+        {
+            // Get the answer text.
+            char* str    = buildString (tl);
+            char* answer = evalAnswerString (str, true, *state);
+            delete[] str;
+
+            // If the answer isn't NULL get the name of the predicate.
+            // If the predicate already exists add a new answer to that
+            // predicate otherwise create a new predicate.
+            if (answer) {
+                const char* name = ((PreTreeToken*) id)->token ()->text ();
+                if (PrePredicate* predicate = parser->predicateManager ()->
+                                              getPredicate (name))
+                    predicate->addAnswer (answer);
+                else
+                    parser->predicateManager ()->addPredicate (
+                            new PrePredicate (name, answer));
+                delete[] answer;
+            }
+        }
+    }
+
+/***********************************************************************/
+/*                              unassert_line                          */
+/***********************************************************************/
+        
+unassert_line(ual) ::= TOK_PRE_UNASSERT(ua) token_list(tl).
+    {
+        ual = new PreUnassertDirective (ua, tl);
+    }
+unassert_line(ual) ::= TOK_PRE_UNASSERT(ua) TOK_PRE_ID(id) token_list(tl).
+    {
+        ual = new PreUnassertDirective (ua, id, tl);
+
+        if (! state->errorDirective && state->passOnToken) 
+        {
+            // Get the answer text.
+            char* str    = buildString (tl);
+            char* answer = evalAnswerString (str, false, *state);
+            delete[] str;
+
+            // If the answer string is empty remove the whole predicate.
+            // Otherwise remove the answer for the predicate.
+            if (answer) {
+                const char* name = ((PreTreeToken*) id)->token ()->text ();
+                PrePredicate* predicate = parser->predicateManager ()->
+                                          getPredicate (name);
+                                          
+                if (! strlen (answer)) 
+                    parser->predicateManager ()->removePredicate (name);
+                else if (predicate)
+                    predicate->removeAnswer (answer);
+                    
+                delete[] answer;
+            }
+        }
+    }
+
+/***********************************************************************/
+/*                               define_line                           */
+/***********************************************************************/
+        
+define_line(dl) ::= TOK_PRE_DEFINE(d) token_list(tl).
+    {
+        dl = new PreDefineConstantDirective (d, tl);
+    }
+define_line(dl) ::= TOK_PRE_DEFINE(d) TOK_PRE_ID(fid) TOK_PRE_LPAREN(l) 
+                    TOK_PRE_RPAREN(r) token_list(tl).
+    {
+        dl = new PreDefineFunctionDirective (d, fid, l, r, tl);
+        
+        if (! state->errorDirective && state->passOnToken) 
+        {
+            // Build a new function-like macro without arguments.
+            char*     str   = buildString (tl);
+            PreMacro* macro = new PreMacro (((PreTreeToken*) fid)->
+                              token ()->dtext (), (PreTree*) 0, str);
+            delete[] str;
+            macro->location (((PreTreeToken*) d)->token ()->location ());
+            
+            // Add the macro to the macro manager if its name is a valid
+            // macro name.
+            if (state->checkMacroName (macro)) 
+                parser->macroManager ()->addMacro (macro);
+            else
+                delete macro;
+        }
+    }
+define_line(dl) ::= TOK_PRE_DEFINE(d) TOK_PRE_ID(fid) TOK_PRE_LPAREN(l) 
+                    TOK_PRE_REST(rest) TOK_PRE_RPAREN(r) token_list(tl).
+    {
+        dl = new PreDefineFunctionDirective (d, fid, l, rest, r, tl);
+        
+        if (! state->errorDirective && state->passOnToken) 
+        {
+            // Build a new function-like macro with variable number 
+            // of arguments.
+            char*     str   = buildString (tl);
+            PreMacro* macro = new PreMacro (((PreTreeToken*) fid)->
+                              token ()->dtext (), (PreTree*) 0, str, 
+                              PreMacro::VAR_ARG_MACRO);
+            delete[] str;
+            macro->addArg ("__VA_ARGS__");
+            macro->location (((PreTreeToken*) d)->token ()->location ());
+            
+            // Add the macro to the macro manager if its name is a valid
+            // macro name.
+            if (state->checkMacroName (macro)) 
+                parser->macroManager ()->addMacro (macro);
+            else
+                delete macro;
+        }
+    }
+define_line(dl) ::= TOK_PRE_DEFINE(d) TOK_PRE_ID(fid) TOK_PRE_LPAREN(l) 
+                    identifier_list(il) 
+                    TOK_PRE_RPAREN(r) token_list(tl).
+    {
+        dl = new PreDefineFunctionDirective (d, fid, l, il, r, tl);
+        
+        if (! state->errorDirective && state->passOnToken) 
+        {
+            // Build a new function-like macro with arguments.
+            char*     str   = buildString (tl);
+            PreMacro* macro = new PreMacro (((PreTreeToken*) fid)->
+                              token ()->dtext (), il, str);
+            delete[] str;
+            macro->location (((PreTreeToken*) d)->token ()->location ());
+        
+            // Add the macro to the macro manager if its name is a valid
+            // macro name.
+            if (state->checkMacroName (macro)) 
+                parser->macroManager ()->addMacro (macro);
+            else
+                delete macro;
+        }
+    }
+define_line(dl) ::= TOK_PRE_DEFINE(d) TOK_PRE_ID(fid) TOK_PRE_LPAREN(l) 
+                    identifier_list(il) TOK_PRE_REST(rest)
+                    TOK_PRE_RPAREN(r) token_list(tl).
+    {
+        dl = new PreDefineFunctionDirective (d, fid, l, il, rest, r, tl);
+        
+        if (! state->errorDirective && state->passOnToken) 
+        {
+            // Build a new function-like macro with arguments.
+            char*     str   = buildString (tl);
+            PreMacro* macro = new PreMacro (((PreTreeToken*) fid)->
+                              token ()->dtext (), il, str, 
+                              PreMacro::VAR_ARG_MACRO);
+            delete[] str;
+            macro->location (((PreTreeToken*) d)->token ()->location ());
+                    
+            // Add the macro to the macro manager if its name is a valid
+            // macro name.
+            if (state->checkMacroName (macro)) 
+                parser->macroManager ()->addMacro (macro);
+            else
+                delete macro;
+        }
+    }
+define_line(dl) ::= TOK_PRE_DEFINE(d) TOK_PRE_ID(fid) TOK_PRE_LPAREN(l) 
+                    identifier_list(il) TOK_PRE_COMMA(c) TOK_PRE_REST(rest)
+                    TOK_PRE_RPAREN(r) token_list(tl).
+    {
+        dl = new PreDefineFunctionDirective (d, fid, l, il, c, rest, r, tl);
+        
+        if (! state->errorDirective && state->passOnToken) 
+        {
+            // Build a new function-like macro with arguments.
+            char*     str   = buildString (tl);
+            PreMacro* macro = new PreMacro (((PreTreeToken*) fid)->
+                              token ()->dtext (), il, str, 
+                              PreMacro::VAR_ARG_MACRO);
+            delete[] str;
+            macro->addArg ("__VA_ARGS__");
+            macro->location (((PreTreeToken*) d)->token ()->location ());
+                    
+            // Add the macro to the macro manager if its name is a valid
+            // macro name.
+            if (state->checkMacroName (macro)) 
+                parser->macroManager ()->addMacro (macro);
+            else
+                delete macro;
+        }
+    }
+define_line(dl) ::= TOK_PRE_DEFINE(d) TOK_PRE_ID(id) token_list(tl).
+    {
+        dl = new PreDefineConstantDirective (d, id, tl);
+
+        if (! state->errorDirective && state->passOnToken) 
+        {
+            // Build a new simple macro.
+            char*     str   = buildString (tl);
+            PreMacro* macro = new PreMacro (((PreTreeToken*) id)->
+                              token ()->dtext (), str);
+            delete[] str;
+            macro->location (((PreTreeToken*) d)->token ()->location ());
+            
+            // Add the macro to the macro manager if its name is a valid
+            // macro name.
+            if (state->checkMacroName (macro)) 
+                parser->macroManager ()->addMacro (macro);
+            else
+                delete macro;
+        }
+    }
+
+/***********************************************************************/
+/*                               undef_line                            */
+/***********************************************************************/
+
+undef_line(ul) ::= TOK_PRE_UNDEF(ud) token_list(tl).
+    {
+        ul = new PreUndefDirective (ud, tl);
+    }
+undef_line(ul) ::= TOK_PRE_UNDEF(ud) TOK_PRE_ID(id) token_list(tl).
+    {
+        ul = new PreUndefDirective (ud, id, tl);
+
+        // Remove the macro given by its name from macro manager.
+        if (! state->errorDirective && state->passOnToken) {
+            Token* token = ((PreTreeToken*) id)->token ();;
+            state->removeMacroFromStack (*parser->macroStack (), token->text ());
+            parser->macroManager ()->removeMacro (token->dtext (), token->location ());
+        }
+    }
+
+/***********************************************************************/
+/*                              warning_line                           */
+/***********************************************************************/
+
+warning_line(wl) ::= TOK_PRE_WARNING(w) token_list(tl).
+    {
+        wl = new PreWarningDirective (w, tl);
+        
+        if (! state->errorDirective && state->passOnToken) 
+        {
+            // Print a warning message containing the text given as
+            // argument of the #warning directive.
+            char* message = buildString (tl);
+            *err << ((PreTreeToken*) w)->token ()->location () 
+                 << sev_warning << message << endMessage; 
+            delete[] message;
+        }
+    }
+
+/***********************************************************************/
+/*                               error_line                            */
+/***********************************************************************/
+
+error_line(el) ::= TOK_PRE_ERROR(e) token_list(tl).
+    {
+        el = new PreErrorDirective (e, tl);
+        
+        if (! state->errorDirective && state->passOnToken) 
+        {
+            // Tell the parser to hide all following tokens from
+            // other parsers in chain.
+            state->errorDirective = true;
+            
+            // Print the text given as argument of the #error
+            // directive.
+            char* message = buildString (tl);
+            *err << ((PreTreeToken*) e)->token ()->location () 
+                 << sev_error << message << endMessage; 
+            delete[] message;
+        }
+    }
+
+/***********************************************************************/
+/*                             identifier_list                         */
+/***********************************************************************/
+
+identifier_list(idl) ::= TOK_PRE_ID(id).
+    { 
+        idl = new PreIdentifierList (id);
+    }
+identifier_list(idl) ::= identifier_list(oidl) TOK_PRE_COMMA(c) TOK_PRE_ID(id).
+    {
+        ((PreIdentifierList*) (oidl))->addSons (c, id);
+        idl = oidl;
+    }
+
+/************************************************************************/
+/*     special token_list e.g. with macros that have to be expanded     */
+/************************************************************************/
+
+token_list(tl) ::= TOK_PRE_NEWLINE(nl).
+    { 
+        if (nl->startToken () == state->newline) 
+        {
+            delete nl;
+            tl = new PreTokenList ();
+        } 
+        else
+            tl = nl;  
+    }
+token_list(tl) ::= token_list_part(tlp) TOK_PRE_NEWLINE(nl).
+    { 
+        if (nl->startToken () == state->newline) 
+        {
+            delete nl;
+            tl = new PreTokenList (tlp);
+        }
+        else
+            tl = new PreTokenList (tlp, nl);
+    }
+
+/************************************************************************/
+/*                          token list part                             */
+/************************************************************************/
+
+token_list_part(tlp) ::= TOK_PRE_TOKEN_LIST(ttl).        
+    { 
+        tlp = new PreTokenListPart (ttl); 
+    }
+token_list_part(tlp) ::= token_list_part(tlpo) TOK_PRE_TOKEN_LIST(ttl).        
+    { 
+        tlpo->add_son (ttl);
+        tlp = tlpo; 
+    }

@@ -1,0 +1,18 @@
+CallAccess: call advice for private or protected member fcts
+============================================================
+--- f ---
+  External::prot()
+  Internal::priv()
+--- g ---
+  External::vprot()
+  Internal::vprot()
+  Internal::priv()
+--- x ---
+--- friends ---
+  External::prot()
+  Internal::priv()
+--- problem with static private functions (bug 485)
+  Internal::static_priv()
+  Internal::static_priv()
+  Internal::static_pub()
+============================================================

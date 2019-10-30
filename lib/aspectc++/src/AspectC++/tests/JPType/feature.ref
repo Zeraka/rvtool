@@ -1,0 +1,11 @@
+execution join point int main()
+call join point int printf(const char *,...)
+JPType: checks the JPType number generation
+call join point int printf(const char *,...)
+===========================================
+construction join point C::C()
+call join point void C::f()
+execution join point void C::f()
+call join point int printf(const char *,...)
+===========================================
+destruction join point C::~C()

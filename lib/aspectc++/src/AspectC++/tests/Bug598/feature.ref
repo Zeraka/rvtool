@@ -1,0 +1,5 @@
+Get: char const arr[2]
+Entity type: char type
+Result type: char type
+Res::Type: char type
+Res::ReferredType: char type

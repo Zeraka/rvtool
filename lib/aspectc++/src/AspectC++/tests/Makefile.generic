@@ -1,0 +1,97 @@
+ifeq ($(MAKELEVEL),0)
+$(error Sorry, this makefile is not intended to be \
+used directly. Please use the makefile in the toplevel \
+directory of the ApectC++ source tree instead)
+endif
+
+CXX ?= g++ -O6
+DIFF=diff --strip-trailing-cr
+ACFLAGS += $(ACOPTFLAGS) -k
+
+ifeq ($(filter -r, $(ACFLAGS)),)
+  ACFLAGS += -r repo.acp
+endif
+
+ifneq ($(MAKECMDGOALS),run)
+  ACFLAGS += -v9
+endif
+
+PROG:=feature$(EXT)
+
+SOURCES := $(wildcard *.cc)
+
+ACTEST :=$(shell pwd|sed -e s+/.*/++)
+
+JUNK    := Junk
+OBJECTS := $(addprefix $(JUNK)/,$(patsubst %.cc,%.o,$(SOURCES)))
+DEPS    := $(addprefix $(JUNK)/,$(patsubst %.cc,%.d,$(SOURCES)))
+ACC     := $(patsubst %.cc,%.acc,$(SOURCES))
+HEADERS := $(wildcard *.h)
+ASPECTS := $(wildcard *.ah)
+INCLUDE_LIST := $(patsubst %.ah,-include %.ah,$(ASPECTS))
+
+ifeq ($(WEAVE_ERROR),)
+all: $(PROG)
+else
+all: $(ACC)
+endif
+
+run: all
+	./$(PROG)
+
+check: all
+
+
+SED := $(foreach pat, $(AC_PATTERN_REPLACEMENTS), | sed -e "$(pat)")
+
+diff:  $(PROG)
+	./$(PROG) $(AC_PATTERN_REPLACEMENTS) > $(basename $(PROG)).out
+	@$(DIFF) $(basename $(PROG)).out $(basename $(PROG)).ref
+	@rm $(basename $(PROG)).out
+
+
+diff-only:
+	@cat $(basename $(PROG)).out $(AC_PATTERN_REPLACEMENTS) > $(basename $(PROG)).fil
+	@$(DIFF) $(basename $(PROG)).fil $(basename $(PROG)).ref
+	@rm $(basename $(PROG)).out $(basename $(PROG)).fil
+
+
+ref:   $(PROG)	
+	@./$(PROG) > $(basename $(PROG)).ref
+
+
+feature$(EXT): $(OBJECTS)
+	@echo Linking
+	@$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS)
+
+
+clean:
+	@rm -rf *.o $(JUNK) *.acc feature$(EXT) *~ *.acp
+
+%.acc : %.cc
+	@echo Weaving $<
+ifeq ($(WEAVE_ERROR),)
+	$(AC) $(ACFLAGS) -p . -c $< -o $@ 
+else
+	-$(AC) $(ACFLAGS) -p . -c $< -o $@ 
+endif
+
+$(JUNK)/%.o : %.acc
+	@echo Compiling $<
+	@$(CXX) $(CXXFLAGS) -x c++ -c $< -o $@
+
+$(JUNK)/%.d : %.cc
+	@mkdir -p $(JUNK)
+	@$(CXX) $(CXXFLAGS) -x c++ -MM $(INCLUDE_LIST) $< | \
+        sed -e "s/$*\.o/$(JUNK)\/& $(JUNK)\/$*.d $*.acc/g" > $@
+
+
+ifneq ($(MAKECMDGOALS),clean)
+-include $(DEPS)
+endif
+
+.PHONY: clean all run diff diff-only ref
+
+# don't remove any intermediate files
+.SECONDARY:
+

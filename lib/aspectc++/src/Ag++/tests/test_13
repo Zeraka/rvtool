@@ -1,0 +1,18 @@
+DESC="String including whitespace used with -D option"
+
+main()
+{
+  mkdir -p src/bin
+
+  EXEC="${AGCC} -p src -v1 -o src/bin/test13{EXT} -DFOO=\"foo bar\" src/*.cc"
+  if  ( eval ${EXEC} );then true;
+  else
+    ERR_MSG="Execution failed '${EXEC}'";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+   rm -rf puma.config src/bin
+}

@@ -1,0 +1,38 @@
+DESC="Generate Object File from source file and link it afterwards"
+
+main()
+{
+  mkdir src/bin
+  mkdir src/obj
+
+  OBJ="src/obj/Test03.o"
+  BIN="src/bin/test03${EXT}"
+
+  EXEC="${AGCC} -v2 --path src -c -o ${OBJ} src/Test.cc"
+  if  (${EXEC});then true;else
+    ERR_MSG="Failed executing '${EXEC}'";
+    return 1;
+  fi;
+
+  if [ ! -f ${OBJ} ];then
+    ERR_MSG="Object file '${OBJ}' was not created";
+    return 1;
+  fi;
+
+
+  EXEC="${AGCC} -v2 --path src -o ${BIN} ${OBJ} src/main.cc"
+  if  (${EXEC});then true;else
+    ERR_MSG="Failed executing '${EXEC}";
+  fi
+
+  if [ ! -e ${BIN} ];then
+    ERR_MSG="Executable '${BIN}' was not created";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+  rm -rf src/bin src/obj
+}
+

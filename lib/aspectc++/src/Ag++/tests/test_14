@@ -1,0 +1,19 @@
+DESC="XLinker GCC option"
+
+main()
+{
+  mkdir -p src/bin
+  BIN=src/bin/test14${EXT}
+
+  EXEC="${AGCC} -p src -v1 -o ${BIN} -Xlinker -assert -Xlinker definitions src/*.cc"
+  if  ( ${EXEC} );then true;
+  else
+    ERR_MSG="Execution failed '${EXEC}'";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+   rm -rf puma.config src/bin
+}

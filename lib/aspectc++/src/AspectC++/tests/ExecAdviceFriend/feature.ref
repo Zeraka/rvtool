@@ -1,0 +1,6 @@
+before exec int main()
+ExecAdviceFriend: advice for func declared as a friend only
+===========================================================
+before exec int myfunc(void *,int)
+myfunc() running
+===========================================================

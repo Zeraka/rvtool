@@ -1,0 +1,9 @@
+MacroCall:
+=============================================================
+call to foo() -> before foo() call -> in foo()
+call to bar() -> before bar() execution -> in bar()
+=============================================================
+call to qInitResources_foo() -> in qInitResources_foo
+=============================================================
+call to qInitResources_bar() -> before qInitResources_% call -> in qInitResources_bar
+=============================================================

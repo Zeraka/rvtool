@@ -1,0 +1,20 @@
+DESC="Include paths from original location "
+
+main()
+{
+  mkdir src/bin
+
+  BIN="src/bin/test12{EXT}"
+
+  EXEC="${AGCC} -p src -v1 -o ${BIN} src/*.cc"
+  if  ( ${EXEC} );then true;
+  else
+    ERR_MSG="Execution failed '${EXEC}'";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+  rm -rf puma.config src/bin
+}

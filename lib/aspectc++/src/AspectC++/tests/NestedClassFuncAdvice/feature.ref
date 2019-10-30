@@ -1,0 +1,7 @@
+NestedClassFuncAdvice
+=============================================================
+before void func()
+in func()
+before void Class1::Class2::func1()
+in Class1::Class2::func1()
+=============================================================

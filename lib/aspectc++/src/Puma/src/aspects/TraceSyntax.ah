@@ -1,0 +1,172 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __TraceSyntax_ah__
+#define __TraceSyntax_ah__
+
+#ifndef NDEBUG
+#define __PUMA_TRACING__
+
+#include "Puma/Tracing.h"
+
+
+namespace Puma {
+  class CTree;
+}
+
+
+aspect TraceSyntax : public Puma::Tracing {
+  int skipping;
+  
+  void trace_rule (const char *sig) {
+    char rule[256];
+    while (*sig != ' ') 
+      sig++;
+    sig += 1;
+    while (*sig != ':') 
+      sig++;
+    sig += 2;
+    char *rptr = rule;
+    while (*sig != '(')
+      *rptr++ = *sig++;
+    *rptr = '\0';
+    trace (rule);
+  }
+
+  void trace_rule2 (const char *sig) {
+    char rule[256];
+    while (*sig != ':')
+      sig++;
+    sig += 2;
+    char *rptr = rule;
+    while (*sig != ':')
+      *rptr++ = *sig++;
+    *rptr++ = *sig++;
+    *rptr++ = *sig++;
+    while (*sig != ':')
+      *rptr++ = *sig++;
+    *rptr = '\0';
+    trace (rule);
+  }
+
+public:
+  TraceSyntax () : skipping (0) {}
+
+  // Create instances an define locator function
+  static TraceSyntax* aspectOf () 
+   { return thisJoinPoint->that ()->trace_aspect (); }
+
+  // structural extensions
+  pointcut syntax () = "Puma::Syntax";
+  pointcut parser () = "Puma::Parser";
+
+  advice syntax () : slice class {
+    TraceSyntax __trace;
+  public:
+    TraceSyntax *trace_aspect () { return &__trace; }
+    Puma::TokenProvider *__tp () { return token_provider; }
+  };
+  
+  // add initialization function to Parser
+  advice parser () : slice class {
+  public:
+    void trace (std::ostream &out, bool tokens = false) {
+      syntax->trace_aspect ()->trace (out, tokens);
+    }
+  };
+  
+  // advice code for rules
+  advice call ("bool Puma::%CSyntax::%::parse(...)") :
+      order ("TraceSyntax", !"TraceSyntax");
+
+  advice within (derived (syntax ())) && !within("Puma::%::...::%") &&
+      call ("bool Puma::%CSyntax::%::parse(...)") : around () {
+    trace_rule2 (JoinPoint::signature ());
+    tjp->proceed ();
+    trace (*tjp->result () ? "ACCEPT" : "FAILED", -1);
+  }
+
+  advice within (derived (syntax ()) && ! syntax ()) &&
+   execution ("%::CTree * Puma::%::%()") : before () 
+   { trace_rule (JoinPoint::signature ()); }
+
+  advice within (syntax ()) && args (result, "%::Syntax::State") &&
+  execution ("bool Puma::%::accept(...)") : before (Puma::CTree *result) {
+    trace (result ? "ACCEPT" : "FAILED", -1);
+  }
+
+  advice within (syntax ()) && args (result) &&
+  execution ("% Puma::%::accept(...)") : before (Puma::CTree *result) {
+    trace (result ? "ACCEPT" : "FAILED", -1);
+  }
+
+  advice within (syntax ()) && execution ("% Puma::%::locate_token()") : after ()
+   { if (! skipping) this->trace (thisJoinPoint->that ()->
+                     __tp ()->current (), "INPUT", "INPUT END"); }
+
+  // trace reset operations
+  // because of a problem in AspectC++ or PUMA we cannot expose 'state' here!!! fix me.
+  advice within (syntax ()) && call ("% Puma::TokenProvider::set_state(...)") /* &&
+    args (state) */ : around (/* TokenProvider::State state */) {
+    bool diff = (*tjp->arg<0>() != tjp->target ()->get_state ());
+    tjp->proceed ();
+    if (diff )
+      trace (**tjp->arg<0>(), "RESET", "INPUT END");
+  }
+
+  // tracing for token provider calls within skip functions
+  advice within (syntax ()) && call ("% Puma::TokenProvider::next()") : before ()
+   { if (skipping && trace_mode ())
+       tos () << thisJoinPoint->target ()->current ()->text () << " "; }
+
+  // trace token if required
+  advice within (syntax ()) && execution ("bool Puma::%::parse_token(...)") && 
+   args (tok) : around (int tok)
+   { if (trace_mode () == 2) trace (tok);
+     thisJoinPoint->action ().trigger ();
+     if (trace_mode () == 2)
+       trace (*(bool*)thisJoinPoint->result () ? "ACCEPT" : "FAILED", -1);}
+       
+  // trace consumed tokens
+  advice within (syntax ()) && execution ("bool Puma::%::consume()") : before () {
+    if (trace_mode () == 2) {
+      trace (tjp->that ()->token_provider->current ()->type ());
+      trace ("ACCEPT", -1);
+    }
+  }
+
+  advice within (syntax ()) && execution ("% Puma::%::skip(...)") : around () {
+    skipping++;
+    if (trace_mode ()) tos () << "SKIP: ";
+    thisJoinPoint->action ().trigger ();
+    if (trace_mode ()) tos () << endl;
+    skipping--;
+  }
+
+  advice within (syntax ()) && execution ("% Puma::%::skip_block()") : around () {
+    skipping++;
+    if (trace_mode ()) tos () << "SKIP_BLOCK: ";
+    thisJoinPoint->action ().trigger ();
+    if (trace_mode ()) tos () << endl;
+    skipping--;
+  }
+};
+
+#endif
+
+#endif /* __TraceSyntax_ah__ */

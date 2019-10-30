@@ -1,0 +1,690 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __CCBuilderExtension_ah__
+#define __CCBuilderExtension_ah__
+
+#include "Puma/CCBuilder.h"
+
+namespace Puma {
+
+  slice class CCClassNameBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().simple_name ();
+    }
+  };
+
+  slice class CCEnumNameBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().simple_name ();
+    }
+  };
+
+  slice class CCTemplateNameBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().simple_name ();
+    }
+  };
+
+  slice class CCClassTemplateNameBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().simple_name ();
+    }
+  };
+
+  slice class CCNamespaceNameBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().namespace_name ();
+    }
+  };
+
+  slice class CCOriginalNsNameBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().simple_name ();
+    }
+  };
+
+  slice class CCNamespaceAliasBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().simple_name ();
+    }
+  };
+
+  slice class CCLiteralBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().literal ();
+    }
+  };
+
+  slice class CCPrimExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().prim_expr ();
+    }
+  };
+
+  slice class CCIdExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().id_expr ();
+    }
+  };
+
+  slice class CCQualIdBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().qual_id ();
+    }
+  };
+
+  slice class CCUnqualIdBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().unqual_id ();
+    }
+  };
+
+  slice class CCColonColonBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().get_node ();
+    }
+  };
+
+  slice class CCNestedNameSpecBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().nested_name_spec ();
+    }
+  };
+
+  slice class CCNestedNameSpec1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().nested_name_spec1 ();
+    }
+  };
+
+  slice class CCClassOrNsNameBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().class_or_ns_name ();
+    }
+  };
+
+  slice class CCPostfixExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      // calling this does not make real sense. CCSemantic advice needed!
+      return s.builder().postfix_expr ();
+    }
+  };
+
+  slice class CCPostfixExpr1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().postfix_expr1 ();
+    }
+  };
+
+  slice class CCPostfixExpr2Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().postfix_expr2 ();
+    }
+  };
+
+  slice class CCConstructExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().construct_expr ();
+    }
+  };
+
+  slice class CCPseudoDtorNameBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().pseudo_dtor_name ();
+    }
+  };
+
+  slice class CCUnaryExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().unary_expr ();
+    }
+  };
+
+  slice class CCTypeTraitExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().type_trait_expr ();
+    }
+  };
+
+  slice class CCNewExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().new_expr ();
+    }
+  };
+
+  slice class CCNewPlacementBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().new_placement ();
+    }
+  };
+
+  slice class CCNewTypeIdBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().type_id ();
+    }
+  };
+
+  slice class CCNewDeclaratorBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().abst_declarator ();
+    }
+  };
+
+  slice class CCDirectNewDeclaratorBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().direct_new_declarator ();
+    }
+  };
+
+  slice class CCDirectNewDeclarator1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().direct_new_declarator1 ();
+    }
+  };
+
+  slice class CCNewInitBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().new_init ();
+    }
+  };
+
+  slice class CCDeleteExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().delete_expr ();
+    }
+  };
+
+  slice class CCPmExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().pm_expr ();
+    }
+  };
+
+  slice class CCMulExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().mul_expr ();
+    }
+  };
+
+  slice class CCRelExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().rel_expr ();
+    }
+  };
+
+  slice class CCCondExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().cond_expr ();
+    }
+  };
+
+  slice class CCAssExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().ass_expr ();
+    }
+  };
+
+  slice class CCAssExpr1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().ass_expr1 ();
+    }
+  };
+
+  slice class CCConstExprBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().const_expr ();
+    }
+  };
+
+  slice class CCStmtBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().stmt ();
+    }
+  };
+
+  slice class CCStmtSeqBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().stmt_seq ();
+    }
+  };
+
+  slice class CCSubStmtBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().sub_stmt ();
+    }
+  };
+
+  slice class CCConditionBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().condition ();
+    }
+  };
+
+  slice class CCCondition1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().condition ();
+    }
+  };
+
+  slice class CCCondition2Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().condition ();
+    }
+  };
+
+  slice class CCDeclStmtBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().decl_stmt ();
+    }
+  };
+
+  slice class CCDeclBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().decl ();
+    }
+  };
+
+  slice class CCBlockDeclBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().block_decl ();
+    }
+  };
+
+  slice class CCSimpleDeclBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().simple_decl ();
+    }
+  };
+
+  slice class CCDeclSpecSeq1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().decl_spec_seq1 ();
+    }
+  };
+
+  slice class CCMiscSpecBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().misc_spec ();
+    }
+  };
+
+  slice class CCStorageClassSpecBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().storage_class_spec ();
+    }
+  };
+
+  slice class CCFctSpecBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().fct_spec ();
+    }
+  };
+
+  slice class CCSimpleTypeSpecBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().simple_type_spec ();
+    }
+  };
+
+  slice class CCTypeNameBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().type_name ();
+    }
+  };
+
+  slice class CCElaboratedTypeSpecBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().elaborated_type_spec ();
+    }
+  };
+
+  slice class CCEnumeratorListBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().enumerator_list ();
+    }
+  };
+
+  slice class CCEnumeratorDefBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().enumerator_def ();
+    }
+  };
+
+  slice class CCLinkageSpecBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().linkage_spec ();
+    }
+  };
+
+  slice class CCNamespaceDefBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().namespace_def ();
+    }
+  };
+
+  slice class CCNamedNsDefBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().named_ns_def ();
+    }
+  };
+
+  slice class CCOriginalNsDefBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().orig_namespace_def ();
+    }
+  };
+
+  slice class CCOriginalNsDef1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().orig_namespace_def1 ();
+    }
+  };
+
+  slice class CCExtensionNsDefBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().orig_namespace_def ();
+    }
+  };
+
+  slice class CCExtensionNsDef1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().orig_namespace_def1 ();
+    }
+  };
+
+  slice class CCUnnamedNsDefBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().orig_namespace_def ();
+    }
+  };
+
+  slice class CCUnnamedNsDef1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().orig_namespace_def1 ();
+    }
+  };
+
+  slice class CCNamespaceBodyBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().namespace_body ();
+    }
+  };
+
+  slice class CCNsAliasDefBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().ns_alias_def ();
+    }
+  };
+
+  slice class CCQualNsSpecBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().qual_ns_spec ();
+    }
+  };
+
+  slice class CCUsingDeclBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().using_decl ();
+    }
+  };
+
+  slice class CCUsingDirectiveBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().using_directive ();
+    }
+  };
+
+  slice class CCInitDeclaratorBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().init_declarator ();
+    }
+  };
+
+  slice class CCDirectDeclarator1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().direct_declarator1 ();
+    }
+  };
+
+  slice class CCArrayDelimBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().array_delim ();
+    }
+  };
+
+  slice class CCPtrOperatorBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().ptr_operator ();
+    }
+  };
+
+  slice class CCDeclaratorIdBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().declarator_id ();
+    }
+  };
+
+  slice class CCDirectAbstDeclaratorBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().direct_abst_declarator ();
+    }
+  };
+
+  slice class CCParamDeclClauseBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().param_decl_clause ();
+    }
+  };
+
+  slice class CCClassHeadBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().class_head ();
+    }
+  };
+
+  slice class CCClassHead1Builder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().class_head1 ();
+    }
+  };
+
+  slice class CCConvFctIdBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().conv_fct_id ();
+    }
+  };
+
+  slice class CCConvTypeIdBuilder {
+  public:
+    static CTree *build(Puma::CCSyntax &s) {
+      return s.builder().type_id ();
+    }
+  };
+}
+
+aspect CCBuilderExtension {
+
+  // create the corresponding syntax tree nodes for the rules
+  advice "Puma::CCSyntax::ClassName": slice Puma::CCClassNameBuilder;
+  advice "Puma::CCSyntax::EnumName": slice Puma::CCEnumNameBuilder;
+  advice "Puma::CCSyntax::TemplateName": slice Puma::CCTemplateNameBuilder;
+  advice "Puma::CCSyntax::ClassTemplateName": slice Puma::CCClassTemplateNameBuilder;
+  advice "Puma::CCSyntax::NamespaceName": slice Puma::CCNamespaceNameBuilder;
+  advice "Puma::CCSyntax::OriginalNsName": slice Puma::CCOriginalNsNameBuilder;
+  advice "Puma::CCSyntax::NamespaceAlias": slice Puma::CCNamespaceAliasBuilder;
+  advice "Puma::CCSyntax::Literal": slice Puma::CCLiteralBuilder;
+  advice "Puma::CCSyntax::PrimExpr": slice Puma::CCPrimExprBuilder;
+  advice "Puma::CCSyntax::IdExpr": slice Puma::CCIdExprBuilder;
+  advice "Puma::CCSyntax::QualId": slice Puma::CCQualIdBuilder;
+  advice "Puma::CCSyntax::UnqualId": slice Puma::CCUnqualIdBuilder;
+  advice "Puma::CCSyntax::ColonColon": slice Puma::CCColonColonBuilder;
+  advice "Puma::CCSyntax::NestedNameSpec": slice Puma::CCNestedNameSpecBuilder;
+  advice "Puma::CCSyntax::NestedNameSpec1": slice Puma::CCNestedNameSpec1Builder;
+  advice "Puma::CCSyntax::ClassOrNsName": slice Puma::CCClassOrNsNameBuilder;
+  advice "Puma::CCSyntax::PostfixExpr": slice Puma::CCPostfixExprBuilder;
+  advice "Puma::CCSyntax::PostfixExpr1": slice Puma::CCPostfixExpr1Builder;
+  advice "Puma::CCSyntax::PostfixExpr2": slice Puma::CCPostfixExpr2Builder;
+  advice "Puma::CCSyntax::ConstructExpr": slice Puma::CCConstructExprBuilder;
+  advice "Puma::CCSyntax::PseudoDtorName": slice Puma::CCPseudoDtorNameBuilder;
+  advice "Puma::CCSyntax::UnaryExpr": slice Puma::CCUnaryExprBuilder;
+  advice "Puma::CCSyntax::TypeTraitExpr": slice Puma::CCTypeTraitExprBuilder;
+  advice "Puma::CCSyntax::NewExpr": slice Puma::CCNewExprBuilder;
+  advice "Puma::CCSyntax::NewPlacement": slice Puma::CCNewPlacementBuilder;
+  advice "Puma::CCSyntax::NewTypeId": slice Puma::CCNewTypeIdBuilder;
+  advice "Puma::CCSyntax::NewDeclarator": slice Puma::CCNewDeclaratorBuilder;
+  advice "Puma::CCSyntax::DirectNewDeclarator": slice Puma::CCDirectNewDeclaratorBuilder;
+  advice "Puma::CCSyntax::DirectNewDeclarator1": slice Puma::CCDirectNewDeclarator1Builder;
+  advice "Puma::CCSyntax::NewInit": slice Puma::CCNewInitBuilder;
+  advice "Puma::CCSyntax::DeleteExpr": slice Puma::CCDeleteExprBuilder;
+  advice "Puma::CCSyntax::PmExpr": slice Puma::CCPmExprBuilder;
+  advice "Puma::CCSyntax::MulExpr": slice Puma::CCMulExprBuilder;
+  advice "Puma::CCSyntax::RelExpr": slice Puma::CCRelExprBuilder;
+  advice "Puma::CCSyntax::CondExpr": slice Puma::CCCondExprBuilder;
+  advice "Puma::CCSyntax::AssExpr": slice Puma::CCAssExprBuilder;
+  advice "Puma::CCSyntax::AssExpr1": slice Puma::CCAssExpr1Builder;
+  advice "Puma::CCSyntax::ConstExpr": slice Puma::CCConstExprBuilder;
+  advice "Puma::CCSyntax::Stmt": slice Puma::CCStmtBuilder;
+  advice "Puma::CCSyntax::StmtSeq": slice Puma::CCStmtSeqBuilder;
+  advice "Puma::CCSyntax::SubStmt": slice Puma::CCSubStmtBuilder;
+  advice "Puma::CCSyntax::Condition": slice Puma::CCConditionBuilder;
+  advice "Puma::CCSyntax::Condition1": slice Puma::CCCondition1Builder;
+  advice "Puma::CCSyntax::Condition2": slice Puma::CCCondition2Builder;
+  advice "Puma::CCSyntax::DeclStmt": slice Puma::CCDeclStmtBuilder;
+  advice "Puma::CCSyntax::Decl": slice Puma::CCDeclBuilder;
+  advice "Puma::CCSyntax::BlockDecl": slice Puma::CCBlockDeclBuilder;
+  advice "Puma::CCSyntax::SimpleDecl": slice Puma::CCSimpleDeclBuilder;
+  advice "Puma::CCSyntax::DeclSpecSeq1": slice Puma::CCDeclSpecSeq1Builder;
+  advice "Puma::CCSyntax::MiscSpec": slice Puma::CCMiscSpecBuilder;
+  advice "Puma::CCSyntax::StorageClassSpec": slice Puma::CCStorageClassSpecBuilder;
+  advice "Puma::CCSyntax::FctSpec": slice Puma::CCFctSpecBuilder;
+  advice "Puma::CCSyntax::SimpleTypeSpec": slice Puma::CCSimpleTypeSpecBuilder;
+  advice "Puma::CCSyntax::TypeName": slice Puma::CCTypeNameBuilder;
+  advice "Puma::CCSyntax::ElaboratedTypeSpec": slice Puma::CCElaboratedTypeSpecBuilder;
+  advice "Puma::CCSyntax::EnumeratorList": slice Puma::CCEnumeratorListBuilder;
+  advice "Puma::CCSyntax::EnumeratorDef": slice Puma::CCEnumeratorDefBuilder;
+  advice "Puma::CCSyntax::LinkageSpec": slice Puma::CCLinkageSpecBuilder;
+  advice "Puma::CCSyntax::NamespaceDef": slice Puma::CCNamespaceDefBuilder;
+  advice "Puma::CCSyntax::NamedNsDef": slice Puma::CCNamedNsDefBuilder;
+  advice "Puma::CCSyntax::OriginalNsDef": slice Puma::CCOriginalNsDefBuilder;
+  advice "Puma::CCSyntax::OriginalNsDef1": slice Puma::CCOriginalNsDef1Builder;
+  advice "Puma::CCSyntax::ExtensionNsDef": slice Puma::CCExtensionNsDefBuilder;
+  advice "Puma::CCSyntax::ExtensionNsDef1": slice Puma::CCExtensionNsDef1Builder;
+  advice "Puma::CCSyntax::UnnamedNsDef": slice Puma::CCUnnamedNsDefBuilder;
+  advice "Puma::CCSyntax::UnnamedNsDef1": slice Puma::CCUnnamedNsDef1Builder;
+  advice "Puma::CCSyntax::NamespaceBody": slice Puma::CCNamespaceBodyBuilder;
+  advice "Puma::CCSyntax::NsAliasDef": slice Puma::CCNsAliasDefBuilder;
+  advice "Puma::CCSyntax::QualNsSpec": slice Puma::CCQualNsSpecBuilder;
+  advice "Puma::CCSyntax::UsingDecl": slice Puma::CCUsingDeclBuilder;
+  advice "Puma::CCSyntax::UsingDirective": slice Puma::CCUsingDirectiveBuilder;
+  advice "Puma::CCSyntax::InitDeclarator": slice Puma::CCInitDeclaratorBuilder;
+  advice "Puma::CCSyntax::DirectDeclarator1": slice Puma::CCDirectDeclarator1Builder;
+  advice "Puma::CCSyntax::ArrayDelim": slice Puma::CCArrayDelimBuilder;
+  advice "Puma::CCSyntax::PtrOperator": slice Puma::CCPtrOperatorBuilder;
+  advice "Puma::CCSyntax::DeclaratorId": slice Puma::CCDeclaratorIdBuilder;
+  advice "Puma::CCSyntax::DirectAbstDeclarator": slice Puma::CCDirectAbstDeclaratorBuilder;
+  advice "Puma::CCSyntax::ParamDeclClause": slice Puma::CCParamDeclClauseBuilder;
+  advice "Puma::CCSyntax::ClassHead": slice Puma::CCClassHeadBuilder;
+  advice "Puma::CCSyntax::ClassHead1": slice Puma::CCClassHead1Builder;
+  advice "Puma::CCSyntax::ConvFctId": slice Puma::CCConvFctIdBuilder;
+  advice "Puma::CCSyntax::ConvTypeId": slice Puma::CCConvTypeIdBuilder;
+
+};
+
+#endif /* __CCBuilderExtension_ah__ */

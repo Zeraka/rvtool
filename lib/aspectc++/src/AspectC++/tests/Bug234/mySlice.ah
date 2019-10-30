@@ -1,0 +1,13 @@
+#ifndef __mySlice_ah__
+#define __mySlice_ah__
+
+typedef int (*my_func)(int);
+
+slice class mySlice {
+  my_func a_func;
+public:
+  void set_a_func(my_func b_func) { a_func = b_func; }
+  my_func get_a_func() { return a_func; }
+};
+
+#endif /* __mySlice_ah__ */

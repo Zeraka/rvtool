@@ -1,0 +1,1971 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{a4}
+%--------------------------------------------------------------------
+% PDF related
+%--------------------------------------------------------------------
+\newif\ifmypdf 
+\ifx\pdfoutput\undefined 
+  \mypdffalse                     % we are not running PDFLaTeX 
+\else 
+  \pdfoutput=1                % we are running PDFLaTeX 
+  \mypdftrue 
+\fi
+
+%--------------------------------------------------------------------
+% setup hyperref
+%--------------------------------------------------------------------
+\ifmypdf
+  \usepackage{color}
+  \pagecolor{white}
+  \usepackage{hyperref}  
+  \hypersetup{% 
+    %
+    %% general document information
+    pdftitle          = {AG++ Manual}, 
+    pdfsubject     = {Dokumentation}, 
+    pdfkeywords  = {AOP, AspectC++, ac++, pure-systems,g++}, 
+    pdfauthor      = {Georg Blaschke}, 
+    pdfcreator     = {\LaTeX\ with package \flqq hyperref\frqq},
+    pdfproducer  = {pdfTeX-0.\the\pdftexversion\pdftexrevision},
+    %
+    %% document style
+    colorlinks=true,                  % colored link
+    urlcolor=blue,                    % blue URL links
+    bookmarks=true,                % generate bookmarks
+    bookmarksnumbered=true,  % generate section numbers
+    pdfpagemode=None           % don't open bookmarks
+  } 
+  
+  %% set document creation date to 
+  \pdfinfo {/CreationDate (D:20130925000000)}
+\fi
+
+%--------------------------------------------------------------------
+% create hyperrefs depending on the use of pdflatex
+%--------------------------------------------------------------------
+\newcommand\depref[2]{%
+  \ifmypdf
+    \href{#1}{#2}
+  \else  
+    {#2}
+  \fi
+}
+
+%--------------------------------------------------------------------
+% setup pure-systems style
+%--------------------------------------------------------------------
+%\usepackage{floatflt}
+\usepackage{../styles/acc}
+\version{0.9} 
+\doctype{Documentation:}
+\credit{}
+\otherlogo{
+  \resizebox{4cm}{!}{\includegraphics{../images/ac++logo}}}
+\sloppy
+\remark{}
+
+
+% less than one half space between lines
+\setstretch{1.15}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman times
+\font_sans helvet
+\font_typewriter courier
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing onehalf
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 0
+\use_mhchem 0
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 2
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+
+\emph on
+Ag++  Manual:
+\end_layout
+
+\begin_layout Author
+
+\size largest
+Georg Blaschke
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+clearpage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+\family sans
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Introduction"
+
+\end_inset
+
+
+\family default
+Introduction
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+ag++
+\family default
+ program provides a more intuitive frontend to the AspectC++ weaver (
+\family typewriter
+ac++
+\family default
+) in a GNU environment.
+ The only preliminaries are a working installation of GNU C++ compiler,
+ which also can run within a cygwin environment.
+ It basically wraps the functionality of the aspect weaver and the c++ compiler
+ into one single program.
+ 
+\end_layout
+
+\begin_layout Section
+
+\family sans
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Invocation"
+
+\end_inset
+
+
+\family default
+Invocation
+\end_layout
+
+\begin_layout Standard
+The usage of 
+\family typewriter
+ag++
+\family default
+ is mainly influenced by the usage of the GNU g++ compiler and the synopsis
+ is like:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ag++ [options] [files...]
+\family default
+.
+\begin_inset Newline newline
+\end_inset
+
+Let's say, you want to 
+\series bold
+compile
+\series default
+ a single file (here: 
+\family typewriter
+main.cc
+\family default
+) with 
+\family typewriter
+g++,
+\family default
+ you have to run
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+g++ -c main.cc
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+in order to generate an object file.
+\begin_inset Newline newline
+\end_inset
+
+To 
+\series bold
+weave
+\series default
+ and 
+\series bold
+compile
+\series default
+ a single file you simply invoke
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ag++ -c main.cc
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+the same way like you did before with 
+\family typewriter
+g++
+\family default
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Concept
+\end_layout
+
+\begin_layout Standard
+As 
+\family typewriter
+ag++
+\family default
+ is just a wrapper, it first generates the puma configuration file, then
+ calls 
+\family typewriter
+ac++
+\family default
+ and afterwards 
+\family typewriter
+g++
+\family default
+.
+ The intermediate files generated by 
+\family typewriter
+ac++
+\family default
+ are stored in the directory which is extracted from the 
+\family typewriter
+-o
+\family default
+ option or in current directory.
+ In some cases this may lead to a situation where the names of intermediate
+ files interfere with each other.
+\end_layout
+
+\begin_layout Subsection
+Options
+\end_layout
+
+\begin_layout Standard
+All available options are summed up in the options table (see table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:options"
+
+\end_inset
+
+).
+ The column labeled with 
+\emph on
+AC++
+\emph default
+ shows if the option is taken over from 
+\family typewriter
+ac++
+\family default
+ by 
+\family typewriter
+ag++
+\family default
+ ('X'), not supported by 
+\family typewriter
+ac++
+\family default
+ ('--') or modified by 
+\family typewriter
+ag++
+\family default
+ ('!').
+ All options which are taken over, are not described in this document.
+ Consult the AC++ Compiler Manual instead.
+ Options which are not listed in the option table are accounted as 
+\family typewriter
+g++
+\family default
+ options.
+ Some 
+\family typewriter
+g++
+\family default
+ options can not be automatically handled correctly by the options parser
+ of 
+\family typewriter
+ag++.
+
+\family default
+ So all 
+\family typewriter
+g++
+\family default
+ options starting with 
+\family typewriter
+-p, -a, -d and -r
+\family default
+ (e.g.
+ 
+\family typewriter
+-pipe, -ansi, -dletters ,-remap
+\family default
+ ) have to be written between 
+\family typewriter
+--Xcompiler
+\family default
+ (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:--Xcompiler"
+
+\end_inset
+
+) and 
+\family typewriter
+--Xweaver
+\family default
+ (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:--Xweaver"
+
+\end_inset
+
+).
+ If such options passed to 
+\family typewriter
+ag++
+\family default
+ without using 
+\family typewriter
+--Xcompiler
+\family default
+ they will be interpreted a 
+\family typewriter
+ag++/ac++
+\family default
+ options ; e.g.
+ 
+\family typewriter
+-pipe
+\family default
+ will be interpreted as 
+\family typewriter
+-p 
+\begin_inset Quotes eld
+\end_inset
+
+ipe
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+
+\family typewriter
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="30" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="block" valignment="top" width="8cm">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Option
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+AC++
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--gen_config
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+--
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Only generate Puma configuration file
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--weave_only 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+--
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Weave only
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-c 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+!
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Compile only
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--keep_woven
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+--
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Keep woven source code files
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--c_compiler <arg> 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+--
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Path to C++ compiler
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--ac_compiler <arg> 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+--
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Path to AspectC++ compiler
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--config_command <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+--
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Specify command which prints information about compiler
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--Xcompiler
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+--
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+In case of doupt account following options as 
+\family typewriter
+g++
+\family default
+ options.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--Xweaver
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+--
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+In case of doupt account following options as 
+\family typewriter
+ac++
+\family default
+ options.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-p|--path
+\begin_inset space ~
+\end_inset
+
+<arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+!
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Defines a project directory
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-d|--dest <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Specifies a target directory for saving
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-v|--verbose <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+!
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Level of verbosity (
+\family typewriter
+0
+\family default
+-
+\family typewriter
+9
+\family default
+)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-o|--output <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name of the output file
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--include_files
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Generate manipulated header files (short version 
+\family typewriter
+-i
+\family default
+ is not supported)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-a|--aspect_header <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+!
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Name of aspect header file or
+\family default
+\series default
+\shape default
+\emph default
+\bar default
+ 
+\family typewriter
+\size default
+\noun default
+\color inherit
+0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-r|--repository <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name of the project repository
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--expr <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Pointcut expression to match in repository
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--config <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+!
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parser configuration file
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--no_line
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Disable generation of 
+\family typewriter
+#line
+\family default
+ directives
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-k|--keywords
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Allow AspectC++ keywords in normal project files
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--real-instances
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Let 
+\family typewriter
+ac++
+\family default
+ perform a full template analysis
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--problem...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Enable back-end compiler problem workaround 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--no_problem...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Disable back-end compiler problem workaround
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--warn...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Show a specific 
+\family typewriter
+ac++
+\family default
+ warning that is suppressed by default
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--no_warn...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Suppress a specific 
+\family typewriter
+ac++
+\family default
+ warning
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-I <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Include file search path
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-D <name>[=<value>]
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Macro definitions
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-U <name>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Undefine a macro
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+--include <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Forced include
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:options"
+
+\end_inset
+
+
+\family typewriter
+ag++
+\family default
+ Compiler Option Summary
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--gen_config
+\end_layout
+
+\begin_layout Standard
+Just create a parser configuration and quit afterwards.
+ The argument of the 
+\family typewriter
+-o
+\family default
+ option specifies the name of the file.
+ In any other case (no 
+\family typewriter
+--gen_config
+\family default
+ and/or no 
+\family typewriter
+-o
+\family default
+ option) a configuration file with the name 'puma.config' will be generated
+ in the directory where 
+\family typewriter
+ag++
+\family default
+ was invoked.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--weave_only
+\end_layout
+
+\begin_layout Standard
+Generate only woven source code files.
+ With 
+\family typewriter
+-o
+\family default
+ option and one file the generated output is named after the argument of
+ the 
+\family typewriter
+-o
+\family default
+ option.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--path
+\end_layout
+
+\begin_layout Standard
+This options differs only slightly from the 
+\family typewriter
+--path
+\family default
+ option of 
+\family typewriter
+ac++
+\family default
+.
+ In 
+\family typewriter
+ac++
+\family default
+ it is mandatory to specify a project path, whereby 
+\family typewriter
+ag++
+\family default
+ the current working directory is used as project path by default.
+ Especially for larger projects it is NOT wise to rely on the default project
+ path, as weaving take a lot of time.
+ See the AspectC++ Compiler Manual for a more detailed description of this
+ option.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-c
+\end_layout
+
+\begin_layout Standard
+Like the 
+\family typewriter
+-c
+\family default
+ option of 
+\family typewriter
+g++
+\family default
+, this options effects the creation of object files of one or more source
+ files.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-v|--verbose [<arg>]
+\end_layout
+
+\begin_layout Standard
+Set the level of verbosity.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--aspect-header <arg>
+\end_layout
+
+\begin_layout Standard
+This option differs from meaning in 
+\family typewriter
+ac++
+\family default
+ only if dependencies are generated ( see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Generating-dependency-information"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--keep_woven
+\end_layout
+
+\begin_layout Standard
+Don't remove intermediate woven files.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--c_compiler
+\end_layout
+
+\begin_layout Standard
+Specify path to GNU C++ compiler ̇ The default is 
+\family typewriter
+g++.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--ac_compiler
+\end_layout
+
+\begin_layout Standard
+Specify path to AspectC++ compiler ̇ By default ag++ assumes, that the ac++
+ executable is located in the same directory like itself.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--config_command
+\end_layout
+
+\begin_layout Standard
+Specify the command which prints information about the compiler.
+ This information is necessary for generating the parser (puma) configuration
+ file.
+ The default value is 
+\begin_inset Quotes erd
+\end_inset
+
+
+\family typewriter
+<compiler> <compiler options> -E -dM -v -x c++ <an empty file>
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--config <arg>
+\end_layout
+
+\begin_layout Standard
+Path to a puma configuration file.
+ If this option is available the configuration file will not be generated
+ automatically.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:--Xcompiler"
+
+\end_inset
+
+--Xcompiler
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ac++
+\family default
+ and 
+\family typewriter
+ag++
+\family default
+ options that might interfere with 
+\family typewriter
+g++
+\family default
+ options are not recognized after using 
+\family typewriter
+--Xcompiler
+\family default
+ in the argument list of an 
+\family typewriter
+ag++
+\family default
+ invocation.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:--Xweaver"
+
+\end_inset
+
+--Xweaver
+\end_layout
+
+\begin_layout Standard
+Enable the recognition of those 
+\family typewriter
+ac++
+\family default
+ and 
+\family typewriter
+ag++
+\family default
+ options which previously have been disabled by the usage of --
+\family typewriter
+Xcompiler.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Generating-dependency-information"
+
+\end_inset
+
+Generating dependency information
+\end_layout
+
+\begin_layout Standard
+To produce dependency files just pass the 
+\family typewriter
+-M
+\family default
+ or 
+\family typewriter
+-MM
+\family default
+ (consult the GNU C++ Compiler Manual) to 
+\family typewriter
+ag++
+\family default
+ .
+ Dependency files generated by 
+\family typewriter
+ag++
+\family default
+ are slighty different from dependency files created by 
+\family typewriter
+g++
+\family default
+, as they contain dependencies to aspect header files.
+ If the 
+\family typewriter
+--aspect-header
+\family default
+ option is provided, only the header file specified as option argument is
+ considered when building the dependency file; otherwise the dependency
+ file will contain all aspect header files within the whole project path
+ .
+ 
+\end_layout
+
+\begin_layout Subsection
+Examples
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ag++ --help
+\family default
+ 
+\begin_inset Newline newline
+\end_inset
+
+Displays all options with a short description.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ag++ -o test Test.cc main.cc
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+Weave, compile and link the source files 
+\family typewriter
+Test.cc
+\family default
+ and 
+\family typewriter
+main.cc
+\family default
+.
+ The created executable will be named '
+\family typewriter
+test
+\family default
+'.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ag++ --gen_config
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+Create a puma configuration file named 
+\family typewriter
+puma.config
+\family default
+ within the current working directory.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ag++ --gen_config -o my.config
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+Create a puma configuration file named 
+\family typewriter
+my.config.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ag++ --path src --include_files --dest gen/includes
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+Generate modified include files out of all include files found below 
+\family typewriter
+src
+\family default
+ directory and store them under '
+\family typewriter
+gen/includes
+\family default
+'.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ag++ -M -MFmain.dep main.cc
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+Generate dependency file 
+\family typewriter
+main.dep
+\family default
+ from source file 
+\family typewriter
+main.cc
+\family default
+ .
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ag++ -p ../aspects -p .
+ --Xcompiler
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+This string could be used to substitute 
+\family typewriter
+g++
+\family default
+ in a simple 
+\family typewriter
+make
+\family default
+ environment.
+\end_layout
+
+\end_body
+\end_document

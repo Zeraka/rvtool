@@ -1,0 +1,53 @@
+Construction of T1::T1()
+  memberptr: 0
+  entity:    0
+
+FUNC-ENTITY:
+
+FUNC_NM:
+self: FUNC_NM
+After execution: int FUNC_NM(int,int)
+self: FUNC_NM
+After call: int FUNC_NM(int,int)
+self: FUNC_NM
+After execution: int FUNC_NM(int,int)
+self: FUNC_NM
+
+FUNC_SM (1):
+self: FUNC_SM
+After execution: int T1::FUNC_SM(int,int)
+self: FUNC_SM
+After call: int T1::FUNC_SM(int,int)
+self: FUNC_SM
+After execution: int T1::FUNC_SM(int,int)
+self: FUNC_SM
+
+FUNC_SM (2):
+self: FUNC_SM
+After execution: int T1::FUNC_SM(int,int)
+self: FUNC_SM
+After call: int T1::FUNC_SM(int,int)
+self: FUNC_SM
+After execution: int T1::FUNC_SM(int,int)
+self: FUNC_SM
+
+FUNC_OM:
+self: FUNC_OM
+After execution: int T1::FUNC_OM(int,int)
+self: FUNC_OM
+After call: int T1::FUNC_OM(int,int)
+self: FUNC_OM
+After execution: int T1::FUNC_OM(int,int)
+self: FUNC_OM
+
+FUNC_VM:
+self: FUNC_VM
+After execution: int T1::FUNC_VM(int,int)
+self: FUNC_VM
+After call: int T1::FUNC_VM(int,int)
+self: FUNC_VM
+After execution: int T1::FUNC_VM(int,int)
+self: FUNC_VM
+Destruction of T1::~T1()
+  memberptr: 0
+  entity:    0

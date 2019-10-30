@@ -1,0 +1,23 @@
+#ifndef __Aspect_ah__
+#define __Aspect_ah__
+
+#include <stdio.h>
+#include "Forward.h"
+
+aspect Aspect {
+  pointcut both () = "Forward"||"Backward";
+  advice both () : slice class {
+    int _val;
+  public:
+    void introduced () {
+      _val = 0;
+    }
+  };
+  advice within (both ()) && execution ("% %::introduced()") &&
+    that (fwd) : before (Forward *fwd) {
+    printf ("before %s\n", JoinPoint::signature ());
+    fwd->needed_by_aspect ();
+  }
+};
+
+#endif // __Aspect_ah__

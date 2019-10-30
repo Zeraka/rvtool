@@ -1,0 +1,142 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __WinAsm__
+#define __WinAsm__
+
+/********************************************************/
+/* Win asm support aspect                               */
+/********************************************************/
+
+#include "Puma/WinCTree.h"
+
+
+namespace Puma {
+  class CCSyntax;
+  class CCBuilder;
+}
+
+namespace Puma {
+  slice class WinAsmSyntax;
+  slice class WinAsmBuilder;
+}
+
+aspect WinAsm {
+  /********************************************************/
+  /* Visual C++ asm statement                             */
+  /********************************************************/
+
+  // pointcut definitions
+  pointcut syntax ()  = classes ("Puma::CSyntax");
+  pointcut builder () = classes ("Puma::CBuilder");
+
+  // extend the builder
+  advice builder () : slice Puma::WinAsmBuilder;
+
+  // add rules to the syntax
+  advice syntax () : slice Puma::WinAsmSyntax;
+
+  // let first parse asm_block() and then stmt() if failed
+  advice within (derived (syntax ())) && execution ("% Puma::%::stmt()") : after () {
+    if (!*tjp->result () && tjp->that ()->asm_block ())
+      *tjp->result () = tjp->that ()->builder().stmt ();
+  }
+
+protected:
+  WinAsm () {}
+};
+
+slice class Puma::WinAsmSyntax {
+public:
+  virtual bool asm_block ();
+  Puma::CTree * rule_asm_block ();
+};
+
+slice bool Puma::WinAsmSyntax::asm_block () {
+  return look_ahead (Puma::TOK_ASM) && parse (&WinAsmSyntax::rule_asm_block);
+}
+
+slice Puma::CTree *Puma::WinAsmSyntax::rule_asm_block () {
+  // 3: ASM  {  }
+  consume (); // Puma::TOK_ASM already checked by prediction
+
+  // asm declaration
+  if ((CvQual::check (*this), parse (Puma::TOK_OPEN_ROUND)))
+    return (Puma::CTree*)0;
+  
+  Puma::Token *current, *asm_begin, *asm_end;
+
+  asm_begin = token_provider->current ();
+  asm_end = 0;
+
+  // ASM { ... }
+  if (look_ahead (Puma::TOK_OPEN_CURLY)) {
+    skip_curly_block ();
+    current = token_provider->current ();
+    while ((current = (Puma::Token*)current->belonging_to ()->prev (current)) &&
+           ! current->is_core ());
+    asm_end = current;
+  // ASM ...
+  } else {
+    int token;
+    static int stop_tokens[] = { Puma::TOK_CLOSE_CURLY, Puma::TOK_SEMI_COLON, 0 };
+  
+    while ((current = token_provider->current ())) {
+      token = current->type ();
+
+      if (is_in (token, stop_tokens)) {
+        asm_end = current;
+        break;
+      } else if (asm_begin->location () < current->location ()) {
+        while ((current = (Puma::Token*)current->belonging_to ()->prev (current)) &&
+               ! current->is_core ());
+        asm_end = current;
+        break;
+      }
+
+      if (token == Puma::TOK_OPEN_CURLY)
+        skip_curly_block ();
+      else if (token == Puma::TOK_OPEN_ROUND)
+        skip_round_block ();
+      else {
+        token_provider->next ();
+        locate_token ();
+      }
+    }
+  }
+
+  if (! asm_end)
+    return (Puma::CTree*)0;
+    
+  builder ().Push (builder ().token (asm_begin));
+  builder ().Push (builder ().token (asm_end));
+  return builder ().asm_block ();
+}
+
+slice class Puma::WinAsmBuilder {
+public:
+  virtual Puma::CTree * asm_block ();
+};
+
+slice Puma::CTree * Puma::WinAsmBuilder::asm_block () {
+  // 3: ASM  {  }
+  return new Puma::CT_AsmBlock (get_node (0), get_node (1), get_node (2));
+}
+
+
+#endif /* __WinAsm__ */

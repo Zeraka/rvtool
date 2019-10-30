@@ -1,0 +1,6 @@
+within("A"): void foo() at line 14
+within("A::B"): void foo() at line 14
+within("A::B::C::InC"): void foo() at line 14
+within("A"): void foo() at line 18
+within("A::B"): void foo() at line 18
+within("A::B::C::InC::Inner"): void foo() at line 18

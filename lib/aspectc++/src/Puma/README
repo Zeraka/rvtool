@@ -1,0 +1,78 @@
+PUMA 1.0 - a library for parsing and manipulating C/C++ source code
+Copyright (C) 1999-2008  The PUMA developer team.
+
+This program is free software; you can redistribute it and/or modify 
+it under the terms of the GNU General Public License as published by 
+the Free Software Foundation; either version 2 of the License, or (at 
+your option) any later version.
+                                                                
+This program is distributed in the hope that it will be useful, but 
+WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+General Public License for more details.                   
+                                                                
+You should have received a copy of the GNU General Public License 
+along with this program; if not, write to the Free Software Foundation, 
+Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+
+Roadmap
+=======
+
+  * The COPYING file contains a copy of the GPL described above.
+
+  * See INSTALL for installation details. 
+
+  * ChangeLog describes the changes between the versions of the PUMA 
+    library.
+
+  * Some documentation is located in the `doc' directory.
+  
+  * Examples of how to use PUMA can be found in the `examples' 
+    directory.
+
+  * `src' and `tools' contain all the stuff to build the library.
+  
+  * In the `lib' directory you will find the PUMA library after 
+    building it.  The corresponding header files will be placed in
+    the `include' directory.
+
+
+Description
+===========
+
+PUMA is a library of C++ classes for parsing and manipulating C/C++ 
+source code.  It provides different levels of analyzing source code, 
+i.e. lexical, syntactical, and semantical analyses.  Additionally, 
+PUMA contains its own C preprocessor following the macro language 
+understood by the GNU C preprocessor (cpp).  
+   The parsers for C and C++ are based on an extensible recursive 
+descent parser architecture that can be easily adapted for your own 
+needs by inheriting from one of the parsers.  They are oriented on 
+the ISO/IEC standards defined in ISO/IEC 9899:1999(E) and ISO/IEC 
+14882:1998(E) but also supporting a list of extensions to the C and 
+C++ languages.  The information about the source code being analyzed 
+is organized in an attributed syntax tree referring to a separate 
+structure of semantic information.
+   For the purpose of manipulating source code PUMA provides a syntax
+based mechanism for searching code structures.  Manipulations on the 
+source code can be collected and validated before executing them in a
+single transaction.
+
+
+Limitations
+===========
+
+This version of PUMA is distributed under the terms of the GPL.  
+
+There is also a commercial edition of the PUMA library available, which 
+may be used to develop commercial/proprietary software.  For pricing and 
+availability of the commercial edition, please contact pure-systems GmbH
+at contact@pure-systems.com.
+
+
+Contact
+=======
+
+If you want any information about the AspectC++ project or have any
+comments, feel free to contact the development team via info@aspectc.org.

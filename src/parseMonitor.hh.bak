@@ -1,0 +1,34 @@
+#pragma once
+
+#include "util-base.h"
+/*
+This moudle is used for parse the HOA or dot file and will make a state-table for states.
+
+*/
+
+
+typedef struct fsm_table_t{
+    uint4 event;
+    uint4 current_state;
+    uint4 next_state;
+
+}fsm_table;
+
+typedef struct fsm_t{
+    
+
+}fsm;
+
+
+class ParseMonitorDotFile {
+public:
+    ParseMonitorDotFile();
+    ~ParseMonitorDotFile();
+
+
+private:
+    
+
+}
+
+//解析出之后，就可以将日志的格式给开发我牛逼了

@@ -1,0 +1,9 @@
+Bug368: access control problem with private class
+=================================================
+before call to void C::foo()
+before call to void C::foo()
+before call to void C::foo(C::D *)
+before call to void C::foo(C::D *)
+before call to C::E C::returner()
+before call to C::E C::returner()
+=================================================

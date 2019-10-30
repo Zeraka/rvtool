@@ -1,0 +1,13 @@
+UnknownTypeCheck: dynamic check for an unknown type
+===============================================================
+with advice (invocation on B object):
+--> void A::f()
+A::f() running
+<--
+---------------------------------------------------------------
+without advice (invocation on A object):
+A::f() running
+---------------------------------------------------------------
+without advice (invocation on Unrelated object):
+void Unrelated::f()
+===============================================================

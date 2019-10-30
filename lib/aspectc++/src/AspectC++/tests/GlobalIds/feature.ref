@@ -1,0 +1,4 @@
+GlobalIds: checks whether a JPID is globally unique
+===================================================
+IDs are fine if no other message follows.
+===================================================

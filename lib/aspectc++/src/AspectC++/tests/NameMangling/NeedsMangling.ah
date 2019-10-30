@@ -1,0 +1,12 @@
+#ifndef __NeedsMangling__
+#define __NeedsMangling__
+
+#include <stdio.h>
+
+aspect NeedsMangling {
+  advice call("% func()") : before () {
+    printf ("%s\n", JoinPoint::signature ());
+  }
+};
+
+#endif // __NeedsMangling__

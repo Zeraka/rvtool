@@ -1,0 +1,7 @@
+Bug271: access control problem with privately inherited func
+============================================================
+before void BAR::barMethod()
+before void FOOBAR::fooBarMethod()
+before int MyNS::FOO1::d()
+before int MyNS::FOO2::d()
+============================================================

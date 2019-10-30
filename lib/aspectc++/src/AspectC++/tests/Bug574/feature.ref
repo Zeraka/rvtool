@@ -1,0 +1,2 @@
+bool Cyg_SchedThread::priority_inherited
+int Cyg_SchedThread::original_priority

@@ -1,0 +1,19 @@
+CallPostfixOp: advice for calls to postfix operators
+====================================================
+before A A::operator ++(int)
+inside A A::operator ++(int)
+before A A::operator ++()
+inside A A::operator ++()
+before A A::operator --(int)
+inside A A::operator --(int)
+before A A::operator --()
+inside A A::operator --()
+before int A::operator [](int)
+inside A A::operator [](int)
+before void A::operator ()(int,bool)
+inside A A::operator ()(int,bool=false)
+before void A::operator ()(int,bool)
+inside A A::operator ()(int,bool=false)
+before void A::operator ()(int,bool)
+inside A A::operator ()(int,bool=false)
+====================================================

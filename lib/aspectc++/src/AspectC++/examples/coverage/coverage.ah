@@ -1,0 +1,80 @@
+#ifndef __coverage_ah__
+#define __coverage_ah__
+
+#include <iostream>
+using namespace std;
+
+// Implementation of a generic coveragemonitor that does not only
+// count how often a function is executed, but also which functions
+// are not executed.
+
+
+namespace coveragemonitor {
+  // data structure used to gather information about a joinpoint
+  struct Data {
+    unsigned _calls;
+    const char *(*_sig)();
+  };
+
+  // data structure used to link the joinpoint data elements
+  struct Chain {
+    static Chain *&first () { static Chain *chain = 0; return chain; }
+    Data *_data;
+    Chain *_next;
+    Chain (Data *data) : _data (data) {
+      Chain *head = first ();
+      first () = this;
+      _next = head;
+    }
+  };
+
+  // data structure used to combine data and chain elements 
+  template <const char *(*SIG)()>
+  struct Collector {
+    static Data _data;
+    static Chain _chain;
+  };
+
+  template <const char *(*SIG)()> Data Collector<SIG>::_data = { 0, SIG };
+  template <const char *(*SIG)()> Chain Collector<SIG>::_chain (&_data);
+
+}
+
+
+aspect GenericCoverageAspect {
+  // Do not measure the coverage aspect's own methods
+  pointcut dontMeasure () = "% coveragemonitor::...::%(...)";
+
+  // Specify this joinpoint to define the functions you are
+  // interested in.
+  pointcut virtual coverage() = 0;
+
+  // Whenever one of the functions you are interested in is
+  // executed, save its name and count the number of invocations.
+  advice execution (coverage() && !dontMeasure()) : before() {
+    using namespace coveragemonitor;
+    typedef Collector<&JoinPoint::signature> Collector;
+
+    // As the compiler recognizes the access to the elements of
+    // Collector<JoinPoint::signature> it will create a template instance
+    // for all joinpoints - even for those that will never be
+    // visited.
+    // It is necessary to explicitly mention the _chain element
+    // here otherwise the compiler will not instantiate
+    // any Chain elements.
+    Collector::_chain._data->_calls++;
+  }
+
+  // Print the resulting information.
+  advice execution ("% main(...)") : after () {
+    std::cout << "*** Result of coverage monitoring ***" << std::endl;
+    for (coveragemonitor::Chain *curr = coveragemonitor::Chain::first();
+	 curr; curr = curr->_next) {
+      std::cout << curr->_data->_sig() << " was executed "
+      		<< curr->_data->_calls << " times." << std::endl;
+    }
+  }
+};
+
+
+#endif

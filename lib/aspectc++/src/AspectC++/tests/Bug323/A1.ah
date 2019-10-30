@@ -1,0 +1,15 @@
+#ifndef __A1_ah__
+#define __A1_ah__
+
+#include <stdio.h>
+
+#include "header.h"
+
+aspect A1 {
+    advice execution ("% main(...)") : before () {
+	printf ("A1\n");
+	in_header ();
+    }
+};
+
+#endif

@@ -1,0 +1,134 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __WinIfExists__
+#define __WinIfExists__
+
+/********************************************************/
+/* Win __if_exists and __if_not_exists support aspect   */
+/********************************************************/
+
+#include "Puma/Stack.h"
+#include "Puma/CTokens.h"
+#include "Puma/Token.h"
+
+namespace Puma {
+
+slice class WinIfExistsCpp {
+public:
+  // introduce data member into preprocessor
+  Puma::Stack<unsigned> _depth;
+
+  // skip __if_exists resp. __if_not_exists statement
+  void skip_up_to (int end_token) {
+    unsigned parenthesis = 0, curlies = 0;
+    Puma::Token *token;
+    int type;
+
+    // skip up to the first non-nested `{'
+    while ((token = parseToken ())) {
+      type = token->type ();
+      if (type == Puma::TOK_OPEN_CURLY) {
+        if (parenthesis == 0 && curlies == 0)
+          break;
+        curlies++;
+      } else if (type == Puma::TOK_CLOSE_CURLY)
+        curlies--;
+      else if (type == Puma::TOK_OPEN_ROUND)
+        parenthesis++;
+      else if (type == Puma::TOK_CLOSE_ROUND)
+        parenthesis--;
+    }
+
+    // skip up to the first non-nested `}'
+    if (end_token == Puma::TOK_CLOSE_CURLY) {
+      parenthesis = curlies = 0;
+      while ((token = parseToken ())) {
+        type = token->type ();
+        if (type == Puma::TOK_OPEN_CURLY)
+          curlies++;
+        else if (type == Puma::TOK_CLOSE_CURLY) {
+          if (parenthesis == 0 && curlies == 0)
+            break;
+          curlies--;
+        } else if (type == Puma::TOK_OPEN_ROUND)
+          parenthesis++;
+        else if (type == Puma::TOK_CLOSE_ROUND)
+          parenthesis--;
+      }
+    }
+  }
+};
+
+}
+
+aspect WinIfExists {
+  /********************************************************/
+  /* Win __if_exists and __if_not_exists                  */
+  /********************************************************/
+
+  // pointcut definitions
+  pointcut cpp () = classes ("Puma::PreprocessorParser");
+
+  // structural extensions
+  advice cpp () : slice class Puma::WinIfExistsCpp;
+
+  // preprocess __if_exists and __if_not_exists statements
+  advice execution ("% Puma::PreprocessorParser::next()") : around () {
+    Puma::Token *token;
+    int type;
+    JoinPoint::That *preparser;
+
+    preparser = tjp->that ();
+    tjp->proceed (); // get the next token
+    token = *tjp->result ();
+    if (token) {
+      type = token->type ();
+      // __if_exists (...) { ... }
+      if (type == Puma::TOK_IF_EXISTS) {
+        preparser->skip_up_to (Puma::TOK_CLOSE_CURLY);
+        *(Puma::Token**)thisJoinPoint->result () = preparser->next ();
+        return;
+        // __if_not_exists (...) { ... }
+      } else if (type == Puma::TOK_IF_NOT_EXISTS) {
+        preparser->skip_up_to (Puma::TOK_OPEN_CURLY);
+        preparser->_depth.push (1);
+        *(Puma::Token**)thisJoinPoint->result () = preparser->next ();
+        return;
+      }
+      // skip closing `}' of __if_not_exists
+      if (preparser->_depth.length ()) {
+        if (type == Puma::TOK_OPEN_CURLY) 
+          preparser->_depth.top () = preparser->_depth.top () + 1;
+        else if (type == Puma::TOK_CLOSE_CURLY) { 
+          preparser->_depth.top () = preparser->_depth.top () - 1;
+          if (preparser->_depth.top () == 0) {
+            preparser->_depth.pop ();
+            *(Puma::Token**)thisJoinPoint->result () = preparser->next ();
+            return;
+          }
+        }
+      }
+    }
+  }
+
+protected:
+  WinIfExists () {}
+};
+
+#endif /* __WinIfExists__ */

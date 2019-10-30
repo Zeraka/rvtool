@@ -1,0 +1,17 @@
+DESC="Handle gcc options which only print information"
+
+main()
+{
+
+  # check long option with '=' as separator
+  EXEC="${AGCC} -p src -v2 --Xcompiler -print-libgcc-file-name"
+  if  ( ${EXEC} );then true;else
+    ERR_MSG="Execution failed: '${EXEC}'";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+  true
+}

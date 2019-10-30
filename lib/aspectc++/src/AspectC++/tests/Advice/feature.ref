@@ -1,0 +1,38 @@
+Advice: each function must be wrapped by call and exec advice
+=============================================================
+A: before(call) int A::a(int,float)
+A: before(exec) int A::a(int,float)
+inside A::a(4711, 3.140000)
+A: after(exec) int A::a(int,float)
+A: after(call) int A::a(int,float)
+-------------------------------------------------------------
+A: before(call) void b(char,const char *)
+A: before(exec) void b(char,const char *)
+b(H, ello World)
+A: after(exec) void b(char,const char *)
+A: after(call) void b(char,const char *)
+-------------------------------------------------------------
+A: before(call) int A::c(int,int)
+A: before(exec) int A::c(int,int)
+A::c(4, 5)
+A: after(exec) int A::c(int,int)
+A: after(call) int A::c(int,int)
+-------------------------------------------------------------
+A: before(call) void d(char,const char *)
+A: before(exec) void d(char,const char *)
+d(H, ello World)
+A: after(exec) void d(char,const char *)
+A: after(call) void d(char,const char *)
+-------------------------------------------------------------
+A: before(call) void e()
+A: before(exec) void e()
+e(void)
+A: after(exec) void e()
+A: after(call) void e()
+-------------------------------------------------------------
+A: before(call) void f(int,int)
+A: before(exec) void f(int,int)
+f(1, anon int)
+A: after(exec) void f(int,int)
+A: after(call) void f(int,int)
+=============================================================

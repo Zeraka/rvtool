@@ -1,0 +1,2820 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//
+// This program is free software;  you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 2 of
+// the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this program; if not, write to the Free
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+// MA  02111-1307  USA
+
+#ifndef __ext_gnu_h__
+#define __ext_gnu_h__
+
+#include <string.h>
+#include <float.h>
+#include <list>
+#include <stack>
+
+#include "Puma/GnuCTree.h"
+#include "Puma/CFunctionInfo.h"
+#include "Puma/CLabelInfo.h"
+#include "Puma/CLocalScope.h"
+#include "Puma/CSemVisitor.h"
+#include "Puma/CSemDeclSpecs.h"
+#include "Puma/PreMacro.h"
+#include "Puma/PreMacroManager.h"
+#include "Puma/Config.h"
+#include "Puma/CConstant.h"
+#include "Puma/TokenProvider.h"
+#include "Puma/CLexer.h"
+
+#include "Puma/ExtGnuCSemDeclSpecs.ah"
+#include "Puma/ExtGnuCInfos.ah"
+#include "Puma/ExtGnuCSemantic.ah"
+#include "Puma/ExtGnuCSemExpr.ah"
+
+namespace Puma {
+  class CCSyntax;
+  class CSyntax;
+}
+
+
+namespace Puma {
+  slice class ExtGnuAttributeSyntax;
+  slice class ExtGnuAttributeBuilder;
+  slice class ExtGnuAsmSyntax;
+  slice class ExtGnuAsmBuilder;
+  slice class ExtGnuLocalLabelStmtSyntax;
+  slice class ExtGnuLocalLabelStmtBuilder;
+  slice class ExtGnuTypeofSyntax;
+  slice class ExtGnuTypeofBuilder;
+  slice class ExtGnuTypeofSemantic;
+  slice class ExtGnuTypeofCCSemantic;
+  slice class ExtGnuBuiltinsSemantic;
+  slice class ExtGnuPIC24BuiltinsSemantic;
+  slice class ExtGnuStmtExprsBuilder;
+}
+
+aspect ExtGnu {
+
+  // flags to enable/disable certain Gnu features
+  bool extended_asm;
+  bool extended_cv_qual;
+  bool gnu_builtins;
+  bool std_hack;
+  bool typeof_keyword;
+  bool statement_exprs;
+  bool labels_as_values;
+  bool thread_local_storage_class;
+  bool friend_injection;
+  bool extern_inline;
+  bool pic24;
+  bool local_labels;
+  bool if_then_exprs;
+  bool case_ranges;
+
+  // pointcut definitions
+  pointcut node ()            = "Puma::CT_AsmDef";
+  pointcut syntax ()          = "Puma::CSyntax";
+  pointcut builder ()         = "Puma::CBuilder";
+  pointcut semantic ()        = "Puma::CSemantic";
+  pointcut ccsemantic ()      = "Puma::CCSemantic";
+  pointcut csemdeclspecs ()   = "Puma::CSemDeclSpecs";
+  // TODO: shall we rely on the naming convention "is_%" here?
+  pointcut look_ahead_fcts () = "bool Puma::CSyntax::is_fct_def ()" ||
+                                "bool Puma::CSyntax::is_ass_expr ()" ||
+                                "bool Puma::CCSyntax::is_fct_def ()" ||
+                                "bool Puma::CCSyntax::is_nested_name ()" ||
+                                "bool Puma::CCSyntax::is_class_def ()" ||
+                                "bool Puma::CCSyntax::is_tpl_id ()" ||
+                                "bool Puma::CCSyntax::is_tpl_declarator_id ()" ||
+                                "bool Puma::CCSyntax::is_ptr_to_fct ()" ||
+                                "bool Puma::CCSyntax::is_nested (...)" ||
+                                "bool Puma::CCSyntax::is_ass_expr ()";
+
+
+  // ----------------------------------------------------
+  // the GNU 128-bit integer type
+  // ----------------------------------------------------
+
+  advice within (derived (syntax ())) &&
+         execution ("% Puma::%::init_prim_types()") : after () {
+    tjp->that ()->_prim_types.set (Puma::TOK_INT128);
+  }
+
+  // ----------------------------------------------------
+  // the GNU extension keyword
+  // ----------------------------------------------------
+
+  // a helper function to collect extension keywords
+  template <typename Syntax>
+  void collect_extension_keywords (Syntax &s, std::list<Puma::CTree *> &nodes) {
+    while (s.parse (Puma::TOK_EXTENSION)) {
+      nodes.push_back (s.builder ().Top ());
+      s.builder ().Pop ();
+    }
+  }
+
+  // extended declarations and unary expressions => __extension__ before
+  advice call("bool Puma::CSyntax::BlockDecl::check (...)" ||
+              "bool Puma::CCSyntax::BlockDecl::check (...)"  ||
+              "bool Puma::CSyntax::ForInitStmt::check (...)" ||
+              "bool Puma::CCSyntax::NamespaceDef::check (...)" ||
+              "bool Puma::CCSyntax::LinkageSpec::check (...)") : around () {
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    typedef Puma::CTree::CTreeList TL;
+    TL temp_prefix;
+    Puma::TokenProvider::State state = s.token_provider->get_state ();
+    collect_extension_keywords (s, temp_prefix);
+    tjp->proceed ();
+    bool discard = true;
+    if (*tjp->result ()) {
+      Puma::CTree *node = s.builder().Top();
+      Puma::CTree::CTreeList *prefix = node->gnu_prefix ();
+      if (prefix) {
+        // copy the collected attributes as prefix into the
+        for (TL::iterator i = temp_prefix.begin (); i != temp_prefix.end (); ++i)
+          prefix->push_back (*i);
+        discard = false;
+      }
+      else if (temp_prefix.size () > 0)
+        std::cout << "no prefix memory on " << node->NodeName () << std::endl;
+    }
+    else
+      s.token_provider->set_state (state);
+    if (discard) {
+      for (TL::iterator i = temp_prefix.begin (); i != temp_prefix.end (); ++i)
+        s.builder ().destroy (*i);
+    }
+  }
+
+  // extended unary expressions => __extension__ before
+  advice call("bool Puma::CSyntax::UnaryExpr::check (...)" ||
+              "bool Puma::CCSyntax::UnaryExpr::check (...)") : around () {
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    typedef Puma::CTree::CTreeList TL;
+    TL temp_prefix;
+    Puma::TokenProvider::State state = s.token_provider->get_state ();
+    collect_extension_keywords (s, temp_prefix);
+    if (temp_prefix.size () > 0)
+      *tjp->result () = s.cast_expr ();
+    else
+      tjp->proceed ();
+    bool discard = true;
+    if (*tjp->result ()) {
+      Puma::CTree *node = s.builder().Top();
+      Puma::CTree::CTreeList *prefix = node->gnu_prefix ();
+      if (prefix) {
+        // copy the collected attributes as prefix into the
+        for (TL::iterator i = temp_prefix.begin (); i != temp_prefix.end (); ++i)
+          prefix->push_back (*i);
+        discard = false;
+      }
+      else if (temp_prefix.size () > 0)
+        std::cout << "no prefix memory on " << node->NodeName () << std::endl;
+    }
+    else
+      s.token_provider->set_state (state);
+    if (discard) {
+      for (TL::iterator i = temp_prefix.begin (); i != temp_prefix.end (); ++i)
+        s.builder ().destroy (*i);
+    }
+  }
+
+  // TODO: old-style syntax rule scheme => merge with code above
+  advice execution("% Puma::CSyntax::rule_member_decl ()" ||
+                   "% Puma::CCSyntax::rule_member_decl ()" ||
+                   "% Puma::CSyntax::fct_def ()" ||
+                   "% Puma::CCSyntax::fct_def ()" ||
+                   "% Puma::CCSyntax::explicit_specialization ()" ||
+                   "% Puma::CCSyntax::template_decl ()" ||
+                   "% Puma::CCSyntax::member_template_decl ()" ||
+                   "% Puma::CCSyntax::explicit_instantiation ()") : around () {
+    JoinPoint::That &s = *tjp->that();
+    Puma::TokenProvider::State state = s.token_provider->get_state ();
+    typedef Puma::CTree::CTreeList TL;
+    TL temp_prefix;
+    collect_extension_keywords (s, temp_prefix);
+    tjp->proceed ();
+    bool discard = true;
+    if (*tjp->result ()) {
+      Puma::CTree *node = s.builder().Top();
+      Puma::CTree::CTreeList *prefix = node->gnu_prefix ();
+      if (prefix) {
+        // copy the collected attributes as prefix into the
+        for (TL::iterator i = temp_prefix.begin (); i != temp_prefix.end (); ++i)
+          prefix->push_back (*i);
+        discard = false;
+      }
+      else if (temp_prefix.size () > 0)
+        std::cout << "no prefix memory on " << node->NodeName () << std::endl;
+    }
+    else
+      s.token_provider->set_state (state);
+    if (discard) {
+      for (TL::iterator i = temp_prefix.begin (); i != temp_prefix.end (); ++i)
+        s.builder ().destroy (*i);
+    }
+  }
+
+  // let lookahead functions in the syntax classes igore extension keywords
+  advice call("Puma::Token *Puma::TokenProvider::current() const") &&
+         within(look_ahead_fcts ()): after () {
+    while (*tjp->result () && (*tjp->result ())->type () == Puma::TOK_EXTENSION) {
+      tjp->that ()->skip ();
+      *tjp->result () = tjp->target ()->current ();
+    }
+  }
+
+  // ----------------------------------------------------
+  // the GNU attribute syntax
+  // ----------------------------------------------------
+
+  // structural extensions
+  advice syntax ()     : slice Puma::ExtGnuAttributeSyntax;
+  advice builder ()    : slice Puma::ExtGnuAttributeBuilder;
+
+  // temporary store for collected attributes in infix nodes
+  std::list<Puma::CTree *> infix;
+
+  // a helper function to collect attributes
+  template <typename Syntax>
+  void collect_attributes (Syntax &s, std::list<Puma::CTree *> &nodes,
+                           bool asm_allowed = false) {
+    if (asm_allowed && s.gnu_asm_spec ()) {
+      nodes.push_back (s.builder ().Top ());
+      s.builder ().Pop ();
+    }
+    while (s.look_ahead (Puma::TOK_ATTRIBUTE)) {
+      s.catch_gnu_attribute();
+      nodes.push_back (s.builder ().Top ());
+      s.builder ().Pop ();
+    }
+  }
+
+  // extended init declarator syntax
+  advice call ("bool Puma::CSyntax::InitDeclarator1::check (...)") : after () {
+    if (!*tjp->result ())
+      return;
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    Puma::CTree *node = s.builder().Top();
+    Puma::CTree::CTreeList *infix = node->gnu_infix ();
+    if (!infix) {
+      std::cout << "no suffix memory on " << node->NodeName () << std::endl;
+      return;
+    }
+    collect_attributes (s, *infix, extended_asm);
+  }
+
+  // attributes in member declarator
+  // TODO: old-style rule matched
+  advice call("bool Puma::CSyntax::Declarator::check (...)") &&
+         within("Puma::CTree *Puma::CCSyntax::rule_member_declarator (...)" ||
+                "Puma::CTree *Puma::CSyntax::rule_member_declarator (...)"): after () {
+    JoinPoint::That &s = *tjp->that();
+    collect_attributes (s, infix, extended_asm);
+  }
+
+  advice execution("Puma::CTree *Puma::CCSyntax::rule_member_declarator (...)" ||
+                   "Puma::CTree *Puma::CSyntax::rule_member_declarator (...)") : after () {
+    typedef Puma::CTree::CTreeList TL;
+    JoinPoint::That &s = *tjp->that();
+    if (*tjp->result ()) {
+      if ((*tjp->result ())->gnu_infix ()) {
+        // attach the attribute nodes
+        for (TL::iterator i = infix.begin (); i != infix.end (); ++i) {
+          (*tjp->result ())->gnu_infix ()->push_back (*i);
+        }
+      }
+    }
+    else {
+      for (TL::iterator i = infix.begin (); i != infix.end (); ++i)
+        s.builder ().destroy (*i);
+    }
+    infix.clear ();
+  }
+
+  // extended declarator in C++ condition
+  advice call("bool Puma::CSyntax::Declarator::check (...)") &&
+         within("bool Puma::CCSyntax::Condition1::parse (...)"): after () {
+    if (*tjp->result ()) {
+      JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+      collect_attributes (s, infix);
+    }
+  }
+
+  advice call("bool Puma::CCSyntax::Condition1::check (...)") : after () {
+    typedef Puma::CTree::CTreeList TL;
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    if (*tjp->result ()) {
+      Puma::CTree *node = s.builder().Top();
+      if (node->gnu_infix ()) {
+        // attach the attribute nodes
+        for (TL::iterator i = infix.begin (); i != infix.end (); ++i) {
+          node->gnu_infix ()->push_back (*i);
+        }
+      }
+    }    
+    else {
+      for (TL::iterator i = infix.begin (); i != infix.end (); ++i)
+        s.builder ().destroy (*i);
+    }
+    infix.clear ();
+  }
+
+  // extended elaborated type specifiers
+  
+  // extended namespace definitions
+  // extended declaration specifier sequences => attributes after
+  //  - attributes in front will be attached to the first specifier in the list
+  // extended enum specifiers: "(enum ... { ... } __attribute((foo))"
+  advice (call("bool Puma::CSyntax::Identifier::check (...)") &&
+		      within("bool Puma::CCSyntax::OriginalNsDef1::parse (...)")) ||
+         (call("bool Puma::CCSyntax::OriginalNsName::check (...)") &&
+          within("bool Puma::CCSyntax::ExtensionNsDef1::parse (...)")) ||
+         (call("bool Puma::CSyntax::PrivateName::check (...)") &&
+          within("bool Puma::CCSyntax::UnnamedNsDef1::parse (...)")) ||
+         call("bool Puma::CSyntax::DeclSpecSeq::check (...)") ||
+         call("bool Puma::CSyntax::EnumSpec::check (...)") : after () {
+    if (!*tjp->result ())
+      return;
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    Puma::CTree *node = s.builder().Top();
+    Puma::CTree::CTreeList *suffix = node->gnu_suffix ();
+    if (!suffix) {
+      std::cout << "no suffix memory on " << node->NodeName () << std::endl;
+      return;
+    }
+    collect_attributes (s, *suffix);
+  }
+
+  // attributes after "enum", "class", "struct", or "union"
+  // extended using directives: "using namespace Foo __attribute__((strong));"
+  advice (call("bool Puma::CSyntax::ClassKey::check (...)" ||
+               "bool Puma::CSyntax::EnumKey::check (...)") &&
+          within("bool Puma::CSyntax::EnumSpec1::parse (...)" ||
+                 "bool Puma::CSyntax::ElaboratedTypeSpec::parse (...)" ||
+                 "bool Puma::CCSyntax::ElaboratedTypeSpec::parse (...)" ||
+                 "bool Puma::CSyntax::ClassHead::parse (...)" ||
+                 "bool Puma::CCSyntax::ClassHead1::parse (...)")) ||
+         (call("bool Puma::CCSyntax::NamespaceName::check (...)") &&
+          within("bool Puma::CCSyntax::UsingDirective::parse (...)")) : after () {
+    if (*tjp->result ()) {
+      JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+      collect_attributes (s, infix);
+    }
+  }
+
+  advice call("bool Puma::CSyntax::EnumSpec1::check (...)" ||
+              "bool Puma::CSyntax::ElaboratedTypeSpec::check (...)" ||
+              "bool Puma::CCSyntax::ElaboratedTypeSpec::check (...)" ||
+              "bool Puma::CSyntax::ClassHead::check (...)" ||
+              "bool Puma::CCSyntax::ClassHead1::check (...)" ||
+              "bool Puma::CCSyntax::UsingDirective::check (...)") : after () {
+    typedef Puma::CTree::CTreeList TL;
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    bool discard = true;
+    if (*tjp->result () && infix.size () > 0) {
+      if (s.builder ().Top()->gnu_infix ()) {
+        // attach the attribute nodes
+        for (TL::iterator i = infix.begin (); i != infix.end (); ++i)
+          ((Puma::CT_EnumDef*)s.builder ().Top())->gnu_infix ()->push_back (*i);
+        discard = false;
+      }
+      else {
+        std::cout << "no prefix memory on " << s.builder ().Top()->NodeName () << std::endl;
+      }
+    }
+    if (discard) {
+      for (TL::iterator i = infix.begin (); i != infix.end (); ++i)
+        s.builder ().destroy (*i);
+    }
+    infix.clear ();
+  }
+
+  // extended declaration specifiers => attributes before
+  // extended conversion type ids => attributes before
+  // extended direct declarator => attributes before
+  advice call("bool Puma::CSyntax::DeclSpec::check (...)" ||
+              "bool Puma::CSyntax::DirectDeclarator::check (...)" ||
+              "bool Puma::CCSyntax::ConvTypeId::check (...)") : around () {
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    typedef Puma::CTree::CTreeList TL;
+    TL temp_prefix;
+    collect_attributes (s, temp_prefix);
+    tjp->proceed ();
+    bool discard = true;
+    if (*tjp->result ()) {
+      Puma::CTree *node = s.builder().Top();
+      Puma::CTree::CTreeList *prefix = node->gnu_prefix ();
+      if (prefix) {
+        // copy the collected attributes as prefix into the
+        for (TL::iterator i = temp_prefix.begin (); i != temp_prefix.end (); ++i)
+          prefix->push_back (*i);
+        discard = false;
+      }
+      else {
+        std::cout << "no prefix memory on " << node->NodeName () << std::endl;
+      }
+    }
+    if (discard) {
+      for (TL::iterator i = temp_prefix.begin (); i != temp_prefix.end (); ++i)
+        s.builder ().destroy (*i);
+    }
+  }
+
+  // extended parameter declarations
+  advice call("bool Puma::CSyntax::ParamDecl1::check (...)") : after () {
+    if (!*tjp->result ())
+      return;
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    Puma::CTree *node = ((Puma::CT_ArgDecl*)s.builder().Top())->Declarator ();
+    Puma::CTree::CTreeList *suffix = node->gnu_suffix ();
+    if (!suffix) {
+      std::cout << "no suffix memory on " << node->NodeName () << std::endl;
+      return;
+    }
+    collect_attributes (s, *suffix);
+  }
+
+  // extended labels
+  advice call("bool Puma::CSyntax::Stmt::check (...)") &&
+         within("bool Puma::CSyntax::LabelStmt::parse (...)"): around () {
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    Puma::TokenProvider::State state = s.token_provider->get_state ();
+    typedef Puma::CTree::CTreeList TL;
+    TL temp_infix;
+    if (s.builder ().get_node (0)->IsSimpleName ())
+      collect_attributes (s, temp_infix);
+    bool cplusplus = (s.grammar () == s.GRAMMAR_CPLUSPLUS);
+    bool undo = false;
+    if (cplusplus && !s.look_ahead (Puma::TOK_SEMI_COLON)) {
+      s.token_provider->set_state (state);
+      undo = true;
+    }
+
+    tjp->proceed ();
+
+    if (*tjp->result () && !undo)
+      infix = temp_infix;
+    else
+      undo = true;
+    
+    if (undo) {
+      for (TL::iterator i = temp_infix.begin (); i != temp_infix.end (); ++i)
+         s.builder().destroy (*i);
+      temp_infix.clear ();
+    }
+  }
+
+  advice call("bool Puma::CSyntax::LabelStmt::check (...)") : after () {
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+	  if (!*tjp->result ())
+      return;	    
+	  typedef Puma::CTree::CTreeList TL;
+    if (s.builder ().Top()->gnu_infix ()) {
+      // attach the attribute nodes
+      for (TL::iterator i = infix.begin (); i != infix.end (); ++i)
+        ((Puma::CT_LabelStmt*)s.builder ().Top())->gnu_infix ()->push_back (*i);
+    }
+    else {
+// normal: std::cout << "no infix memory on " << s.builder ().Top ()->NodeName () << std::endl;
+      for (TL::iterator i = infix.begin (); i != infix.end (); ++i)
+         s.builder().destroy (*i);
+    }
+    infix.clear ();
+  }
+
+  // Make sure the print visitor regards this extension
+
+  // handle gnu extension prefixes
+  advice execution("void Puma::CPrintVisitor::pre_visit (...)") && args (tree) :
+    before (Puma::CTree *tree) {
+    Puma::CTree *parent = tree->Parent ();
+    if (!parent)
+      return;
+    typedef Puma::CTree::CTreeList TL;
+    TL *tl = parent->gnu_prefix ();
+    if (tl && parent->Sons () > 0 && parent->Son(0) == tree) {
+      for (TL::iterator i = tl->begin (); i != tl->end (); ++i)
+        tjp->that ()->visit (*i);
+    }
+  }
+  
+  // handle infix and suffix extension
+  advice execution("void Puma::CPrintVisitor::post_visit (...)") && args (tree) :
+    after (Puma::CTree *tree) {
+    Puma::CTree *parent = tree->Parent ();
+    if (!parent)
+      return;
+    typedef Puma::CTree::CTreeList TL;
+    TL *tl = parent->gnu_infix ();
+    if (tl && parent->Sons () > parent->gnu_infix_pos () &&
+        parent->Son(parent->gnu_infix_pos ()) == tree) {
+      for (TL::iterator i = tl->begin (); i != tl->end (); ++i)
+        tjp->that ()->visit (*i);
+    }
+    tl = parent->gnu_suffix ();
+    if (tl && parent->Sons () > 0 && parent->Son(parent->Sons () - 1) == tree) {
+      for (TL::iterator i = tl->begin (); i != tl->end (); ++i)
+        tjp->that ()->visit (*i);
+    }
+  }
+
+  // let lookahead functions in the syntax classes igore attributes
+  advice call("Puma::Token *Puma::TokenProvider::current() const") &&
+         within(look_ahead_fcts ()): after () {
+    while (*tjp->result () && (*tjp->result ())->type () == Puma::TOK_ATTRIBUTE) {
+      tjp->that ()->skip ();
+      tjp->that ()->skip_round_block ();
+      *tjp->result () = tjp->target ()->current ();
+    }
+  }
+
+  // TODO: extend Builder::destroy in order to delete prefix or suffix sub-trees
+
+  // ----------------------------------------------------
+  // the GNU ASM syntax
+  // ----------------------------------------------------
+
+  // structural extensions
+  advice syntax ()     : slice Puma::ExtGnuAsmSyntax;
+  advice builder ()    : slice Puma::ExtGnuAsmBuilder;
+
+  // extended asm statement
+  advice execution ("% Puma::CSyntax::asm_def()") : around () {
+    if (extended_asm)
+      *tjp->result () = tjp->that ()->gnu_asm_def ();
+    else
+      tjp->proceed ();
+  }
+
+  // ----------------------------------------------------
+  // redefinition of 'extern inline' functions
+  // ----------------------------------------------------
+
+  advice execution ("% Puma::CSemantic::isRedefinedFunction(...)") : around () {
+    // if previous function definition is declared 'extern inline'
+    // then it is no error to redefine it
+    Puma::CObjectInfo* fct = *tjp->arg<0>();
+    if (extern_inline && fct->isExtern () && fct->isInline ())
+      *(tjp->result ()) = false;
+    else
+      tjp->proceed ();
+  }
+
+  // ----------------------------------------------------
+  // the 'restrict' keyword
+  // ----------------------------------------------------
+
+  // extended cv qualifier
+  advice execution ("% Puma::CCSyntax::init_cv_quals()") : after () {
+    if (extended_cv_qual)
+      tjp->that ()->_cv_quals.set (Puma::TOK_RESTRICT);
+  }
+
+  // ----------------------------------------------------
+  // PIC24/dsPIC CV-qualifiers
+  // ----------------------------------------------------
+
+  // extended cv qualifier
+  advice execution ("% Puma::CCSyntax::init_cv_quals()" ||
+                    "% Puma::CSyntax::init_cv_quals()") : after () {
+    tjp->that ()->_cv_quals.set (Puma::TOK_PSV);
+    tjp->that ()->_cv_quals.set (Puma::TOK_PMP);
+    tjp->that ()->_cv_quals.set (Puma::TOK_EXTERNAL);
+  }
+
+  // -------------------------
+  // GNU statement expressions
+  // -------------------------
+
+  // pointcut definitions
+  pointcut csemexpr ()  = classes ("Puma::CSemExpr");
+  pointcut ccsemexpr () = classes ("Puma::CCSemExpr");
+
+  // structural extensions
+  advice builder ()   : slice Puma::ExtGnuStmtExprsBuilder;
+  advice csemexpr ()  : slice Puma::ExtGnuStmtExprsCSemExpr;
+  advice ccsemexpr () : slice Puma::ExtGnuStmtExprsCCSemExpr;
+
+  // extended primary expression syntax
+  advice execution ("bool Puma::CSyntax::PrimExpr::parse(...)") : around () {
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    if (statement_exprs &&
+        s.look_ahead (Puma::TOK_OPEN_ROUND) &&
+        s.look_ahead (Puma::TOK_OPEN_CURLY, 2)) {
+      s.consume ();
+      *tjp->result () = (s.cmpd_stmt () && s.parse (Puma::TOK_CLOSE_ROUND));
+    }
+    else
+      tjp->proceed ();
+  }
+
+  // extended primary expression syntax
+  advice within (derived (builder ())) &&
+    execution ("% ...::prim_expr(...)") : around () {
+    if (statement_exprs && tjp->that ()->nodes () == 3 &&
+        tjp->that ()->get_node (1)->NodeName () == Puma::CT_CmpdStmt::NodeId ())
+      *tjp->result () = tjp->that ()->gnu_statement_expr ();
+    else
+      tjp->proceed ();
+  }
+  
+  // ------------------------------------
+  // support for "local labels" extension
+  // ------------------------------------
+
+  // structural extensions
+  advice syntax ()              : slice Puma::ExtGnuLocalLabelStmtSyntax;
+  advice builder ()             : slice Puma::ExtGnuLocalLabelStmtBuilder;
+  advice semantic ()            : slice Puma::ExtGnuLocalLabelStmtSemantic;
+  advice "Puma::CFunctionInfo"  : slice Puma::ExtGnuLocalLabelStmtInfo;
+  advice "Puma::CLabelInfo"     : slice Puma::ExtGnuLocalLabelInfo;
+
+  // extended syntax: "__label__ l1, l2;" -> allowed at beginning of compound statements
+  advice execution ("bool Puma::CSyntax::StmtSeq::parse(...)") ||
+         execution ("bool Puma::CCSyntax::StmtSeq::parse(...)") : before () {
+    if (local_labels) {
+      JoinPoint::template Arg<0>::ReferredType &syntax = *tjp->arg<0>();
+      while (syntax.look_ahead (Puma::TOK_LABEL)) {
+        syntax.gnu_local_label_stmt ();
+      }
+    }
+  }
+
+  // semantic extension
+  advice execution("% Puma::CSyntax::GnuLocalLabelStmt::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_local_label();
+  }
+
+  advice execution("% Puma::CFunctionInfo::removeLabel (const Puma::CLabelInfo *)") : around () {
+    const Puma::CLabelInfo *info = *tjp->arg<0>();
+    if (info->LocalScope ())
+      tjp->that ()->unregisterLocalLabel (info->Name ().c_str (), info->LocalScope ());
+    else
+      tjp->proceed ();
+  }
+
+  advice execution("void Puma::CSemantic::introduce_label(Puma::CTree *&)") : around () {
+    if (!tjp->that ()->gnu_introduce_label (*tjp->arg<0>()))
+      tjp->proceed ();
+  }
+
+  advice call("% Puma::CFunctionInfo::Label(const char *)") &&
+      within("void ...::%CSemVisitor::check_goto_label(Puma::CTree*)" ||
+             "% ...::%CSemExpr::resolveLabelAddr(...)") : around () {
+    *tjp->result () = tjp->target ()->findLocalLabel (*tjp->arg<0>(), tjp->that ()->current_scope, true);
+    if (*tjp->result ()) {
+      if (!(*tjp->result ())->Tree ()) // only *defined* (not only declared) local labels can be used!
+        *tjp->result () = 0;
+    }
+    else
+      tjp->proceed ();
+  }
+
+  // ----------------------------------------
+  // support for "labels as values" extension
+  // ----------------------------------------
+
+  // extended goto syntax
+  advice execution ("bool Puma::CSyntax::JumpStmt::parse(...)") ||
+         execution ("bool Puma::CCSyntax::JumpStmt::parse(...)") : around () {
+    JoinPoint::template Arg<0>::ReferredType &syntax = *tjp->arg<0>();
+    if (labels_as_values &&
+        syntax.look_ahead (Puma::TOK_GOTO) &&
+        syntax.look_ahead (Puma::TOK_MUL, 2)) {
+      syntax.consume (); // skip the 'goto' keyword
+      *tjp->result () = (syntax.expr () &&
+                         syntax.parse (Puma::TOK_SEMI_COLON));
+    }
+    else
+      tjp->proceed ();
+  }
+
+  // the address of a label
+  advice execution ("bool Puma::CSyntax::UnaryExpr::parse(...)") ||
+         execution ("bool Puma::CCSyntax::UnaryExpr::parse(...)") : around () {
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    if (labels_as_values && s.look_ahead (Puma::TOK_AND_AND)) {
+      s.consume (); // consume the '&&' token, already checked
+      *tjp->result () = s.identifier ();
+    }
+    else
+      tjp->proceed ();
+  }
+
+  advice within (derived (builder ())) &&
+    execution ("% ...::unary_expr()") : around () {
+    if (labels_as_values && tjp->that ()->nodes () == 2 &&
+        tjp->that ()->get_node (0)->NodeName () == Puma::CT_Token::NodeId () &&
+        tjp->that ()->get_node (0)->token ()->type () == Puma::TOK_AND_AND) {
+      *tjp->result () = new Puma::CT_UnaryExpr (tjp->that ()->get_node (0),
+          tjp->that ()->get_node (1));
+    }
+    else
+      tjp->proceed ();
+  }
+
+  // extended semantic analysis
+  advice within ("Puma::%CSemVisitor") &&
+    execution ("% ...::check_goto_label(...)") &&
+    args (tree) : around (Puma::CTree *tree) {
+    if (tree->NodeName () == Puma::CT_SimpleName::NodeId ())
+      tjp->proceed ();
+    else if (tree->NodeName () == Puma::CT_DerefExpr::NodeId ())
+      tjp->that ()->resolveExpr (((Puma::CT_DerefExpr*)tree)->Expr (), tree);
+  }
+
+  // label address has type void*
+  advice within ("Puma::%CSemExpr") &&
+    execution ("% ...::resolve(Puma::CT_UnaryExpr *, Puma::CTree *)") : around () {
+      int oper = (*tjp->arg<0>())->token ()->type ();
+      if (oper == Puma::TOK_AND_AND && tjp->that ()->current_scope->LocalScope ()) {
+        *tjp->result () = tjp->that ()->resolveLabelAddr (*tjp->arg<0>());
+      }
+      else
+        tjp->proceed ();
+  }
+
+  // ----------------------------------------
+  // Thread-local storage class (TLS) support
+  // ----------------------------------------
+
+  // extend storage class specifiers
+  advice within (derived (syntax ())) &&
+         execution ("% Puma::%::init_storage_class_spec()") : after () {
+    if (thread_local_storage_class)
+      tjp->that ()->_storage_class_spec_1.set (Puma::TOK_THREAD);
+  }
+
+  advice execution ("% Puma::CSyntax::StorageClassSpec::parse(...)") : after () {
+    JoinPoint::template Arg<0>::ReferredType &syntax = *tjp->arg<0>();
+    bool &result = *tjp->result ();
+    if (typeof_keyword && !result)
+      result = syntax.parse (Puma::TOK_THREAD);
+  }
+
+  // ----------------------
+  // TYPEOF keyword support
+  // ----------------------
+
+  // structural extensions
+  advice syntax ()     : slice Puma::ExtGnuTypeofSyntax;
+  advice builder ()    : slice Puma::ExtGnuTypeofBuilder;
+  advice semantic ()   : slice Puma::ExtGnuTypeofSemantic;
+  advice ccsemantic () : slice Puma::ExtGnuTypeofCCSemantic;
+
+  // introduce new state into CSemDeclSpecs
+  advice csemdeclspecs () : slice Puma::ExtGnuCSemDeclSpecs;
+
+  // syntax extension
+  advice within (derived (syntax ())) &&
+         execution ("% Puma::%::init_simple_type_spec()") : after () {
+    if (typeof_keyword)
+      tjp->that ()->_simple_type_spec_1.set (Puma::TOK_TYPEOF);
+  }
+  advice execution ("% Puma::CSyntax::SimpleTypeSpec::parse(...)") ||
+         execution ("% Puma::CCSyntax::SimpleTypeSpec::parse(...)"): after () {
+    JoinPoint::template Arg<0>::ReferredType &syntax = *tjp->arg<0>();
+    bool &result = *tjp->result ();
+    if (typeof_keyword && !result && syntax.look_ahead (Puma::TOK_TYPEOF))
+      result = syntax.gnu_typeof ();
+  }
+
+  // initialize the new state before an analysis starts
+  advice execution("bool Puma::%::analyze_seq()") && within (csemdeclspecs ()) &&
+         that (csd) : before (Puma::CSemDeclSpecs &csd) {
+    csd._typeofs = 0;
+    csd._typeof_node = 0;
+  }
+
+  // make the analysis function aware of 'typeof'
+  advice execution("bool Puma::%::analyze(...)") && within (csemdeclspecs ()) &&
+         that (csd) && args (spec): after (Puma::CSemDeclSpecs &csd, Puma::CTree *spec) {
+    bool &result = *tjp->result ();
+    if (!result && spec->NodeName () == Puma::CT_GnuTypeof::NodeId ()) {
+      csd._typeofs++;
+      csd._typeof_node = (Puma::CT_GnuTypeof*)spec;
+      result = true;
+    }
+  }
+
+  // make the check functions aware of 'typeof'
+  advice execution("bool Puma::%::check_complex_decl_specs(...)") &&
+         within (csemdeclspecs ()) && that (csd) && args (have_type):
+         after (Puma::CSemDeclSpecs &csd, bool &have_type) {
+    bool &result = *tjp->result ();
+    if (result && !have_type && csd._typeofs) {
+      have_type = true;
+      result    = true;
+    }
+  }
+
+  advice execution("bool Puma::%::check_signed_unsigned()") &&
+         within (csemdeclspecs ()) && that (csd) : after (Puma::CSemDeclSpecs &csd) {
+    bool &result = *tjp->result ();
+    if (result) {
+      if ((csd._prim_map[Puma::CT_PrimDeclSpec::PDS_SIGNED] ||
+           csd._prim_map[Puma::CT_PrimDeclSpec::PDS_UNSIGNED]) &&
+          csd._typeofs) {
+        *csd._err << Puma::sev_error << csd._dss->token ()->location ()
+                  << "`signed' or `unsigned' invalid for 'typeof'"
+                  << Puma::endMessage;
+        result = false;
+      }
+    }
+  }
+
+  advice execution("bool Puma::%::check_finally()") &&
+         within (csemdeclspecs ()) && that (csd) : after (Puma::CSemDeclSpecs &csd) {
+    bool &result = *tjp->result ();
+    if (result && csd._typeofs > 0) {
+      *csd._err << Puma::sev_error << csd._dss->token ()->location ()
+                << "invalid type specified in declaration"
+                << Puma::endMessage;
+      result = false;
+    }
+  }
+
+  // make the type creation function aware of 'typeof'
+  advice execution("% Puma::%::create_type()") && within (csemdeclspecs ()) &&
+         that (csd) : after (Puma::CSemDeclSpecs &csd) {
+    Puma::CTypeInfo *&result = *tjp->result ();
+    if (result->isUndefined () && csd._typeofs) {
+      csd._typeofs--;
+      if (csd._typeof_node->Type ()) {
+        Puma::CTypeInfo *arg_type = csd._typeof_node->Type ();
+        // in a template the argument type might be undefined
+        // -> set the node type to unknown_t, in order to make it 'dependent'
+        if (arg_type->isUndefined ())
+          result = &Puma::CTYPE_UNKNOWN_T;
+        else
+          // otherwise copy the type
+          result = Puma::CTypeInfo::Duplicate (csd._typeof_node->Type ());
+      }
+    }
+  }
+
+  // ------------------------------------------
+  // support for extended "if-then expressions"
+  // ------------------------------------------
+
+  // structural extensions
+  advice csemexpr () : slice Puma::ExtGnuCondExprCSemExpr;
+
+  // extended syntax: "foo ? : bar"
+  advice call ("bool Puma::CSyntax::Expr::check(...)") &&
+         within ("bool Puma::CSyntax::CondExpr::parse (...)") : around () {
+    JoinPoint::template Arg<0>::ReferredType &syntax = *tjp->arg<0>();
+    if (if_then_exprs && syntax.look_ahead (Puma::TOK_COLON))
+      *tjp->result () = true;
+    else
+      tjp->proceed ();
+  }
+
+  advice within (derived (builder ())) &&
+    execution ("% ...::cond_expr()") : around () {
+    if (if_then_exprs && tjp->that ()->nodes () == 4) {
+      *tjp->result () = new Puma::CT_IfThenExpr (tjp->that ()->get_node (0),
+          tjp->that ()->get_node (1), tjp->that ()->get_node (2),
+          tjp->that ()->get_node (3));
+    }
+    else
+      tjp->proceed ();
+  }
+
+  advice execution ("Puma::CTypeInfo *Puma::CSemExpr::resolve (Puma::CT_IfThenExpr *, Puma::CTree *)") : around () {
+    if (!(*tjp->arg<0>())->LeftOperand ())
+      *tjp->result () = tjp->that ()->resolve_gnu (*tjp->arg<0>(), *tjp->arg<1>());
+    else
+      tjp->proceed ();
+  }
+
+  // -----------------------------------
+  // support for "case ranges" extension
+  // -----------------------------------
+
+  // extended syntax: "case 10 ... 20 : bar=open;"
+  advice call ("bool Puma::CSyntax::ConstExpr::check(...)") &&
+         within ("bool Puma::CSyntax::LabelStmt::parse (...)") : around () {
+    JoinPoint::template Arg<0>::ReferredType &syntax = *tjp->arg<0>();
+    tjp->proceed ();
+    if (*tjp->result () && case_ranges && syntax.look_ahead (Puma::TOK_ELLIPSIS)) {
+      *tjp->result () = (syntax.parse (Puma::TOK_ELLIPSIS) && syntax.const_expr ());
+    }
+  }
+
+  advice within (derived (builder ())) &&
+    execution ("% ...::label_stmt()") : around () {
+    // 5: identifier ... identifier :  stmt
+    if (case_ranges && tjp->that ()->nodes () == 6) {
+      *tjp->result () = new Puma::CT_GnuCaseStmt (tjp->that ()->get_node (0),
+          tjp->that ()->get_node (1), tjp->that ()->get_node (2),
+          tjp->that ()->get_node (3), tjp->that ()->get_node (4),
+          tjp->that ()->get_node (5));
+    }
+    else
+      tjp->proceed ();
+  }
+
+  // ----------------------
+  // GNU builtin functions
+  // ----------------------
+
+  advice within (derived (builder ())) &&
+    execution ("% ...::cond_expr()") : around () {
+    if (if_then_exprs && tjp->that ()->nodes () == 4) {
+      *tjp->result () = new Puma::CT_IfThenExpr (tjp->that ()->get_node (0),
+          tjp->that ()->get_node (1), tjp->that ()->get_node (2),
+          tjp->that ()->get_node (3));
+    }
+    else
+      tjp->proceed ();
+  }
+
+  // structural extensions
+  advice semantic () : slice Puma::ExtGnuBuiltinsSemantic;
+  advice semantic () : slice Puma::ExtGnuPIC24BuiltinsSemantic;
+
+  advice within (semantic ()) && execution ("void Puma::%::declareImplicitFcts()") :
+    after () {
+    if (gnu_builtins) {
+      tjp->that ()->define_gnu_builtins ();
+      if (pic24)
+        tjp->that ()->define_gnu_pic24_builtins ();
+    }
+  }
+
+  // C implicit constant expressions
+  advice execution ("% Puma::CSemExpr::resolve(Puma::CT_CallExpr *, Puma::CTree *)") : after () {
+    Puma::CT_CallExpr *call = (*tjp->arg<0>());
+    Puma::CObjectInfo *fct = call->Object ();
+    if (fct && fct->Name().c_str() && strncmp(fct->Name().c_str(), "__builtin_", 10) == 0) {
+      Puma::CT_ExprList *args = call->Arguments();
+      if (strcmp(fct->Name(), "__builtin_types_compatible_p") == 0) {
+        if (args && args->Entries() == 2) {
+          Puma::U_LONG_LONG v = tjp->that ()->compatible(args->Entry(0)->Type(), args->Entry(1)->Type()) ? 1 : 0;
+          call->setValue(new Puma::CConstant(v, call->Type()));
+        }
+      } else if (strcmp(fct->Name(), "__builtin_constant_p") == 0) {
+        if (args && args->Entries() == 1) {
+          Puma::U_LONG_LONG v = tjp->that ()->isConstExpr(args->Entry(0)) ? 1 : 0;
+          call->setValue(new Puma::CConstant(v, call->Type()));
+        }
+      } else if (strcmp(fct->Name(), "__builtin_huge_val") == 0 || 
+                 strcmp(fct->Name(), "__builtin_huge_valf") == 0 ||
+                 strcmp(fct->Name(), "__builtin_huge_vall") == 0 || 
+                 strcmp(fct->Name(), "__builtin_inf") == 0 ||
+                 strcmp(fct->Name(), "__builtin_infd32") == 0 || 
+                 strcmp(fct->Name(), "__builtin_infd64") == 0 ||
+                 strcmp(fct->Name(), "__builtin_infd128") == 0 || 
+                 strcmp(fct->Name(), "__builtin_inff") == 0 ||
+                 strcmp(fct->Name(), "__builtin_infl") == 0) {
+        call->setValue(new Puma::CConstant((long double)DBL_MAX, call->Type()));
+      }
+    }
+  }
+
+  // C++ implicit constant expressions
+  advice execution ("% Puma::CCSemExpr::resolve(Puma::CT_CallExpr *, Puma::CTree *)") : after () {
+    Puma::CT_CallExpr *call = (*tjp->arg<0>());
+    Puma::CObjectInfo *fct = call->Object ();
+    if (fct && fct->Name().c_str() && strncmp(fct->Name().c_str(), "__builtin_", 10) == 0) {
+      Puma::CT_ExprList *args = call->Arguments();
+      if (strcmp(fct->Name(), "__builtin_constant_p") == 0) {
+        if (args && args->Entries() == 1) {
+          Puma::U_LONG_LONG v = tjp->that ()->isConstExpr(args->Entry(0)) ? 1 : 0;
+          call->setValue(new Puma::CConstant(v, call->Type()));
+        }
+      } else if (strcmp(fct->Name(), "__builtin_huge_val") == 0 || 
+                 strcmp(fct->Name(), "__builtin_huge_valf") == 0 ||
+                 strcmp(fct->Name(), "__builtin_huge_vall") == 0 || 
+                 strcmp(fct->Name(), "__builtin_inf") == 0 ||
+                 strcmp(fct->Name(), "__builtin_infd32") == 0 || 
+                 strcmp(fct->Name(), "__builtin_infd64") == 0 ||
+                 strcmp(fct->Name(), "__builtin_infd128") == 0 || 
+                 strcmp(fct->Name(), "__builtin_inff") == 0 ||
+                 strcmp(fct->Name(), "__builtin_infl") == 0) {
+        call->setValue(new Puma::CConstant((long double)DBL_MAX, call->Type()));
+      }
+    }
+  }
+
+  // ----------------------------------------------------
+  // std hack: if a lookup in 'std' fails, look into '::'
+  // ----------------------------------------------------
+
+  advice execution ("% Puma::CCNameLookup::lookup(%::CStructure *,bool,bool)") :
+  before () {
+    if (std_hack) {
+      Puma::CStructure *&scope = *(Puma::CStructure**)tjp->arg (0);
+      bool &nested = *(bool*)tjp->arg (1);
+      if (scope->Parent ()->GlobalScope () &&
+          strcmp (scope->Name (), "std") == 0)
+        nested = true;
+    }
+  }
+
+  // ----------------------------------------------------
+  // friend injection of GCC before version 4.1
+  // ----------------------------------------------------
+
+  advice execution ("% Puma::CCNameLookup::invisibleFriend(...)") : around () {
+    if (friend_injection)
+      *tjp->result () = false;  // friends are always visible
+    else
+      tjp->proceed ();
+  }
+
+  // ----------------------------------------------------
+  // get the configuration and check whether the GNU mode is enabled
+  // ----------------------------------------------------
+
+  bool get_gnu_version (const Puma::Config &config,
+    int &major, int &minor, int &patchlevel) {
+    const Puma::ConfOption *gnu_option = config.Option ("--gnu");
+    if (!gnu_option)
+      return false;
+    major = -1;
+    minor = -1;
+    patchlevel = -1;
+    const char *gnu_version_str =
+      (gnu_option->Arguments() == 1) ? gnu_option->Argument (0) : 0;
+    if (gnu_version_str) {
+      char sep;
+      std::istringstream in (gnu_version_str);
+      if (in.good()) in >> major;
+      if (in.good()) in >> sep >> minor;
+      if (in.good()) in >> sep >> patchlevel;
+    }
+    return true;
+  }
+
+  long int parse_size(const char* sizestr) {
+    long int size = 0;
+    std::istringstream in(sizestr);
+    in >> size;
+    return size * 8; // size in bits
+  }
+
+  void adjust_primitive_type_sizes(const Puma::Config &config) {
+    unsigned num = config.Options();
+    for (unsigned i = 0; i < num; i++) {
+      const Puma::ConfOption *o = config.Option(i);
+      if (o->Arguments() == 2 && strcmp(o->Name(), "-D") == 0) {
+        const char* macroName = o->Argument(0);
+        if (strncmp(macroName, "__SIZEOF_", 9) != 0)
+          continue;
+
+        if (strcmp(macroName, "__SIZEOF_BOOL__") == 0) {
+          Puma::CTYPE_BOOL.Size(parse_size(o->Argument(1)));
+          Puma::CTYPE_C_BOOL.Size(Puma::CTYPE_BOOL.Size());
+        } else if (strcmp(macroName, "__SIZEOF_CHAR__") == 0) {
+          Puma::CTYPE_CHAR.Size(parse_size(o->Argument(1)));
+          Puma::CTYPE_SIGNED_CHAR.Size(Puma::CTYPE_CHAR.Size());
+          Puma::CTYPE_UNSIGNED_CHAR.Size(Puma::CTYPE_CHAR.Size());
+        } else if (strcmp(macroName, "__SIZEOF_WCHAR_T__") == 0) {
+          Puma::CTYPE_WCHAR_T.Size(parse_size(o->Argument(1)));
+        } else if (strcmp(macroName, "__SIZEOF_SHORT__") == 0) {
+          Puma::CTYPE_SHORT.Size(parse_size(o->Argument(1)));
+          Puma::CTYPE_UNSIGNED_SHORT.Size(Puma::CTYPE_SHORT.Size());
+        } else if (strcmp(macroName, "__SIZEOF_INT__") == 0) {
+          Puma::CTYPE_INT.Size(parse_size(o->Argument(1)));
+          Puma::CTYPE_UNSIGNED_INT.Size(Puma::CTYPE_INT.Size());
+        } else if (strcmp(macroName, "__SIZEOF_LONG__") == 0) {
+          Puma::CTYPE_LONG.Size(parse_size(o->Argument(1)));
+          Puma::CTYPE_UNSIGNED_LONG.Size(Puma::CTYPE_LONG.Size());
+        } else if (strcmp(macroName, "__SIZEOF_LONG_LONG__") == 0) {
+          Puma::CTYPE_LONG_LONG.Size(parse_size(o->Argument(1)));
+          Puma::CTYPE_UNSIGNED_LONG_LONG.Size(Puma::CTYPE_LONG_LONG.Size());
+        } else if (strcmp(macroName, "__SIZEOF_FLOAT__") == 0) {
+          Puma::CTYPE_FLOAT.Size(parse_size(o->Argument(1)));
+        } else if (strcmp(macroName, "__SIZEOF_DOUBLE__") == 0) {
+          Puma::CTYPE_DOUBLE.Size(parse_size(o->Argument(1)));
+        } else if (strcmp(macroName, "__SIZEOF_LONG_DOUBLE__") == 0) {
+          Puma::CTYPE_LONG_DOUBLE.Size(parse_size(o->Argument(1)));
+        }
+      }
+    }
+  }
+
+  advice args (config) && within (derived ("Puma::Syntax")) &&
+         execution ("void Puma::%::configure(...)"): before (Puma::Config &config) {
+    int gnu_major, gnu_minor, gnu_patchlevel;
+    // call get_gnu_version to check whether --gnu was given
+    if (get_gnu_version (config, gnu_major, gnu_minor, gnu_patchlevel)) {
+      // settings for all gcc dialects
+      extended_asm         = true;
+      extended_cv_qual     = true;
+      gnu_builtins         = true;
+      typeof_keyword       = true;
+      statement_exprs      = true;
+      local_labels         = true;
+      if_then_exprs        = !config.Option("--lang-c++"); // TODO: not supported in C++ mode, yet
+      labels_as_values     = true;
+      extern_inline        = true;
+      thread_local_storage_class = true;
+      case_ranges          = true;
+      pic24                = false; // not enabled by default
+
+      if (gnu_major >= 0 && gnu_major < 3) {
+        std_hack         = true;
+        friend_injection = true;
+      }
+
+      adjust_primitive_type_sizes(config);
+    }
+    // these options can be explicitely set even without --gnu
+    if (config.Option ("--gnu-extended-asm"))
+      extended_asm = true;
+    if (config.Option ("--gnu-std-hack"))
+      std_hack = true;
+    if (config.Option ("--gnu-friend-injection"))
+      friend_injection = true;
+    if (config.Option ("--gnu-pic24"))
+      pic24 = true;
+  }
+
+  // --------------------------------------------------
+  // support for unnamed and empty struct/union members
+  // --------------------------------------------------
+
+  advice execution ("% Puma::CSyntax::rule_member_decl()") : around () {
+    // 1: ;
+    // 2: type_spec_seq                          ;
+    // 3: type_spec_seq  member_declarator_list  ;
+    Puma::CTree *&result = *(Puma::CTree**)tjp->result ();
+    if (tjp->that ()->parse (Puma::TOK_SEMI_COLON) ||
+        (tjp->that ()->type_spec_seq () &&
+         tjp->that ()->opt(tjp->that ()->member_declarator_list ()) &&
+         tjp->that ()->parse (Puma::TOK_SEMI_COLON))) {
+      tjp->that ()->semantic ().finish_decl ();
+      result = tjp->that ()->builder ().member_decl ();
+    } else {
+      result = (Puma::CTree*)0;
+    }
+  }
+
+  // --------------------------------------------------
+  // GNU defined macros
+  // --------------------------------------------------
+
+  advice execution ("void Puma::PreprocessorParser::defineGNUMacros()") : after () {
+    // GNU defines
+    tjp->that ()->defUndefinedMacro ("__GNUC__", "2");
+    tjp->that ()->defUndefinedMacro ("__GNUC_MINOR__", "8");
+    tjp->that ()->defUndefinedMacro ("_GLIBCPP_EXTERN_TEMPLATE", "0");
+    tjp->that ()->defUndefinedMacro ("__null", "0");
+//    tjp->that ()->defUndefinedMacro ("__extension__", " ");
+    //tjp->that ()->defUndefinedMacro ("_WCHAR_T_", " ");
+    // attributes
+    if (! tjp->that ()->_macroManager->getMacro ("__attribute__")) {
+      Puma::PreMacro *macro = new Puma::PreMacro ("__attribute__", " ", Puma::PreMacro::LOCK_MACRO);
+      macro->addArg ("par1");
+      tjp->that ()->_macroManager->addMacro (macro);
+    }
+    if (! tjp->that ()->_macroManager->getMacro ("__attribute")) {
+      Puma::PreMacro *macro = new Puma::PreMacro ("__attribute", " ", Puma::PreMacro::LOCK_MACRO);
+      macro->addArg ("par1");
+      tjp->that ()->_macroManager->addMacro (macro);
+    }
+    // variable argument list access
+    if (! tjp->that ()->_macroManager->getMacro ("__builtin_va_arg")) {
+      Puma::PreMacro *macro = new Puma::PreMacro ("__builtin_va_arg", "((par2)__builtin_va_arg_helper(par1))");
+      macro->addArg ("par1");
+      macro->addArg ("par2");
+      tjp->that ()->_macroManager->addMacro (macro);
+    }
+
+    // atomic memory access built-in functions
+
+    // #define __sync_...(arg,...) *(typeof(arg))__generic_sync_...(arg, ## __VA_ARGS__)
+    #define __puma_defSyncMacro(opname) \
+    if (! tjp->that ()->_macroManager->getMacro ("__sync_" opname)) { \
+      Puma::PreMacro *macro = new Puma::PreMacro ("__sync_" opname, \
+          "*(typeof(par1))__generic_sync_" opname "(par1, ## __VA_ARGS__)", \
+          Puma::PreMacro::VAR_ARG_MACRO); \
+          macro->addArg ("par1"); \
+          macro->addArg ("__VA_ARGS__"); \
+          tjp->that ()->_macroManager->addMacro (macro); \
+    }
+    __puma_defSyncMacro("fetch_and_add");
+    __puma_defSyncMacro("fetch_and_sub");
+    __puma_defSyncMacro("fetch_and_or");
+    __puma_defSyncMacro("fetch_and_and");
+    __puma_defSyncMacro("fetch_and_xor");
+    __puma_defSyncMacro("fetch_and_nand");
+    __puma_defSyncMacro("add_and_fetch");
+    __puma_defSyncMacro("sub_and_fetch");
+    __puma_defSyncMacro("or_and_fetch");
+    __puma_defSyncMacro("and_and_fetch");
+    __puma_defSyncMacro("xor_and_fetch");
+    __puma_defSyncMacro("nand_and_fetch");
+    __puma_defSyncMacro("val_compare_and_swap");
+    __puma_defSyncMacro("lock_test_and_set");
+
+    // #define __atomic_...(arg,...) *(typeof(arg))__generic_sync_...(arg, ## __VA_ARGS__)
+    #define __puma_defAtomicMacro(opname) \
+    if (! tjp->that ()->_macroManager->getMacro ("__atomic_" opname)) { \
+      Puma::PreMacro *macro = new Puma::PreMacro ("__atomic_" opname, \
+          "*(typeof(par1))__generic_atomic_" opname "(par1, ## __VA_ARGS__)", \
+          Puma::PreMacro::VAR_ARG_MACRO); \
+          macro->addArg ("par1"); \
+          macro->addArg ("__VA_ARGS__"); \
+          tjp->that ()->_macroManager->addMacro (macro); \
+    }
+
+    // TODO: this list is still incomplete!
+    __puma_defAtomicMacro("fetch_add");
+    __puma_defAtomicMacro("fetch_sub");
+    __puma_defAtomicMacro("fetch_or");
+    __puma_defAtomicMacro("fetch_and");
+    __puma_defAtomicMacro("fetch_xor");
+    __puma_defAtomicMacro("fetch_nand");
+    __puma_defAtomicMacro("add_fetch");
+    __puma_defAtomicMacro("sub_fetch");
+    __puma_defAtomicMacro("or_fetch");
+    __puma_defAtomicMacro("and_fetch");
+    __puma_defAtomicMacro("xor_fetch");
+    __puma_defAtomicMacro("nand_fetch");
+
+    // built-in versions of the ISO C99 floating point comparison macros
+    // map to its originals
+    tjp->that ()->defUndefinedMacro ("__builtin_isgreater", "isgreater");
+    tjp->that ()->defUndefinedMacro ("__builtin_isgreaterequal", "isgreaterequal");
+    tjp->that ()->defUndefinedMacro ("__builtin_isless", "isless");
+    tjp->that ()->defUndefinedMacro ("__builtin_islessequal", "islessequal");
+    tjp->that ()->defUndefinedMacro ("__builtin_islessgreater", "islessgreater");
+    tjp->that ()->defUndefinedMacro ("__builtin_isunordered", "isunordered");
+
+    // implementation of ?: without side effects in not chosen alternative
+    // type __builtin_choose_expr (const_exp, exp1, exp2)
+    if (! tjp->that ()->_macroManager->getMacro ("__builtin_choose_expr")) {
+      Puma::PreMacro *macro = new Puma::PreMacro ("__builtin_choose_expr", "(exp1)");
+      macro->addArg ("const_exp");
+      macro->addArg ("exp1");
+      macro->addArg ("exp2");
+      tjp->that ()->_macroManager->addMacro (macro);
+    }
+  }
+
+protected:
+  ExtGnu () :
+    extended_asm (false),
+    extended_cv_qual (false),
+    gnu_builtins (false),
+    std_hack (false),
+    typeof_keyword (false),
+    statement_exprs (false),
+    labels_as_values (false),
+    thread_local_storage_class (false),
+    friend_injection (false),
+    extern_inline (false),
+    pic24 (false),
+    local_labels (false),
+    if_then_exprs (false),
+    case_ranges (false)
+  {}
+};
+
+
+// ----------------------------------------------------
+// the Gnu attribute syntax
+// ----------------------------------------------------
+
+// add rules to the C Syntax
+slice class Puma::ExtGnuAttributeSyntax {
+public:
+  struct GnuAttribute {
+    static inline bool check (CSyntax &s) { return s.gnu_attribute (); }
+    static inline bool parse (CSyntax &);
+    static inline CTree *build(CSyntax &s);
+  };
+  virtual bool gnu_attribute ();
+  bool catch_gnu_attribute ();
+};
+
+// simplistic parser: just collected all argument tokens
+slice bool Puma::ExtGnuAttributeSyntax::GnuAttribute::parse (CSyntax &s) {
+  if (s.parse (Puma::TOK_ATTRIBUTE) && s.look_ahead (Puma::TOK_OPEN_ROUND)) {
+    return s.parse_round_block ();
+  }
+  return false;
+}
+
+slice bool Puma::ExtGnuAttributeSyntax::gnu_attribute () { return GnuAttribute::parse (*this); }
+
+slice Puma::CTree * Puma::ExtGnuAttributeSyntax::GnuAttribute::build (CSyntax &s) {
+  return s.builder().gnu_attribute ();
+}
+
+slice bool Puma::ExtGnuAttributeSyntax::catch_gnu_attribute () {
+  int skip[] = { Puma::TOK_SEMI_COLON, Puma::TOK_COMMA, 0 };
+  int finish[] = { 0 };
+
+  return catch_error<CSyntax, GnuAttribute>(*this, "invalid attribute", finish, skip);
+}
+
+// extend the C Builder
+slice class Puma::ExtGnuAttributeBuilder {
+public:
+  Puma::CTree * gnu_attribute ();
+};
+
+slice Puma::CTree * Puma::ExtGnuAttributeBuilder::gnu_attribute () {
+  return list (new CT_GnuAttribute);
+}
+
+// ----------------------------------------------------
+// the Gnu ASM syntax
+// ----------------------------------------------------
+
+// add rules to the C Syntax
+slice class Puma::ExtGnuAsmSyntax {
+public:
+  struct GnuAsmSpec {
+    static inline bool check (CSyntax &s) { return s.gnu_asm_spec (); }
+    static inline bool parse (CSyntax &);
+    static inline CTree *build(CSyntax &s);
+  };
+  virtual bool gnu_asm_spec ();
+
+  struct GnuAsmDef {
+    static inline bool check (CSyntax &s) { return s.gnu_asm_def (); }
+    static inline bool parse (CSyntax &);
+    static inline CTree *build(CSyntax &s);
+  };
+  virtual bool gnu_asm_def ();
+
+  struct GnuAsmOperands {
+    static inline bool check (CSyntax &s) { return s.gnu_asm_operands (); }
+    static inline bool parse (CSyntax &);
+    static inline CTree *build(CSyntax &s);
+  };
+  virtual bool gnu_asm_operands ();
+
+  struct GnuAsmEmptyOperands {
+    static inline bool check (CSyntax &s) { return s.gnu_asm_empty_operands (); }
+    static inline bool parse (CSyntax &);
+    static inline CTree *build(CSyntax &s);
+  };
+  virtual bool gnu_asm_empty_operands ();
+
+  struct GnuAsmOperand {
+    static inline bool check (CSyntax &s) { return s.gnu_asm_operand (); }
+    static inline bool parse (CSyntax &);
+    static inline CTree *build(CSyntax &s);
+  };
+  virtual bool gnu_asm_operand ();
+
+  struct GnuAsmClobbers {
+    static inline bool check (CSyntax &s) { return s.gnu_asm_clobbers (); }
+    static inline bool parse (CSyntax &);
+    static inline CTree *build(CSyntax &s);
+  };
+  virtual bool gnu_asm_clobbers ();
+};
+
+slice bool Puma::ExtGnuAsmSyntax::GnuAsmSpec::parse (CSyntax &s) {
+  return (s.parse (Puma::TOK_ASM) &&
+          s.parse (Puma::TOK_OPEN_ROUND) &&
+          s.cmpd_str () &&
+          s.parse (Puma::TOK_CLOSE_ROUND));
+}
+slice bool Puma::ExtGnuAsmSyntax::gnu_asm_spec () { return GnuAsmSpec::parse (*this); }
+
+slice Puma::CTree * Puma::ExtGnuAsmSyntax::GnuAsmSpec::build (CSyntax &s) {
+  return s.builder().gnu_asm_spec ();
+}
+
+slice bool Puma::ExtGnuAsmSyntax::GnuAsmDef::parse (CSyntax &s) {
+  return (s.parse (Puma::TOK_ASM) && s.opt (CvQual::check (s)) &&
+          s.parse (Puma::TOK_OPEN_ROUND) && CmpdStr::check (s) &&
+          s.opt ((s.look_ahead (Puma::TOK_COLON_COLON) ?
+                 s.gnu_asm_empty_operands () &&
+                 s.gnu_asm_operands () :
+               s.gnu_asm_operands () &&
+               s.look_ahead (Puma::TOK_COLON_COLON) ?
+                 s.gnu_asm_empty_operands () :
+                 s.gnu_asm_operands ()) &&
+               s.gnu_asm_clobbers ()) &&
+          s.parse (Puma::TOK_CLOSE_ROUND) && s.parse (Puma::TOK_SEMI_COLON));
+}
+slice bool Puma::ExtGnuAsmSyntax::gnu_asm_def () { return GnuAsmDef::parse (*this); }
+
+slice Puma::CTree * Puma::ExtGnuAsmSyntax::GnuAsmDef::build (CSyntax &s) {
+  return s.builder().gnu_asm_def ();
+}
+
+slice bool Puma::ExtGnuAsmSyntax::GnuAsmOperands::parse (CSyntax &s) {
+  return ((s.parse (Puma::TOK_COLON) || s.parse (Puma::TOK_COLON_COLON)) &&
+          s.opt (s.list (&Puma::CSyntax::gnu_asm_operand, Puma::TOK_COMMA)));
+}
+slice bool Puma::ExtGnuAsmSyntax::gnu_asm_operands () { return GnuAsmOperands::parse (*this); }
+
+slice Puma::CTree * Puma::ExtGnuAsmSyntax::GnuAsmOperands::build (CSyntax &s) {
+  return s.builder().gnu_asm_operands ();
+}
+
+slice bool Puma::ExtGnuAsmSyntax::GnuAsmEmptyOperands::parse (CSyntax &s) {
+  return true;
+}
+slice bool Puma::ExtGnuAsmSyntax::gnu_asm_empty_operands () { return GnuAsmEmptyOperands::parse (*this); }
+
+slice Puma::CTree * Puma::ExtGnuAsmSyntax::GnuAsmEmptyOperands::build (CSyntax &s) {
+  return s.builder().gnu_asm_empty_operands ();
+}
+
+slice bool Puma::ExtGnuAsmSyntax::GnuAsmOperand::parse (CSyntax &s) {
+  if (s.parse (Puma::TOK_OPEN_SQUARE)) { // symbolic operand name?
+    if (!(s.parse (Puma::TOK_ID) && s.parse (Puma::TOK_CLOSE_SQUARE)))
+      return false;
+  }
+  return (CmpdStr::check (s) && s.parse (Puma::TOK_OPEN_ROUND) &&
+          Expr::check (s) && s.parse (Puma::TOK_CLOSE_ROUND));
+}
+slice bool Puma::ExtGnuAsmSyntax::gnu_asm_operand () { return GnuAsmOperand::parse (*this); }
+
+slice Puma::CTree * Puma::ExtGnuAsmSyntax::GnuAsmOperand::build (CSyntax &s) {
+  return s.builder().gnu_asm_operand ();
+}
+
+slice bool Puma::ExtGnuAsmSyntax::GnuAsmClobbers::parse (CSyntax &s) {
+  return ((s.parse (Puma::TOK_COLON) || s.parse (Puma::TOK_COLON_COLON)) &&
+           s.opt (list<CSyntax, CmpdStr> (s, Puma::TOK_COMMA)));
+}
+slice bool Puma::ExtGnuAsmSyntax::gnu_asm_clobbers () { return GnuAsmClobbers::parse (*this); }
+
+slice Puma::CTree * Puma::ExtGnuAsmSyntax::GnuAsmClobbers::build (CSyntax &s) {
+  return s.builder().gnu_asm_clobbers ();
+}
+
+// extend the C Builder
+slice class Puma::ExtGnuAsmBuilder {
+public:
+  Puma::CTree * gnu_asm_spec ();
+  Puma::CTree * gnu_asm_def ();
+  Puma::CTree * gnu_asm_operands ();
+  Puma::CTree * gnu_asm_empty_operands ();
+  Puma::CTree * gnu_asm_operand ();
+  Puma::CTree * gnu_asm_clobbers ();
+};
+
+slice Puma::CTree * Puma::ExtGnuAsmBuilder::gnu_asm_spec () {
+  return new Puma::CT_GnuAsmSpec (get_node (0), get_node (1), get_node (2),
+    get_node (3));
+}
+
+slice Puma::CTree * Puma::ExtGnuAsmBuilder::gnu_asm_def () {
+  // just copied: this is a wrong implementation!
+  int have_cv = (get_node (1)->NodeName () == Puma::CT_Token::NodeId ()) ? 0 : 1;
+  int gnu_nodes = nodes () - have_cv - 5;
+  int gnu_first = 3 + have_cv;
+  Puma::CTree *cv  = have_cv ? get_node (1) : (Puma::CTree*)0;
+  Puma::CTree *op0 = (gnu_nodes >= 1) ? get_node (gnu_first) : (Puma::CTree*)0;
+  Puma::CTree *op1 = (gnu_nodes >= 2) ? get_node (gnu_first + 1) : (Puma::CTree*)0;
+  Puma::CTree *clb = (gnu_nodes >= 3) ? get_node (gnu_first + 2) : (Puma::CTree*)0;
+  return new Puma::CT_GnuAsmDef (get_node (0), cv, get_node (1 + have_cv),
+                           get_node (2 + have_cv), op0, op1, clb,
+                           get_node (nodes () - 2),get_node (nodes () - 1));
+}
+
+slice Puma::CTree * Puma::ExtGnuAsmBuilder::gnu_asm_operands () {
+  return list (new Puma::CT_GnuAsmOperands);
+}
+
+slice Puma::CTree * Puma::ExtGnuAsmBuilder::gnu_asm_empty_operands () {
+  return new Puma::CT_GnuAsmOperands;
+}
+
+slice Puma::CTree * Puma::ExtGnuAsmBuilder::gnu_asm_operand () {
+  if (nodes () == 4)
+    return new Puma::CT_GnuAsmOperand (get_node (0), get_node (1), get_node (2),
+        get_node (3));
+  else
+    return new Puma::CT_GnuAsmOperand (get_node (0), get_node (1), get_node (2),
+        get_node (3), get_node (4), get_node(5), get_node (6));
+}
+
+slice Puma::CTree * Puma::ExtGnuAsmBuilder::gnu_asm_clobbers () {
+  return list (new Puma::CT_GnuAsmClobbers);
+}
+
+// -------------------------
+// Gnu statement expressions
+// -------------------------
+
+// C Builder extension
+slice class Puma::ExtGnuStmtExprsBuilder {
+public:
+  Puma::CTree * gnu_statement_expr ();
+};
+
+slice Puma::CTree * Puma::ExtGnuStmtExprsBuilder::gnu_statement_expr () {
+  return new Puma::CT_GnuStatementExpr (get_node (0), get_node (1), get_node (2));
+}
+
+
+// ----------------------------------------------------
+// the Gnu local labels extension
+// ----------------------------------------------------
+
+// add rules to the C Syntax
+slice class Puma::ExtGnuLocalLabelStmtSyntax {
+public:
+  struct GnuLocalLabelStmt {
+    static inline bool check (CSyntax &s) { return s.gnu_local_label_stmt (); }
+    static inline bool parse (CSyntax &);
+    static inline CTree *build(CSyntax &s);
+  };
+  virtual bool gnu_local_label_stmt ();
+};
+
+slice bool Puma::ExtGnuLocalLabelStmtSyntax::GnuLocalLabelStmt::parse (CSyntax &s) {
+  return (s.parse (Puma::TOK_LABEL) && list<CSyntax, Identifier> (s, Puma::TOK_COMMA) && s.parse (TOK_SEMI_COLON));
+}
+slice Puma::CTree * Puma::ExtGnuLocalLabelStmtSyntax::GnuLocalLabelStmt::build (CSyntax &s) {
+  return s.builder().gnu_local_label_stmt ();
+}
+slice bool Puma::ExtGnuLocalLabelStmtSyntax::gnu_local_label_stmt () { return GnuLocalLabelStmt::parse (*this); }
+
+// C Builder extension
+slice class Puma::ExtGnuLocalLabelStmtBuilder {
+public:
+  Puma::CTree * gnu_local_label_stmt ();
+};
+
+slice Puma::CTree * Puma::ExtGnuLocalLabelStmtBuilder::gnu_local_label_stmt () {
+  return list (new Puma::CT_GnuLocalLabelStmt);
+}
+
+// ----------------------
+// TYPEOF keyword support
+// ----------------------
+
+// add rules to the C Syntax for the Gnu Typeof syntax
+slice class Puma::ExtGnuTypeofSyntax {
+public:
+  CTree * rule_gnu_typeof ();
+  virtual bool gnu_typeof ();
+};
+
+slice Puma::CTree * Puma::ExtGnuTypeofSyntax::rule_gnu_typeof () {
+  return (parse (Puma::TOK_TYPEOF) &&
+          (unary_expr1 () || unary_expr ())) ?
+    semantic ().gnu_typeof () : (Puma::CTree*)0;
+}
+
+slice bool Puma::ExtGnuTypeofSyntax::gnu_typeof () {
+  return parse (&ExtGnuTypeofSyntax::rule_gnu_typeof);
+}
+
+// add rules to the C Builder for the Gnu Typeof syntax
+slice class Puma::ExtGnuTypeofBuilder {
+public:
+  Puma::CTree * gnu_typeof ();
+};
+
+// builder extension
+slice Puma::CTree * Puma::ExtGnuTypeofBuilder::gnu_typeof () {
+  Puma::CTree *result;
+  if (get_node (1)->NodeName () == Puma::Builder::Container::NodeId ()) {
+    Puma::Builder::Container *c = (Puma::Builder::Container*) get_node (1);
+    result = new Puma::CT_GnuTypeof (get_node (0), c->Son (0), c->Son (1), c->Son (2));
+    delete c;
+  } else {
+    result = new Puma::CT_GnuTypeof (get_node (0), get_node (1));
+  }
+  return result;
+}
+
+// C semantic extension
+slice class Puma::ExtGnuTypeofSemantic {
+public:
+  virtual Puma::CTree * gnu_typeof ();
+};
+
+slice Puma::CTree * Puma::ExtGnuTypeofSemantic::gnu_typeof () {
+  Puma::CTree *result = builder ().gnu_typeof ();
+  if (result) {
+    Puma::CT_GnuTypeof *node = (Puma::CT_GnuTypeof*)result;
+    // if the GnuTypeof node has an expression, resolve it to get the type
+    if (node->Expr ()) {
+      Puma::CSemVisitor sem_visitor (*_err, current_scope);
+      Puma::CTypeInfo *expr_type = sem_visitor.resolveExpr (node->Expr (), node);
+      node->setTypeRef (expr_type);
+    }
+    Puma::CT_NamedType *named_type = node->TypeName ();
+    if (named_type && named_type->Object ()) {
+      node->setTypeRef (named_type->Object ()->TypeInfo ());
+    }
+  }
+  return result;
+}
+
+// C++ semantic extension
+slice class Puma::ExtGnuTypeofCCSemantic {
+public:
+  virtual Puma::CTree * gnu_typeof ();
+};
+
+slice Puma::CTree * Puma::ExtGnuTypeofCCSemantic::gnu_typeof () {
+  Puma::CTree *result = builder ().gnu_typeof ();
+  if (result) {
+    Puma::CT_GnuTypeof *node = (Puma::CT_GnuTypeof*)result;
+    // if the GnuTypeof node has an expression, resolve it to get the type
+    if (node->Expr ()) {
+      Puma::CTypeInfo *expr_type = resolveExpr (node->Expr ());
+      node->setTypeRef (expr_type->NonReferenceType ());
+    }
+    Puma::CT_NamedType *named_type = node->TypeName ();
+    if (named_type && named_type->Object ()) {
+      node->setTypeRef (named_type->Object ()->TypeInfo ());
+    }
+  }
+  return result;
+}
+
+
+// ----------------------
+// Gnu builtin functions
+// ----------------------
+
+// extend the C/C++ semantic
+slice class Puma::ExtGnuBuiltinsSemantic {
+public:
+  void define_gnu_builtins ();
+};
+
+slice void Puma::ExtGnuBuiltinsSemantic::define_gnu_builtins () {
+  // declare GNU built-ins
+
+  Puma::CFunctionInfo *info;
+  Puma::CTypeInfo *type;
+  Puma::CTypeList *args;
+
+
+  // function name constants
+
+  Puma::CAttributeInfo *attr;
+
+  // static const char __func__[] = "function-name";
+  type = new Puma::CTypeQualified (&Puma::CTYPE_CHAR, true, false, false);
+  type = new Puma::CTypeArray (type);
+  type->TypeArray ()->Dimension (1);
+  attr = createAttribute ("__func__", current_scope, type, true);
+
+  // static const char __FUNCTION__[] = "function-name";
+  type = new Puma::CTypeQualified (&Puma::CTYPE_CHAR, true, false, false);
+  type = new Puma::CTypeArray (type);
+  type->TypeArray ()->Dimension (1);
+  attr = createAttribute ("__FUNCTION__", current_scope, type, true);
+
+  // static const char __PRETTY_FUNCTION__[] = "function-name";
+  type = new Puma::CTypeQualified (&Puma::CTYPE_CHAR, true, false, false);
+  type = new Puma::CTypeArray (type);
+  type->TypeArray ()->Dimension (1);
+  attr = createAttribute ("__PRETTY_FUNCTION__", current_scope, type, true);
+
+  // builtin versions of C90 functions:
+  //  The ISO C90 functions `abort', `abs', `acos', `asin', `atan2', `atan',
+  // `calloc', `ceil', `cosh', `cos', `exit', `exp', `fabs', `floor', `fmod',
+  // `fprintf', `fputs', `frexp', `fscanf', `isalnum', `isalpha', `iscntrl',
+  // `isdigit', `isgraph', `islower', `isprint', `ispunct', `isspace',
+  // `isupper', `isxdigit', `tolower', `toupper', `labs', `ldexp', `log10',
+  // `log', `malloc', `memchr', `memcmp', `memcpy', `memset', `modf', `pow',
+  // `printf', `putchar', `puts', `scanf', `sinh', `sin', `snprintf',
+  // `sprintf', `sqrt', `sscanf', `strcat', `strchr', `strcmp', `strcpy',
+  // `strcspn', `strlen', `strncat', `strncmp', `strncpy', `strpbrk',
+  // `strrchr', `strspn', `strstr', `tanh', `tan', `vfprintf', `vprintf' and
+  // `vsprintf' are all recognized as built-in functions
+  // (implementation still incomplete)
+
+  // void *__builtin_memcpy(void *dest, const void *src, size_t n);
+  args = new Puma::CTypeList (3);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_VOID));
+  args->AddEntry (new Puma::CTypePointer (
+      new Puma::CTypeQualified (&Puma::CTYPE_VOID, true, false, false)));
+  args->AddEntry (Puma::CTypeInfo::CTYPE_SIZE_T);
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__builtin_memcpy", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+
+  // void *__builtin_memset(void *s, int c, size_t n);
+  args = new Puma::CTypeList (3);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_VOID));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (Puma::CTypeInfo::CTYPE_SIZE_T);
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__builtin_memset", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+
+  // other stuff
+
+  // void __builtin_unreachable (void)
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_unreachable", current_scope, type);
+
+  // variable arguments access
+
+  // void __builtin_stdarg_start(...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_stdarg_start", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // void __builtin_va_start(...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_va_start", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // hm, __builtin_va_arg is a problem as it has a variable result type
+  // I use int __builtin_va_start_helper(...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_va_arg_helper", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // void __builtin_va_end(...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_va_end", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // typedef void *__builtin_va_list
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  createTypedef ("__builtin_va_list", current_scope, type);
+
+
+  // debug/frame access functions
+
+  // void *__builtin_return_address(unsigned int c);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT); // inr
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__builtin_return_address", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // void *__builtin_frame_address(unsigned int c);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT); // inr
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__builtin_frame_address", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // void * __builtin_extract_return_address (void *ADDR);
+  // Name seems to be wrong!: __builtin_extract_return_addr
+  args = new Puma::CTypeList (1);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_VOID));
+  type = new Puma::CTypeFunction (new Puma::CTypePointer (&Puma::CTYPE_VOID), args, true);
+  info = createFunction ("__builtin_extract_return_addr", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // Object Size Checking Builtins
+  // size_t __builtin_object_size (void * PTR, int TYPE);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_VOID));
+  args->AddEntry (&Puma::CTYPE_INT);
+  type = new Puma::CTypePointer (Puma::CTypeInfo::CTYPE_SIZE_T);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__builtin_object_size", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+
+  // limits
+
+  // double __builtin_huge_val (void)
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_DOUBLE, args, true);
+  info = createFunction ("__builtin_huge_val", current_scope, type);
+
+  // float __builtin_huge_valf (void)
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_FLOAT, args, true);
+  info = createFunction ("__builtin_huge_valf", current_scope, type);
+
+  // long double __builtin_huge_vall (void)
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_LONG_DOUBLE, args, true);
+  info = createFunction ("__builtin_huge_vall", current_scope, type);
+
+  // double __builtin_inf (void)
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_DOUBLE, args, true);
+  info = createFunction ("__builtin_inf", current_scope, type);
+
+  // float __builtin_inff (void)
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_FLOAT, args, true);
+  info = createFunction ("__builtin_inff", current_scope, type);
+
+  // long double __builtin_infl (void)
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_LONG_DOUBLE, args, true);
+  info = createFunction ("__builtin_infl", current_scope, type);
+
+  // double __builtin_nan (const char *str)
+  args = new Puma::CTypeList (1);
+  type = new Puma::CTypeQualified (&Puma::CTYPE_CHAR, true, false, false);
+  type = new Puma::CTypePointer (type);
+  args->AddEntry (type); // const char*
+  type = new Puma::CTypeFunction (&Puma::CTYPE_DOUBLE, args, true);
+  info = createFunction ("__builtin_nan", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // float __builtin_nanf (const char *str)
+  args = new Puma::CTypeList (1);
+  type = new Puma::CTypeQualified (&Puma::CTYPE_CHAR, true, false, false);
+  type = new Puma::CTypePointer (type);
+  args->AddEntry (type); // const char*
+  type = new Puma::CTypeFunction (&Puma::CTYPE_FLOAT, args, true);
+  info = createFunction ("__builtin_nanf", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // double __builtin_nanl (const char *str)
+  args = new Puma::CTypeList (1);
+  type = new Puma::CTypeQualified (&Puma::CTYPE_CHAR, true, false, false);
+  type = new Puma::CTypePointer (type);
+  args->AddEntry (type); // const char*
+  type = new Puma::CTypeFunction (&Puma::CTYPE_LONG_DOUBLE, args, true);
+  info = createFunction ("__builtin_nanl", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // double __builtin_nans (const char *str)
+  args = new Puma::CTypeList (1);
+  type = new Puma::CTypeQualified (&Puma::CTYPE_CHAR, true, false, false);
+  type = new Puma::CTypePointer (type);
+  args->AddEntry (type); // const char*
+  type = new Puma::CTypeFunction (&Puma::CTYPE_DOUBLE, args, true);
+  info = createFunction ("__builtin_nans", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // float __builtin_nansf (const char *str)
+  args = new Puma::CTypeList (1);
+  type = new Puma::CTypeQualified (&Puma::CTYPE_CHAR, true, false, false);
+  type = new Puma::CTypePointer (type);
+  args->AddEntry (type); // const char*
+  type = new Puma::CTypeFunction (&Puma::CTYPE_FLOAT, args, true);
+  info = createFunction ("__builtin_nansf", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // double __builtin_nansl (const char *str)
+  args = new Puma::CTypeList (1);
+  type = new Puma::CTypeQualified (&Puma::CTYPE_CHAR, true, false, false);
+  type = new Puma::CTypePointer (type);
+  args->AddEntry (type); // const char*
+  type = new Puma::CTypeFunction (&Puma::CTYPE_LONG_DOUBLE, args, true);
+  info = createFunction ("__builtin_nansl", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_fpclassify (int, int, int, int, int, ...)
+  args = new Puma::CTypeList (6);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_fpclassify", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  createParameter (info, args->Entry (3));
+  createParameter (info, args->Entry (4));
+  createParameter (info, args->Entry (5));
+
+  // compiler optimization
+
+  // int __builtin_constant_p (...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_constant_p", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_types_compatible_p (...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_types_compatible_p", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // long __builtin_expect (long exp, long c)
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_LONG); // long
+  args->AddEntry (&Puma::CTYPE_LONG); // long
+  type = new Puma::CTypeFunction (&Puma::CTYPE_LONG, args, true);
+  info = createFunction ("__builtin_expect", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+
+  // void __builtin_prefetch (const void *addr, ...)
+  args = new Puma::CTypeList (2);
+  type = new Puma::CTypeQualified (&Puma::CTYPE_VOID, true, false, false);
+  args->AddEntry (new Puma::CTypePointer (type)); // const void*
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_prefetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+
+
+  // bit operations
+
+  // int __builtin_ffs (unsigned int x)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_ffs", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_clz (unsigned int x)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_clz", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_ctz (unsigned int x)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_ctz", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_popcount (unsigned int x)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_popcount", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_parity (unsigned int x)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_parity", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_ffsl (unsigned long)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_ffsl", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_clzl (unsigned long)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_clzl", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_ctzl (unsigned long)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_ctzl", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_popcountl (unsigned long)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_popcountl", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_parityl (unsigned long)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_parityl", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_ffsll (unsigned long long)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG_LONG);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_ffsll", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_clzll (unsigned long long)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG_LONG);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_clzll", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_ctzll (unsigned long long)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG_LONG);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_ctzll", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_popcountll (unsigned long long)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG_LONG);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_popcountll", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // int __builtin_parityll (unsigned long long)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG_LONG);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_parityll", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+
+  // power calculation
+
+  // double __builtin_powi (double, int)
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_DOUBLE); // double
+  args->AddEntry (&Puma::CTYPE_INT); // int
+  type = new Puma::CTypeFunction (&Puma::CTYPE_DOUBLE, args, true);
+  info = createFunction ("__builtin_powi", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+
+  // float __builtin_powif (float, int)
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_FLOAT); // float
+  args->AddEntry (&Puma::CTYPE_INT); // int
+  type = new Puma::CTypeFunction (&Puma::CTYPE_FLOAT, args, true);
+  info = createFunction ("__builtin_powif", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+
+  // long double __builtin_powil (long double, int)
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_LONG_DOUBLE); // long double
+  args->AddEntry (&Puma::CTYPE_INT); // int
+  type = new Puma::CTypeFunction (&Puma::CTYPE_LONG_DOUBLE, args, true);
+  info = createFunction ("__builtin_powil", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+
+
+  // atomic memory access
+
+  // void __sync_synchronize (...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__sync_synchronize", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // void __sync_lock_release (type *ptr, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__sync_lock_release", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // bool __sync_bool_compare_and_swap (type *ptr, type oldval, type newval, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypeFunction (&Puma::CTYPE_BOOL, args, true);
+  info = createFunction ("__sync_bool_compare_and_swap", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_fetch_and_add (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_fetch_and_add", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_fetch_and_sub (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_fetch_and_sub", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_fetch_and_or (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_fetch_and_or", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_fetch_and_and (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_fetch_and_and", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_fetch_and_xor (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_fetch_and_xor", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_fetch_and_nand (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_fetch_and_nand", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_add_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_add_and_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_sub_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_sub_and_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_or_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_or_and_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_and_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_and_and_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_xor_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_xor_and_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_nand_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_nand_and_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_val_compare_and_swap (type *ptr, type oldval, type newval, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_val_compare_and_swap", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __sync_lock_test_and_set (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_sync_lock_test_and_set", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // atomic stuff
+
+  // type __atomic_fetch_and_add (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_fetch_add", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_fetch_and_sub (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_fetch_sub", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_fetch_and_or (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_fetch_or", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_fetch_and_and (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_fetch_and", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_fetch_and_xor (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_fetch_xor", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_fetch_and_nand (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_fetch_nand", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_add_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_add_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_sub_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_sub_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_or_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_or_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_and_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_and_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_xor_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_xor_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // type __atomic_nand_and_fetch (type *ptr, type value, ...)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_ELLIPSIS); // ...
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__generic_atomic_nand_fetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+  // constructing function calls
+
+  // void * __builtin_apply_args()
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__builtin_apply_args", current_scope, type);
+
+  // void * __builtin_apply(void (*function)(), void *arguments, size_t size)
+  args = new Puma::CTypeList (3);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypeFunction (&Puma::CTYPE_VOID, new Puma::CTypeList (0), true)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_VOID));
+  args->AddEntry (Puma::CTypeInfo::CTYPE_SIZE_T);
+  type = new Puma::CTypePointer (&Puma::CTYPE_VOID);
+  type = new Puma::CTypeFunction (type, args, true);
+  info = createFunction ("__builtin_apply", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+
+  // void __builtin_return(void *result)
+  args = new Puma::CTypeList (1);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_VOID));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_return", current_scope, type);
+  createParameter (info, args->Entry (0));
+}
+
+// extend the C/C++ semantic
+slice class Puma::ExtGnuPIC24BuiltinsSemantic {
+public:
+  void define_gnu_pic24_builtins ();
+};
+
+slice void Puma::ExtGnuPIC24BuiltinsSemantic::define_gnu_pic24_builtins () {
+  // declare GNU built-ins
+
+  Puma::CFunctionInfo *info;
+  Puma::CTypeInfo *type;
+  Puma::CTypeList *args;
+
+  // int __builtin_addab (void)
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_addab", current_scope, type);
+  
+  // int __builtin_add(int value, const int shift);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_INT, true, false, false));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_add", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+
+  // void __builtin_btg(unsigned int *, unsigned int 0xn);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_UNSIGNED_INT));
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_btg", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // int __builtin_clr(void);
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_clr", current_scope, type);
+  
+  // int __builtin_clr_prefetch(int **xptr, int *xval, int xincr,
+  //                            int **yptr, int *yval, int yincr, int *AWB)
+  args = new Puma::CTypeList (7);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_clr_prefetch", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  createParameter (info, args->Entry (3));
+  createParameter (info, args->Entry (4));
+  createParameter (info, args->Entry (5));
+  createParameter (info, args->Entry (6));
+  
+  // unsigned int __builtin_divf(unsigned int num, unsigned int den);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_divf", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // signed int __builtin_divmodsd(signed long dividend, signed int divisor,
+  //                               signed int *remainder);
+  args = new Puma::CTypeList (3);
+  args->AddEntry (&Puma::CTYPE_LONG);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_divmodsd", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  
+  // unsigned int __builtin_divmodud(unsigned long dividend, unsigned int divisor,
+  //                                 unsigned int *remainder);
+  args = new Puma::CTypeList (3);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_UNSIGNED_INT));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_divmodud", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  
+  // int __builtin_divsd(const long num, const int den);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_LONG, true, false, false));
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_INT, true, false, false));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_divsd", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // unsigned int __builtin_divud(const unsigned long num, const unsigned int den);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_UNSIGNED_LONG, true, false, false));
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_UNSIGNED_INT, true, false, false));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_divud", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // unsigned int __builtin_dmaoffset(const void *p);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypeQualified (&Puma::CTYPE_VOID, true, false, false)));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_dmaoffset", current_scope, type);
+  createParameter (info, args->Entry (0));
+  
+  // int __builtin_ed(int sqr, int **xptr, int xincr,
+  //                  int **yptr, int yincr, int *distance);
+  args = new Puma::CTypeList (6);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_ed", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  createParameter (info, args->Entry (3));
+  createParameter (info, args->Entry (4));
+  createParameter (info, args->Entry (5));
+  
+  // int __builtin_edac(int sqr, int **xptr, int xincr,
+  //                    int **yptr, int yincr, int *distance);
+  args = new Puma::CTypeList (6);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_edac", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  createParameter (info, args->Entry (3));
+  createParameter (info, args->Entry (4));
+  createParameter (info, args->Entry (5));
+  
+  // int __builtin_fbcl(int value);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_fbcl", current_scope, type);
+  createParameter (info, args->Entry (0));
+  
+  // int __builtin_lac(int value, int shift);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_lac", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // int __builtin_mac(int a, int b,
+  //                   int **xptr, int *xval, int xincr,
+  //                   int **yptr, int *yval, int yincr, int *AWB);
+  args = new Puma::CTypeList (9);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_mac", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  createParameter (info, args->Entry (3));
+  createParameter (info, args->Entry (4));
+  createParameter (info, args->Entry (5));
+  createParameter (info, args->Entry (6));
+  createParameter (info, args->Entry (7));
+  createParameter (info, args->Entry (8));
+  
+  // signed int __builtin_modsd(signed long dividend, signed int divisor);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_LONG);
+  args->AddEntry (&Puma::CTYPE_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_modsd", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // unsigned int __builtin_modud(unsigned long dividend,
+  //                              unsigned int divisor);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_LONG);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_modud", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // int __builtin_movsac(int **xptr, int *xval, int xincr,
+  //                      int **yptr, int *yval, int yincr, int *AWB);
+  args = new Puma::CTypeList (7);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_movsac", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  createParameter (info, args->Entry (3));
+  createParameter (info, args->Entry (4));
+  createParameter (info, args->Entry (5));
+  createParameter (info, args->Entry (6));
+  
+  // int __builtin_mpy(int a, int b,
+  //                   int **xptr, int *xval, int xincr,
+  //                   int **yptr, int *yval, int yincr);
+  args = new Puma::CTypeList (8);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_mpy", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  createParameter (info, args->Entry (3));
+  createParameter (info, args->Entry (4));
+  createParameter (info, args->Entry (5));
+  createParameter (info, args->Entry (6));
+  createParameter (info, args->Entry (7));
+  
+  // int __builtin_mpyn(int a, int b,
+  //                    int **xptr, int *xval, int xincr,
+  //                    int **yptr, int *yval, int yincr);
+  args = new Puma::CTypeList (8);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_mpyn", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  createParameter (info, args->Entry (3));
+  createParameter (info, args->Entry (4));
+  createParameter (info, args->Entry (5));
+  createParameter (info, args->Entry (6));
+  createParameter (info, args->Entry (7));
+  
+  // int __builtin_msc(int a, int b,
+  //                   int **xptr, int *xval, int xincr,
+  //                   int **yptr, int *yval, int yincr, int *AWB);
+  args = new Puma::CTypeList (9);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypePointer (&Puma::CTYPE_INT)));
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (new Puma::CTypePointer (&Puma::CTYPE_INT));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_msc", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  createParameter (info, args->Entry (2));
+  createParameter (info, args->Entry (3));
+  createParameter (info, args->Entry (4));
+  createParameter (info, args->Entry (5));
+  createParameter (info, args->Entry (6));
+  createParameter (info, args->Entry (7));
+  createParameter (info, args->Entry (8));
+  
+  // signed long __builtin_mulss(const signed int p0, const signed int p1);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_INT, true, false, false));
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_INT, true, false, false));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_LONG, args, true);
+  info = createFunction ("__builtin_mulss", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // signed long __builtin_mulsu(const signed int p0, const unsigned int p1);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_INT, true, false, false));
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_UNSIGNED_INT, true, false, false));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_LONG, args, true);
+  info = createFunction ("__builtin_mulsu", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // signed long __builtin_mulus(const unsigned int p0, const signed int p1);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_UNSIGNED_INT, true, false, false));
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_INT, true, false, false));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_LONG, args, true);
+  info = createFunction ("__builtin_mulus", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // unsigned long __builtin_muluu(const unsigned int p0, const unsigned int p1);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_UNSIGNED_INT, true, false, false));
+  args->AddEntry (new Puma::CTypeQualified (&Puma::CTYPE_UNSIGNED_INT, true, false, false));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_LONG, args, true);
+  info = createFunction ("__builtin_muluu", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // void __builtin_nop(void);
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_nop", current_scope, type);
+  
+  // unsigned int __builtin_psvpage(const void *p);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypeQualified (&Puma::CTYPE_VOID, true, false, false)));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_psvpage", current_scope, type);
+  createParameter (info, args->Entry (0));
+  
+  // unsigned int __builtin_psvoffset(const void *p);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypeQualified (&Puma::CTYPE_VOID, true, false, false)));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_psvoffset", current_scope, type);
+  createParameter (info, args->Entry (0));
+  
+  // unsigned int __builtin_readsfr(const void *p);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypeQualified (&Puma::CTYPE_VOID, true, false, false)));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_readsfr", current_scope, type);
+  createParameter (info, args->Entry (0));
+  
+  // int __builtin_return_address (const int level);
+  // => this function is alread defined for all gnu dialects
+  //    it has a slightly different signature, but should be compatible
+  
+  // int __builtin_sac(int value, int shift);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_sac", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+
+  // int __builtin_sacr(int value, int shift);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_INT);
+  args->AddEntry (&Puma::CTYPE_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_sacr", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // int __builtin_sftac(int shift);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_sftac", current_scope, type);
+  createParameter (info, args->Entry (0));
+  
+  // int __builtin_subab(void);
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_INT, args, true);
+  info = createFunction ("__builtin_subab", current_scope, type);
+  
+  // unsigned int __builtin_tblpage(const void *p);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypeQualified (&Puma::CTYPE_VOID, true, false, false)));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_tblpage", current_scope, type);
+  createParameter (info, args->Entry (0));
+  
+  // unsigned int __builtin_tbloffset(const void *p);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (new Puma::CTypePointer (new Puma::CTypeQualified (&Puma::CTYPE_VOID, true, false, false)));
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_tbloffset", current_scope, type);
+  createParameter (info, args->Entry (0));
+  
+  // unsigned int __builtin_tblrdh(unsigned int offset);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_tblrdh", current_scope, type);
+  createParameter (info, args->Entry (0));
+ 
+  // unsigned int __builtin_tblrdl(unsigned int offset);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_UNSIGNED_INT, args, true);
+  info = createFunction ("__builtin_tblrdl", current_scope, type);
+  createParameter (info, args->Entry (0));
+  
+  // void __builtin_tblwth(unsigned int offset, unsigned int data);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_tblwth", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // void __builtin_tblwtl(unsigned int offset, unsigned int data);
+  args = new Puma::CTypeList (2);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_INT);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_tblwtl", current_scope, type);
+  createParameter (info, args->Entry (0));
+  createParameter (info, args->Entry (1));
+  
+  // void __builtin_write_NVM(void);
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_write_NVM", current_scope, type);
+  
+  // void __builtin_write_RTCWEN(void);
+  args = new Puma::CTypeList (0);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_write_RTCWEN", current_scope, type);
+  
+  // void __builtin_write_OSCCONL(unsigned char value);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_CHAR);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_write_OSCCONL", current_scope, type);
+  createParameter (info, args->Entry (0));
+  
+  // void __builtin_write_OSCCONH(unsigned char value);
+  args = new Puma::CTypeList (1);
+  args->AddEntry (&Puma::CTYPE_UNSIGNED_CHAR);
+  type = new Puma::CTypeFunction (&Puma::CTYPE_VOID, args, true);
+  info = createFunction ("__builtin_write_OSCCONH", current_scope, type);
+  createParameter (info, args->Entry (0));
+
+}
+
+#endif /* __ext_gnu_h__ */

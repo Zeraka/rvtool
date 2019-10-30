@@ -1,0 +1,99 @@
+Before: int a
+ent: 42
+Around: int a
+ent: 42
+Around (inner): int a
+ent (inner): 64
+res (inner): 64
+tmp: 64
+After: int a
+res: 96
+
+GET:
+
+A:
+Before: int a
+ent: 64
+Around: int a
+ent: 64
+Around (inner): int a
+ent (inner): 64
+res (inner): 64
+tmp: 64
+After: int a
+res: 96
+
+X1:
+Before: int T1::x
+ent: 23
+Around: int T1::x
+ent: 23
+Around (inner): int T1::x
+ent (inner): 64
+res (inner): 64
+tmp: 64
+After: int T1::x
+res: 96
+
+X2:
+Before: int T1::x
+ent: 64
+Around: int T1::x
+ent: 64
+Around (inner): int T1::x
+ent (inner): 64
+res (inner): 64
+tmp: 64
+After: int T1::x
+res: 96
+
+X3:
+Before: int T1::x
+ent: 64
+Around: int T1::x
+ent: 64
+Around (inner): int T1::x
+ent (inner): 64
+res (inner): 64
+tmp: 64
+After: int T1::x
+res: 96
+
+M1:
+Before: int T1::m
+ent: 5
+Around: int T1::m
+ent: 5
+Around (inner): int T1::m
+ent (inner): 64
+ent ( via memberptr() ): 64
+res (inner): 64
+tmp: 64
+After: int T1::m
+res: 96
+
+M2:
+Before: int T1::m
+ent: 64
+Around: int T1::m
+ent: 64
+Around (inner): int T1::m
+ent (inner): 64
+ent ( via memberptr() ): 64
+res (inner): 64
+tmp: 64
+After: int T1::m
+res: 96
+
+P1:
+Before: int T1::p
+ent: 13
+Around: int T1::p
+ent: 13
+Around (inner): int T1::p
+ent (inner): 64
+ent ( via memberptr() ): 64
+res (inner): 64
+tmp: 64
+After: int T1::p
+res: 96

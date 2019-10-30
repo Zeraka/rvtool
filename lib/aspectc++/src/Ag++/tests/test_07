@@ -1,0 +1,20 @@
+DESC="Generate modified include files"
+
+main()
+{
+  EXEC="${AGCC} --path src -v2 -Isrc --include_files --dest includes"
+  if  ( ${EXEC} );then true;else
+    ERR_MSG="Failed executing '${EXEC}'";
+    return 1;
+  fi;
+
+  if [ ! -d includes ];then
+    ERR_MSG="Directory with include files was not genereated";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+   rm -rf includes;
+}

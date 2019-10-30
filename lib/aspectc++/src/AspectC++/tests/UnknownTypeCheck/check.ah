@@ -1,0 +1,14 @@
+#ifndef __Check_ah__
+#define __Check_ah__
+
+#include <stdio.h>
+
+aspect Check {
+  advice target ("B") && call ("% %::f(...)") : around () {
+    printf ("--> %s\n", tjp->signature ());
+    tjp->proceed ();
+    printf ("<--\n");
+  }
+};
+
+#endif // __Check_ah__

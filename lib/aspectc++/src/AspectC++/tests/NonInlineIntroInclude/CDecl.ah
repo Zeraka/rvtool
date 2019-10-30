@@ -1,0 +1,9 @@
+#ifndef __CDdecl_ah__
+#define __CDdecl_ah__
+
+aspect CDecl {
+public:
+    advice "C" : void f ();
+};
+
+#endif //  __CDdecl_ah__

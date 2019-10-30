@@ -1,0 +1,9 @@
+Bug235: buggy project repository with abstract aspects
+======================================================
+ENTRY: void classA::methodA()
+void classA::methodA()
+EXIT: void classA::methodA()
+ENTRY: void classB::methodB()
+void classB::methodB()
+EXIT: void classB::methodB()
+======================================================

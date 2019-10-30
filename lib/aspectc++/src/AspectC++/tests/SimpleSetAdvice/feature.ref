@@ -1,0 +1,129 @@
+SET:
+
+A:
+Before: int a
+ent: 42
+new: 5
+obj: <null>
+src: <null>
+Around: int a
+ent: 42
+new: 5
+ent (inner): 42
+new (inner): 10
+set (inner): 10
+set: 10
+After: int a
+set: 42
+
+X1:
+Before: int T1::x
+ent: 23
+new: 7
+obj: <null>
+src: <null>
+Around: int T1::x
+ent: 23
+new: 7
+ent (inner): 23
+new (inner): 14
+set (inner): 14
+set: 14
+After: int T1::x
+set: 46
+
+X2:
+Before: int T1::x
+ent: 46
+new: 99
+obj: <null>
+src: <null>
+Around: int T1::x
+ent: 46
+new: 99
+ent (inner): 46
+new (inner): 198
+set (inner): 198
+set: 198
+After: int T1::x
+set: 230
+
+X3:
+Before: int T1::x
+ent: 230
+new: 21
+obj: <null>
+src: <null>
+Around: int T1::x
+ent: 230
+new: 21
+ent (inner): 230
+new (inner): 42
+set (inner): 42
+set: 42
+After: int T1::x
+set: 74
+
+M1:
+Before: int T1::m
+ent: 5
+new: -3
+obj: <obj>
+src: <null>
+Around: int T1::m
+ent: 5
+new: -3
+ent (inner): 5
+new (inner): -6
+set (inner): -6
+set: -6
+After: int T1::m
+set: 26
+
+M2:
+Before: int T1::m
+ent: 26
+new: 49
+obj: <obj>
+src: <obj>
+Around: int T1::m
+ent: 26
+new: 49
+ent (inner): 26
+new (inner): 98
+set (inner): 98
+set: 98
+After: int T1::m
+set: 130
+
+M3:
+Before: int T1::m
+ent: 130
+new: 33
+obj: <obj>
+src: <obj>
+Around: int T1::m
+ent: 130
+new: 33
+ent (inner): 130
+new (inner): 66
+set (inner): 66
+set: 66
+After: int T1::m
+set: 98
+
+P1:
+Before: int T1::p
+ent: 13
+new: 15
+obj: <obj>
+src: <obj>
+Around: int T1::p
+ent: 13
+new: 15
+ent (inner): 13
+new (inner): 30
+set (inner): 30
+set: 30
+After: int T1::p
+set: 62

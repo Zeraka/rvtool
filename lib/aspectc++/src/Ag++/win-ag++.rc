@@ -1,0 +1,41 @@
+/////////////////////////////////////////
+//
+// Version
+//
+
+#include "version.h"
+
+1 ICON DISCARDABLE "win-ac++.ico"
+
+1 VERSIONINFO
+ FILEVERSION 0,0,6,0
+ PRODUCTVERSION 0,0,6,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040704b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", COMPANY_NAME
+            VALUE "FileDescription", "G++ Wrapper for AspectC++ Weaver\0"
+            VALUE "FileVersion", _VERSION
+            VALUE "InternalName", "ag++\0"
+            VALUE "LegalCopyright", COPYRIGHT
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "win-ag++.rc\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "ag++\0"
+            VALUE "ProductVersion", _VERSION
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x407, 1200
+    END
+END

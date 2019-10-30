@@ -1,0 +1,50 @@
+How to compile AspectC++ (for Linux on Linux):
+==============================================
+
+Prerequisites for compiling the AspectC++ project from the source
+repository:
+
+  - The GNU C++ compiler (g++), normally the default compiler of
+    the mainstream Linux distributions will work.
+
+  - Working binaries for ac++ and ag++ (the Puma library itself
+    is implemented in AspectC++!) -- you can get binaries from
+    http://www.aspectc.org/. Unpack the tarball and make sure the
+    directory which contains ag++ and ac++ is in your command
+    search path.
+    Hint: Woven sources from http://www.aspectc.org/ do not require
+    working ac++ and ag++ for compiling Puma. Adjust the first step to:
+      $ make -C Puma compile
+
+  - libxml2 including header files (libxml2-dev on some Linux
+    distributions). Check if the xml2-config command is in your
+    command search path.
+
+Steps for compiling the AspectC++ project (for details, consult the
+README files within each of the subdirectories):
+
+$ make -C Puma
+$ make -C AspectC++ SHARED=1
+$ make -C Ag++
+
+Hint: Compilation can be significantly sped up on multi-processor/multi-core
+machines by parallelizing the build process.  Add "-j<P>" to the make
+invocations mentioned above; "<P>" is the number of parallel activities you
+want to allow, e.g. "make -C Puma -j2".
+
+Eventually you will find the compiled binaries of ag++ and ac++ in the
+directory "AspectC++/bin/linux-release". These binaries are statically
+linked against Puma, but all other libraries (including libxml2) are
+used dynamically.
+
+ -  If you need statically linked binaries, follow the instructions in
+    AspectC++/README.
+
+ -  If you want a "debug-build" instead of a release build, use "TARGET=linux"
+    as an additional option when you run "make" (in all three directories).
+
+If you experience any problems, use our aspectc-user mailing list or
+our bugzilla system. Visit www.aspectc.org and look for "support" for
+information.
+
+The AspectC++ Developers

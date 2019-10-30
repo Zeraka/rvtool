@@ -1,0 +1,18 @@
+int N1::foo()
+int N2::foo()
+int N2::foo()
+int bar()
+int bar()
+int bar()
+int bar()
+StandAloneCalls:
+===============================================================
+here starts main, but we should have seen our advice already
+global var 1 = 1
+global var 2-1 = 1, 2-2 = 1
+global var 3 = 42
+---------------------------------------------------------------
+Now the advice for calls in constructor init lists is checked
+int bar()
+int bar()
+---------------------------------------------------------------

@@ -1,0 +1,12 @@
+#ifndef __A0_ah__
+#define __A0_ah__
+
+#include <stdio.h>
+
+aspect A0 {
+    advice execution ("% in_header(...)") : before () {
+	printf ("A0\n");
+    }
+};
+
+#endif

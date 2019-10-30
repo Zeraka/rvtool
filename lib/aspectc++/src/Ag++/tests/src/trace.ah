@@ -1,0 +1,12 @@
+#ifndef __trace_ah__
+#define __trace_ah__
+#include <stdio.h>
+aspect Trace{
+	pointcut func() = "% Test::%(...)";
+	advice execution(func()): before() {
+		printf("before (Trace 1): %s \n",JoinPoint::signature());
+		}
+};
+
+#endif //__test_ah__
+

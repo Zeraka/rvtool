@@ -1,0 +1,147 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//
+// This program is free software;  you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 2 of
+// the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this program; if not, write to the Free
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+// MA  02111-1307  USA
+
+#ifndef __ext_cc1x_h__
+#define __ext_cc1x_h__
+
+#include "Puma/Config.h"
+#include "Puma/Lexer.h"
+#include "Puma/Token.h"
+#include "Puma/CTokens.h"
+
+namespace Puma {
+slice class ExtCC1XSyntax;
+slice class ExtCC1XBuilder;
+slice class ExtCC1XSemantic;
+}
+
+aspect ExtCC1X {
+  // flags to enable/disable certain C++1x features
+  bool _static_assert;
+
+  // pointcut definitions
+  pointcut ccsyntax ()      = "Puma::CCSyntax";
+  pointcut ccbuilder ()     = "Puma::CBuilder";
+  pointcut ccsemantic ()    = "Puma::CCSemantic";
+
+  // ----------------------------------------------------
+  // 'static_assert'
+  // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1720.html
+  // ----------------------------------------------------
+
+  // To clause 7, Declarations [dcl.dcl], paragraph 1, add an additional entry
+  // to block-declaration:
+  //
+  // static_assert-declaration
+  advice execution ("bool Puma::CCSyntax::BlockDecl::parse(...)") : after () {
+    // 1: static_assert_decl
+    JoinPoint::template Arg<0>::ReferredType &s = *tjp->arg<0>();
+    bool &result = *tjp->result ();
+    if (_static_assert && !result && s.static_assert_decl ()) {
+      result = true;
+    }
+  }
+
+  // To clause 9.2, Class members [class.mem], initial paragraph, add an
+  // additional entry to member-declaration
+  //
+  // static_assert-declaration
+  advice execution ("% Puma::CCSyntax::rule_member_decl()") : after () {
+    // 1: static_assert_decl
+    JoinPoint::Result &result = *tjp->result ();
+    if (_static_assert && !result && tjp->that ()->static_assert_decl ())
+      result = tjp->that ()->builder ().member_decl();
+  }
+
+  
+  // To clause 7, Declarations [dcl.dcl], paragraph 1, add an additional
+  // outer level grammar element:
+  //
+  // static_assert-declaration:
+  //             static_assert ( constant-expression  ,  string-literal  ) ;
+  advice ccsyntax()   : slice Puma::ExtCC1XSyntax;
+  advice ccbuilder()  : slice Puma::ExtCC1XBuilder;
+  advice ccsemantic() : slice Puma::ExtCC1XSemantic;
+
+  // ----------------------------------------------------
+  // get the configuration and check whether the C++1X mode is enabled
+  // ----------------------------------------------------
+
+  advice args (config) && within (derived ("Puma::Syntax")) &&
+         execution ("void Puma::%::configure(...)"): before (Puma::Config &config) {
+    // check for the c++1x option, which enables *all* C++1X extensions
+    if (config.Option ("--c++1x")) {
+      _static_assert = true;
+      // ... more extensions to be implemented
+    }
+
+    // these options can be explicitely set even without --c++1x
+    if (config.Option ("--c++1x-static-assert"))
+      _static_assert = true;
+  }
+
+
+  // ----------------------------------------------------
+  // extend the scanner to recognize C++11 tokens
+  // ----------------------------------------------------
+
+  static const unsigned int _config_mask_cc1x = 4;
+
+  advice "Puma::CScanner" : slice class { bool _config_cc1x; };
+
+  advice construction("Puma::CScanner") : after () {
+    tjp->that ()->_config_cc1x = false;
+  }
+
+  advice args (config) &&
+         execution("void Puma::CScanner::configure (...)"):
+  after (const Puma::Config &config) {
+    tjp->that()->_config_cc1x = _static_assert;
+    // check whether --c++1x was given and potentially enable C++1X keywords
+    if (config.Option ("--c++1x") ||
+        config.Option ("--c++1x-static-assert")) {
+      tjp->that()->allow_cc1x (true);
+      tjp->that()->_config_cc1x = true;
+    }
+  }
+
+  advice call ("% Puma::CCLexer::instance(...)") &&
+    within ("Puma::CScanner"): before () {
+    if (tjp->that ()->_config_cc1x)
+      *tjp->arg<0>() |= _config_mask_cc1x;
+  }
+
+  advice execution ("% Puma::CCLexer::add_keywords(...)") : after () {
+    if (tjp->that ()->_config_mask & _config_mask_cc1x) {
+
+      lexertl::rules &rules = *tjp->arg<0>();
+
+      // C++1X keywords
+      rules.push ("static_assert", Puma::TOK_STATIC_ASSERT, LID(Puma::Token::keyword_id));
+    }
+  }
+
+protected:
+  ExtCC1X () : _static_assert (false) {}
+
+public:
+  // interface for other extensions that include the static assert feature
+  void enable_static_assert (bool enable = true) { _static_assert = enable; }
+};
+
+#endif /* __ext_cc1x_h__ */

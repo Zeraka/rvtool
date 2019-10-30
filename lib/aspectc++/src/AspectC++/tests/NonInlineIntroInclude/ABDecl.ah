@@ -1,0 +1,19 @@
+#ifndef __ABDecl_ah__
+#define __ABDecl_ah__
+
+// Forward declarations
+class A;
+class B;
+
+aspect ABDecl {
+public:
+    // introduce references into A and B (crossed)
+    advice "A" : B *_bref;
+    advice "B" : A *_aref;
+
+    // introduce the function declarations
+    advice "A"||"B" : void f1 ();
+    advice "A"||"B" : void f2 ();
+};
+
+#endif //  __ABDecl_ah__

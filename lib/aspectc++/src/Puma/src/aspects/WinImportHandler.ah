@@ -1,0 +1,65 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __WinImportHandler__
+#define __WinImportHandler__
+
+/********************************************************/
+/* Win #import directive support                        */
+/********************************************************/
+
+#include "Puma/Config.h"
+#include <string.h>
+
+
+aspect WinImportHandler {
+  /********************************************************/
+  /* Win #import directive                                */
+  /********************************************************/
+
+  // pointcuts
+  pointcut cpp () = classes ("Puma::PreprocessorParser");
+  
+  // handle --import-handler option
+  advice args (config, process_includes) && 
+   execution ("void Puma::PreprocessorParser::configure(...)") : 
+   before (const Puma::Config &config, bool process_includes) {
+    const Puma::ConfOption *opt;
+    char *tmp;
+    
+    if (process_includes) {
+      opt = config.Option ("--import-handler");
+      if (opt && opt->Arguments ()) {
+        // delete old import handler
+        if (thisJoinPoint->that ()->_importHandler)
+          delete[] thisJoinPoint->that ()->_importHandler;
+        
+        // get new import handler
+        tmp = new char[strlen (opt->Argument (0))+1];
+        strcpy (tmp, opt->Argument (0));
+        thisJoinPoint->that ()->_importHandler = tmp;
+      }
+    }
+  }
+
+protected:
+  WinImportHandler () {}
+};
+
+
+#endif /* __WinImportHandler__ */

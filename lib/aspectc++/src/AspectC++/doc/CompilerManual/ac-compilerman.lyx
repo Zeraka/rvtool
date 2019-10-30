@@ -1,0 +1,5180 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+%
+% setup fancyhdr
+%
+\RequirePackage{fancyhdr}
+\fancypagestyle{plain}{%
+  %
+  % two side book class setup
+  % odd page  - left head: chapter  - left foot: page number
+  % even page - right head: section - right foot: page number
+  % no head on plain pages
+  %
+  \fancyhf{}%
+  \fancyhead[LE,RO]{\slshape \rightmark}
+  \fancyhead[LO,RE]{\slshape \leftmark}
+  \fancyfoot[LE,RO]{\bfseries \thepage}
+  %
+  % rules for head and foot
+  % also on plain pages
+  %
+  \renewcommand{\headrulewidth}{.4pt}
+  \renewcommand{\footrulewidth}{.4pt}
+  \renewcommand{\plainfootrulewidth}{.4pt}
+}
+%
+% Variables to change some details
+%
+% version number for this document
+%
+\newcommand{\@version}{1}
+\newcommand{\version}[1]{ \renewcommand{\@version}{#1} }
+%
+%
+\newcommand\pslogo[1]{\gdef\@pslogo{#1}}
+\pslogo{}
+%
+\newcommand\otherlogo[1]{\gdef\@otherlogo{#1}}
+\otherlogo{}
+%
+\newcommand\remark[1]{\gdef\@remark{#1}}
+\remark{}
+%
+\newcommand{\doctype}[1]{\gdef\@doctype{#1}}
+\doctype{Studie:}
+%
+\newcommand\credit[1]{\gdef\@credit{#1}}
+\credit{Diese Studie wurde durch die\par
+\vskip .3cm
+pure-systems GmbH\par
+Agnetenstr. 14\par
+39106 Magdeburg\par
+http://www.pure-systems.com\par
+\vskip .3cm
+erstellt.}
+%
+%
+%
+\newcommand\layoutlogos{
+
+        \newlength{\@pslogowidth}
+        \newlength{\@otherlogowidth}
+        \settowidth{\@otherlogowidth}{\@otherlogo}
+        \settowidth{\@pslogowidth}{\@pslogo}
+
+        \noindent
+        \begin{minipage}{\@otherlogowidth}
+        {\@otherlogo}
+        \end{minipage}
+        \hspace*{\fill}
+        \begin{minipage}{\@pslogowidth}
+        {\@pslogo} 
+        \end{minipage}
+}
+
+%
+% redefine \maketitle macro
+%
+\renewcommand{\maketitle}{
+    \null
+    \thispagestyle{empty}
+
+        {\layoutlogos}
+
+        \vskip 3cm
+        \begin{center}\leavevmode
+        {\Huge\raggedright {\@doctype}\\ {\@title}\par}
+        \rule{\textwidth}{1mm}
+        \vskip 3mm
+        {\Large\raggedleft {\@author}\par}
+        \vskip 15mm
+        {\Large\raggedleft {\@date}\par}
+        \end{center}
+        \vfill
+        {\large\raggedleft {\@remark}\par}
+        \vskip 1cm
+        \null
+%
+        \newpage
+%
+        \null
+        \thispagestyle{empty}
+        \vfill
+        {\@credit}
+        \null
+        \cleardoublepage
+}
+
+%--------------------------------------------------------------------
+% setup pure-systems style
+%--------------------------------------------------------------------
+\doctype{Documentation:}
+\credit{
+  \noindent\small{(c) 2017 Olaf Spinczyk and pure-systems GmbH\\All rights reserved.}}
+\pslogo{
+  \resizebox{6cm}{!}{\includegraphics{images/ps-logo}}}
+\otherlogo{
+  \resizebox{4cm}{!}{\includegraphics{images/ac++logo}}}
+\sloppy
+\remark{
+  \small{(c) 2017 Olaf Spinczyk$^1$ and pure-systems GmbH$^2$\\~\\
+$^1$os@aspectc.org\\
+http://www.aspectc.org\\~\\
+$^2$aspectc@pure-systems.com\\
+http://www.pure-systems.com\\
+Agnetenstr. 14\\
+39106 Magdeburg\\
+Germany
+}}
+
+% less than one half space between lines
+\setstretch{1.15}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing onehalf
+\use_hyperref true
+\pdf_title "AC++ Compiler Manual"
+\pdf_author "\\textcopyright\\ Olaf Spinczyk and pure-systems GmbH"
+\pdf_subject "Documentation"
+\pdf_keywords "AOP, AspectC++, ac++, pure-systems"
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "urlcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.5cm
+\topmargin 3cm
+\rightmargin 3.5cm
+\bottommargin 4cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+
+\emph on
+AC++ Compiler Manual
+\end_layout
+
+\begin_layout Author
+
+\size largest
+Olaf Spinczyk
+\begin_inset VSpace 3mm
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+and pure-systems GmbH
+\end_layout
+
+\begin_layout Date
+Version 2.2, March 10, 2017
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+clearpage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+\family sans
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Introduction"
+
+\end_inset
+
+
+\family default
+Introduction
+\end_layout
+
+\begin_layout Standard
+The program 
+\family typewriter
+ac++
+\family default
+ is a compiler for the AspectC++ programming language.
+ It is implemented as a preprocessor that transforms AspectC++ code into
+ ordinary C++ code.
+ During this transformation aspect code, which is defined by aspects, is
+ woven statically into the component code.
+ Aspects are a special AspectC++ language element, which can be used to
+ implement crosscutting concerns in separate modules.
+ Aspect definitions have to be implemented in special 
+\begin_inset Quotes eld
+\end_inset
+
+aspect header files
+\begin_inset Quotes erd
+\end_inset
+
+, which normally have the filename extension 
+\begin_inset Quotes eld
+\end_inset
+
+.ah
+\begin_inset Quotes erd
+\end_inset
+
+.
+ After the code transformation the output of 
+\family typewriter
+ac++
+\family default
+ can be compiled to executable code with ordinary C++ compilers like GNU
+ 
+\family typewriter
+g++
+\family default
+, or Microsoft VisualC++.
+\end_layout
+
+\begin_layout Standard
+More details about the features of AspectC++ can be found in the quick reference
+ sheet and the publications about the language and its application.
+ Everything is available on the AspectC++ homepage 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.aspectc.org
+\end_layout
+
+\end_inset
+
+, which is also a source for updates of this manual.
+\end_layout
+
+\begin_layout Standard
+The compiler's source code is freely available from the project's web site
+ and covered by the GPL.
+ For your convenience there are also binary versions of the open source
+ implementation available.
+ Besides the free GPL version, commercial licenses for 
+\family typewriter
+ac++
+\family default
+, the underlying parser and code manipulator library and the 
+\family typewriter
+ac++
+\family default
+ integration into the MS Visual Studio IDE as well as commercial support
+ are available from pure-systems GmbH
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.pure-systems.com/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+This document focuses on how the 
+\family typewriter
+ac++
+\family default
+ compiler works and how it is used.
+ The following sections are structured as follows: Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:install"
+
+\end_inset
+
+ describes how to get and install the compiler.
+ It is followed by section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Invocation"
+
+\end_inset
+
+, which describes the two transformation modes of 
+\family typewriter
+ac++
+\family default
+ and the meaning of the command line arguments.
+ Platform-specific notes are given in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Platform-Notes"
+
+\end_inset
+
+.
+ It describes the specifics of the ac++ ports and which non-standard features
+ of the back-end C++ compiler are supported.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Problems"
+
+\end_inset
+
+ lists some known problems, common pitfalls, and unimplemented language
+ features.
+\end_layout
+
+\begin_layout Section
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:install"
+
+\end_inset
+
+Download and Installation
+\end_layout
+
+\begin_layout Standard
+Binaries of 
+\family typewriter
+ac++
+\family default
+ for various platforms are available for free download from the AspectC++
+ homepage (see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Platform-Notes"
+
+\end_inset
+
+ for the list and state of the 
+\family typewriter
+ac++
+\family default
+ ports).
+ The versioning scheme is shown in table 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "tab:versioning"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0in">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Scheme
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Example
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Kind of Release/Meaning
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+<version>.<release>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+A regular release 0.7.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+<version>.<release>.<fix-no>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.7.3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Bug fix release number 3 of 0.7
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+<version>.<release>pre<no>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.8pre1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Pre-Release number 1 for 0.8
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:versioning"
+
+\end_inset
+
+Versioning scheme
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Besides the archive file with the compiler there is a README file and a
+ CHANGELOG file available for each release.
+ The README file explains the necessary steps for the installation, while
+ the CHANGELOG documents the changes in the corresponding release as well
+ as the history of changes.
+\end_layout
+
+\begin_layout Standard
+The following subsections explain how the current version of the 
+\family typewriter
+ac++
+\family default
+ compiler is unpacked, installed, and configured.
+ This process depends on the development platform.
+ Skip to the appropriate part from here.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:unix_install"
+
+\end_inset
+
+Linux and MacOS X
+\end_layout
+
+\begin_layout Standard
+The Linux and MacOS X installation procedures are very similar, because
+ all of them belong to the UNIX system family.
+ The 
+\family typewriter
+ac++
+\family default
+ compiler and the example code is provided in a 
+\family typewriter
+gzip
+\family default
+-ed 
+\family typewriter
+tar
+\family default
+ archive (tgz file).
+ It can be unpacked with the following command in any directory:
+\end_layout
+
+\begin_layout LyX-Code
+tar xzvf <tar-file-name>
+\end_layout
+
+\begin_layout Standard
+The command creates a directory aspectc++-<version>, which contains the
+ 
+\family typewriter
+ac++
+\family default
+ binary, the 
+\family typewriter
+ag++
+\family default
+ front-end, the example code, and everything else that is needed to run
+ the examples like a Makefile.
+ To transform the examples (in the 
+\family typewriter
+examples
+\family default
+ directory) simply execute 
+\family typewriter
+make
+\family default
+ in the installation directory.
+ Each example is then transformed from AspectC++ code into C++ code by weaving
+ aspects and saved in 
+\family typewriter
+examples/<name>-out
+\family default
+.
+ To run the example, enter the created directory, call 
+\family typewriter
+make
+\family default
+ and start the executable.
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+Makefile
+\family default
+, which is used to compile the examples uses the command 
+\family typewriter
+ag++
+\family default
+, which is a wrapper for calling 
+\family typewriter
+ac++
+\family default
+, 
+\family typewriter
+g++
+\family default
+, and for the generation of the parser configuration file, which is needed
+ for 
+\family typewriter
+ac++
+\family default
+.
+ A separate manual for 
+\family typewriter
+ag++
+\family default
+ is available from the AspectC++ web site.
+\end_layout
+
+\begin_layout Subsection
+Windows
+\end_layout
+
+\begin_layout Standard
+The Windows port of 
+\family typewriter
+ac++
+\family default
+ supports the freely available Cygwin/GNU 
+\family typewriter
+g++
+\family default
+ and MinGW 
+\family typewriter
+g++
+\family default
+ compiler as back-end compilers.
+\end_layout
+
+\begin_layout Standard
+The installation of 
+\family typewriter
+ac++
+\family default
+ in an environment with GNU 
+\family typewriter
+g++
+\family default
+ and 
+\family typewriter
+make
+\family default
+ is similar to the UNIX-like installation described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:unix_install"
+
+\end_inset
+
+.
+ Additionally refer to section 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "sec:cygwin_back_end"
+
+\end_inset
+
+, which provides some specific information about path names in the Cygwin
+ environment.
+\end_layout
+
+\begin_layout Standard
+The following procedure outlines the installation for non-g++ windows command
+ line compilers: The 
+\family typewriter
+ac++
+\family default
+ compiler and the examples are provided in a ZIP archive.
+ Unpack 
+\family typewriter
+ac++
+\family default
+ in a directory of your choice, for instance into 
+\family typewriter
+C:
+\backslash
+AC
+\family default
+.
+ The next step is to create a parser configuration file that describes predefine
+d macros and standard include file paths of your back-end compiler.
+ The files 
+\family typewriter
+pumabc55.cfg
+\family default
+ and 
+\family typewriter
+pumavc7.cfg
+\family default
+ can be taken as examples.
+ An automatic generation of the config file as under UNIX systems is not
+ available at the moment in the free 
+\family typewriter
+ac++
+\family default
+ version.
+\end_layout
+
+\begin_layout Standard
+The examples directory contains various examples that show how to write
+ aspects in AspectC++.
+ You can use the 
+\family typewriter
+examples.bat
+\family default
+ batch file to weave all the examples at once.
+ After this step the transformed example files can compiled.
+\end_layout
+
+\begin_layout Section
+
+\family sans
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Invocation"
+
+\end_inset
+
+
+\family default
+Invocation
+\end_layout
+
+\begin_layout Subsection
+Modes
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+ac++
+\family default
+ compiler supports two major transformation modes:
+\end_layout
+
+\begin_layout Subsubsection
+Whole ProgramTransformation (WPT) 
+\end_layout
+
+\begin_layout Standard
+WPT mode was the first transformation mode of 
+\family typewriter
+ac++
+\family default
+.
+ However, it is not obsolete, because it may be useful in many cases.
+ In this mode 
+\family typewriter
+ac++
+\family default
+ transforms all files in a project directory tree (or set of directories)
+ and saves the result in a different directory tree.
+ For each translation unit and header file a new file is generated in the
+ target tree with the same name.
+ If further transformations of the source code have to be done, either with
+ 
+\family typewriter
+ac++
+\family default
+ or other tools, this is the mode to choose.
+ Even comments and whitespace remain untouched.
+\end_layout
+
+\begin_layout Standard
+The compiler performs a simple dependency check in WPT mode.
+ A translation unit is recompiled if either the translation unit itself
+ or any header file of the project has been changed.
+ This is not very precise but makes sure that after changing an aspect header
+ file all translation units are recompiled.
+\end_layout
+
+\begin_layout Subsubsection
+Single Translation Unit (STU)
+\end_layout
+
+\begin_layout Standard
+In the STU mode 
+\family typewriter
+ac++
+\family default
+ must be called once for each translation unit like a normal C++ compiler.
+ This makes it easier to integrate 
+\family typewriter
+ac++
+\family default
+ into Makefiles or IDEs.
+ As 
+\family typewriter
+ac++
+\family default
+ can't save manipulated header files in this mode, because the unchanged
+ header files are needed for the next translation units, all #include directives
+ in the translation unit that refer to header files of the project directory
+ tree are expanded and, thus, saved together with the manipulated translation
+ unit.
+ The resulting files can be fed directly into a C++ compiler.
+ They do not depend on any other files of the project anymore.
+\end_layout
+
+\begin_layout Standard
+In the STU mode the user is responsible for checking the dependencies of
+ changed files and for calling the right 
+\family typewriter
+ac++
+\family default
+ to transform all translation units that depend on a changed file.
+ The general dependency rule is that a translation unit depends on every
+ header file that is directly or indirectly included and every aspect header
+ that might affect the translation unit (normally all!) and the files they
+ depend on.
+ If you are using 
+\family typewriter
+g++
+\family default
+ and 
+\family typewriter
+make
+\family default
+, checking of this rule can be automized:
+\end_layout
+
+\begin_layout LyX-Code
+g++ -E -I<some-path> -MM <trans-unit> -include "*.ah"
+\end_layout
+
+\begin_layout Standard
+This call of the 
+\family typewriter
+g++
+\family default
+ preprocessor prints a makefile dependency rule, which is suitable to determine
+ when 
+\family typewriter
+ac++
+\family default
+ must be run to rebuild a tranlsation unit.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:library"
+
+\end_inset
+
+Weaving in Library Code
+\end_layout
+
+\begin_layout Standard
+A C++ library consists of header files that have to be included by the client
+ code and an archive file that contains the object code.
+ If the library is implemented in AspectC++ and the client code should not
+ be compiled with 
+\family typewriter
+ac++
+\family default
+ it is necessary to generate manipulated header files.
+ In the WPT mode this is done anyway.
+ In the STU a directory tree with all manipulated headers can be generated
+ with the 
+\family typewriter
+-i
+\family default
+ option (see 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "sec:option_i"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Subsection
+The Project Repository
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+ac++
+\family default
+ weaver internally creates a translation unit model, which contains a descriptio
+n of all name and code join points as well as the weaving plan, while it
+ processes a C++ input file.
+ By using the command line option 
+\family typewriter
+-r
+\family default
+ (or 
+\family typewriter
+--repository
+\family default
+) it is possible to save this model in a file called the 
+\begin_inset Quotes eld
+\end_inset
+
+project repository
+\begin_inset Quotes erd
+\end_inset
+
+.
+ If the project repository already exists, ac++ will 
+\emph on
+merge
+\emph default
+ its translation unit model into the existing project repository.
+ Eventually, after translation of all C++ input files of the project, the
+ repository will contain a description of 
+\emph on
+all
+\emph default
+ potential and affected join points in the project.
+ When an input file is modified and re-translated, 
+\family typewriter
+ac++
+\family default
+ will update the repository accordingly.
+\end_layout
+
+\begin_layout Standard
+The project model can be used for various purposes, e.g.
+ as input for join point visualization tools.
+ It can also be used for checking pointcut expressions or even their interactive
+ development.
+ This is supported by the 
+\family typewriter
+-x
+\family default
+ (or 
+\family typewriter
+--expr
+\family default
+) command line option, which can be used to evaluate a given pointcut expression
+ by matching it against the join points in the the repository.
+ The internal structure of the project repository might be subject to future
+ changes.
+\end_layout
+
+\begin_layout Subsection
+Options
+\end_layout
+
+\begin_layout Standard
+Table 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "tab:options"
+
+\end_inset
+
+ summarizes the platform-independent options supported by 
+\family typewriter
+ac++
+\family default
+.
+ Platform specific options will be explained in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Platform-Notes"
+
+\end_inset
+
+.
+ All options can either be passed as command line arguments or by the configurat
+ion file
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+In the current ac++ version some of these options are not allowed in the
+ config file, namely all between 
+\family typewriter
+-v
+\family default
+ and 
+\family typewriter
+--no_problem...
+\family default
+.
+ 
+\end_layout
+
+\end_inset
+
+, which is referenced by the environment variable PUMA_CONFIG (see section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:install"
+
+\end_inset
+
+).
+ '–' in any of the columns WPT or STU means that this option has no meaning
+ in the corresponding translation mode.
+\end_layout
+
+\begin_layout Standard
+The upper part of the table lists 
+\family typewriter
+ac++
+\family default
+-specific options, while the options in the lower part are widely-known
+ from other compilers like 
+\family typewriter
+g++
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="28" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="block" valignment="top" width="6.5cm">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Option
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+WPT
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+STU
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-p|--path
+\begin_inset space ~
+\end_inset
+
+<arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Defines a project directory
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-e|--extension <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+–
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Filename extension of translation units
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-v|--verbose <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Level of verbosity (
+\family typewriter
+0
+\family default
+-
+\family typewriter
+9
+\family default
+)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-c|--compile <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+–
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name of the input file
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-o|--output <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+–
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name of the output file
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-g|--generate
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+–
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Generate link-once code
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-i|--include_files
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+–
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Generate manipulated header files
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-a|--aspect_header <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Name of aspect header file or
+\family default
+\series default
+\shape default
+\emph default
+\bar default
+ 
+\family typewriter
+\size default
+\noun default
+0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-r|--repository <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name of the project repository
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-x|--expr <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+–
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+–
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Match a pointcut expression (arg) agaist the project repository
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--config <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Parser configuration file
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-k|--keywords
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Allow AspectC++ keywords in normal project files
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--introduction_depth <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Set the maximum depth for nested introductions
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--no_line
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Disable generation of 
+\family typewriter
+#line
+\family default
+ directives
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--gen_size_type <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+use a specific string as size_t
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--warn...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+enable a weaver warning that is suppressed by default
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--no_warn...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+suppress a specific weaver warning
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--problem...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+enable back-end compiler problem workaround (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:back-end"
+
+\end_inset
+
+)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--no_problem...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disable back-end compiler problem workaround
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--builtin_operators
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Support advice on built-in operator calls
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--data_joinpoints
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Support data-based join points, e.g.
+ get(), set(), ...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--attributes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Support C++11-attribute-based join points
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--no_attributes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Disable support user-defined attributes
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-I <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Include file search path
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-D <name>[=<value>]
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Macro definitions
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+-U <name>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Undefine a macro
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\size small
+--include <arg>
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+X
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Forced include
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:options"
+
+\end_inset
+
+
+\family typewriter
+ac++
+\family default
+ Compiler Option Summary
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-p|--path
+\begin_inset space ~
+\end_inset
+
+<arg>
+\end_layout
+
+\begin_layout Standard
+This option defines the name of a project directory tree 
+\family typewriter
+<arg>
+\family default
+.
+ The option can be used more than once if several directories belong to
+ the project.
+ At least one 
+\family typewriter
+-p
+\family default
+ options is always needed when 
+\family typewriter
+ac++
+\family default
+ has to transform code, even in STU mode.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-d|--dest <arg>
+\end_layout
+
+\begin_layout Standard
+With 
+\family typewriter
+-d
+\family default
+ a target directory for saving is selected.
+ It corresponds to the last 
+\family typewriter
+-p
+\family default
+ option.
+ For example, if two directories belong to a project they would be described
+ in STU mode with
+\end_layout
+
+\begin_layout LyX-Code
+-p dir1 -p dir2
+\end_layout
+
+\begin_layout Standard
+and in WPT with two source/target pairs:
+\end_layout
+
+\begin_layout LyX-Code
+-p source1 -d target1 -p source2 -d target2
+\end_layout
+
+\begin_layout Standard
+In STU mode 
+\family typewriter
+-d
+\family default
+ makes only sense in combination with 
+\family typewriter
+-i
+\family default
+ to generate header files for a library (see 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "sec:option_i"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-e|--extension <arg>
+\end_layout
+
+\begin_layout Standard
+In WPT mode 
+\family typewriter
+ac++
+\family default
+ searches in all project directories for translation units to transform.
+ Translation units are identified by their filename extension.
+ The default is 
+\begin_inset Quotes eld
+\end_inset
+
+cc
+\begin_inset Quotes erd
+\end_inset
+
+, which means that all files ending with 
+\begin_inset Quotes eld
+\end_inset
+
+.cc
+\begin_inset Quotes erd
+\end_inset
+
+ are handled.
+ By using the option 
+\family typewriter
+-e cpp
+\family default
+ or 
+\family typewriter
+-e cxx
+\family default
+ you can select other frequently used filename extensions.
+ The option can be used more than once, but only the last one is effective.
+\end_layout
+
+\begin_layout Standard
+In WPT mode 
+\family typewriter
+ac++
+\family default
+ generates a file called 
+\family typewriter
+ac_gen.<extension>
+\family default
+.
+ This extension is also taken from the 
+\family typewriter
+-e
+\family default
+ option, if one is provided.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-v|--verbose [<arg>]
+\end_layout
+
+\begin_layout Standard
+The compiler can print message on the standard output device, which describe
+ what it is currently doing.
+ These message can be printed with different levels of details.
+ You can select this level with the parameter 
+\family typewriter
+<arg>
+\family default
+.
+ The range is from 
+\family typewriter
+0
+\family default
+, which means no output, to 
+\family typewriter
+9
+\family default
+, which means all details.
+ The option 
+\family typewriter
+-v0
+\family default
+ is the same as having no 
+\family typewriter
+-v
+\family default
+ option at all.
+ 
+\family typewriter
+-v
+\family default
+ without 
+\family typewriter
+<arg>
+\family default
+ is the same as 
+\family typewriter
+-v3
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+-v
+\family default
+ option can be used more than once but only the last one is effective.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-c|--compile <arg>
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+-c
+\family default
+ option is used to select an input file for 
+\family typewriter
+ac++
+\family default
+ in the STU mode.
+ Using it more than once is possible, but only one is effective.
+ There are no restrictions on the filename extension.
+ 
+\family typewriter
+ac++
+\family default
+ expects that the file contains AspectC++ source code.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-o|--output <arg>
+\end_layout
+
+\begin_layout Standard
+With the -o option one can select the name of the output file, i.e.
+ the name of the target of the code transformation, in STU mode.
+ If this option is not used, the default output filename is 
+\family typewriter
+ac.out
+\family default
+.
+ Note that the output filename is 
+\emph on
+not
+\emph default
+ derived from the input file name as it is done by other compilers.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:option_i"
+
+\end_inset
+
+-i|--include_files
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+-i
+\family default
+ option has to be used if the source code of the project should be compiled
+ into a library and 
+\family typewriter
+ac++
+\family default
+ should run in STU mode (see 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "sec:library"
+
+\end_inset
+
+).
+ When a translation unit is transformed by using 
+\family typewriter
+-c
+\family default
+ and 
+\family typewriter
+-o
+\family default
+ in STU mode no manipulated header files are generated.
+ All include files are expanded within the generated source code.
+ This is fully sufficient if the translation units will then be compiled
+ and linked directly.
+ However, if a library should be provided the client needs a library file
+ (an archive) 
+\emph on
+and
+\emph default
+ manipulated header files.
+ These can be generated with 
+\family typewriter
+-i
+\family default
+.
+ The generation results in a directory tree with the same structure as the
+ input directory tree specified by 
+\family typewriter
+-p
+\family default
+ exhibits.
+ Use the 
+\family typewriter
+-d
+\family default
+ option to select the target directory name(s).
+\end_layout
+
+\begin_layout Standard
+Note that at the moment only and all files with the extension 
+\family typewriter
+.h
+\family default
+ are considered to be include files.
+ This is rather inflexible and will be improved in future releases.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-a|--aspect_header <arg>
+\end_layout
+
+\begin_layout Standard
+By default 
+\family typewriter
+ac++
+\family default
+ searches all files with the filename extension 
+\family typewriter
+.ah
+\family default
+ in the project directory tree(s) and allows all aspects defined in these
+ files to affect the current translation unit.
+ If you are looking for a simple mechanism to deactivate aspects at compile-time
+, or if 
+\family typewriter
+.ah
+\family default
+ does not conform to your local conventions, or if not all aspects should
+ affect all translation units (be careful! See 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "sec:pitfalls"
+
+\end_inset
+
+), the 
+\family typewriter
+-a
+\family default
+ option might help.
+\end_layout
+
+\begin_layout Standard
+The option may be used more than once and each of them selects one aspect
+ header that has to be considered for the current translation unit in STU
+ mode or all translation units in WPT mode.
+ If no aspect header should be considered use 
+\family typewriter
+-a0
+\family default
+.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-r|--repository <arg>
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Quotes eld
+\end_inset
+
+project repository
+\begin_inset Quotes erd
+\end_inset
+
+ is an XML-based description of global information about an AspectC++ developmen
+t project that is compiled with 
+\family typewriter
+ac++
+\family default
+.
+ It fulfills two purposes:
+\end_layout
+
+\begin_layout Enumerate
+It is a vehicle to transport information from one compiler run to another
+\end_layout
+
+\begin_layout Enumerate
+It might be used by integrated development environments to visualize the
+ join points where aspects affect the component code.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+In fact, the AspectC++ Development Tools for Eclipse (ACDT) already use
+ the repository to visualize matched join points.
+ See the ACDT homepage 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://acdt.aspectc.org/
+\end_layout
+
+\end_inset
+
+ for information on the ACDT project.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+-r
+\family default
+ option is used to define the name of the project repository file.
+ However, this is an experimental feature.
+ The file format might be subject to future changes.
+ The uniqueness of join point IDs is only guaranteed if the project is compiled
+ with a project repository.
+ If a file with the given name does not exist, 
+\family typewriter
+ac++
+\family default
+ will create a new repository file.
+ If the file exists, but is empty or does not contain valid data, 
+\family typewriter
+ac++
+\family default
+ terminates with an error message.
+ A warning messages will be printed if the version of the weaver, which
+ created the project repository, differs from the current 
+\family typewriter
+ac++
+\family default
+ version.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-x|--expr <arg>
+\end_layout
+
+\begin_layout Standard
+This option is used to match a pointcut expression, given as argument <arg>,
+ against a project repository file.
+ The project repository filename has to be provided with the 
+\family typewriter
+-r
+\family default
+ option.
+ For example the following command prints all nested class known in the
+ 
+\begin_inset Quotes eld
+\end_inset
+
+PragmaOnceObserver
+\begin_inset Quotes erd
+\end_inset
+
+ test program in the AspectC++ development tree.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+prompt> ac++ -x '"%::%"' -r PragmaOnceObserver/repo.acp
+\end_layout
+
+\begin_layout Plain Layout
+
+ObserverPattern.ah:12: Class "ObserverPattern::Subject"
+\end_layout
+
+\begin_layout Plain Layout
+
+ObserverPattern.ah:13: Class "ObserverPattern::Observer"
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This example illustrates the mechanism with a more complicated pointcut
+ expression:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\footnotesize}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+prompt> ac++ -x 'call("%") && within("% main()")' -r ...
+\end_layout
+
+\begin_layout Plain Layout
+
+main.cc:29: Call "void ObserverPattern::addObserver( ...
+\end_layout
+
+\begin_layout Plain Layout
+
+main.cc:32: Call "void ObserverPattern::addObserver( ...
+\end_layout
+
+\begin_layout Plain Layout
+
+main.cc:34: Call "void ClockTimer::Tick()"
+\end_layout
+
+\begin_layout Plain Layout
+
+main.cc:37: Call "void ClockTimer::Tick()"
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that pointcut expression contain quotes (
+\family typewriter
+
+\begin_inset Quotes eld
+\end_inset
+
+
+\family default
+).
+ Make sure that quotes are not removed by the command shell.
+ On Linux systems it is a convenient solution to enclose the pointcut expression
+ in single quotes, e.g.
+ 
+\family typewriter
+'
+\begin_inset Quotes erd
+\end_inset
+
+%
+\begin_inset Quotes erd
+\end_inset
+
+'
+\family default
+.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--config <arg>
+\end_layout
+
+\begin_layout Standard
+Besides setting the environment variable 
+\family typewriter
+PUMA_CONFIG
+\family default
+ this options can be used to set the path to the parser configuration file.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-k|--keywords
+\end_layout
+
+\begin_layout Standard
+By default the AspectC++ keywords 
+\family typewriter
+aspect
+\family default
+, 
+\family typewriter
+pointcut
+\family default
+, 
+\family typewriter
+advice
+\family default
+, and 
+\family typewriter
+slice
+\family default
+ are only treated as keywords in aspect header files.
+ If they are used in normal project files, 
+\family typewriter
+ac++
+\family default
+ interprets them as normal identifiers.
+ By this design decision aspects can be woven into legacy code even if the
+ code uses the AspectC++ keywords as normal identifiers.
+\end_layout
+
+\begin_layout Standard
+If the AspectC++ keywords should be interpreted as keywords in normal project
+ files as well, the command line option 
+\family typewriter
+-k
+\family default
+ or 
+\family typewriter
+--keywords
+\family default
+ has to be used.
+\end_layout
+
+\begin_layout Standard
+In files that do 
+\emph on
+not
+\emph default
+ belong to the project, e.g.
+ standard library header files, the AspectC++ keywords are always regarded
+ as normal identifiers, even if 
+\family typewriter
+-k
+\family default
+ or 
+\family typewriter
+--keywords
+\family default
+ is used.
+\end_layout
+
+\begin_layout Standard
+If any of the AspectC++ keywords is generated by a macro, the classification
+ as keyword or identifier is based on the file in which the macro expansion
+ takes place.
+ It does not depend on the location of the macro definition.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--introduction_depth <arg>
+\end_layout
+
+\begin_layout Standard
+AspectC++ introductions may affect introduced code.
+ This is called a 
+\begin_inset Quotes eld
+\end_inset
+
+nested introduction
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In order to avoid problems with infinitely nested introductions, 
+\family typewriter
+ac++
+\family default
+ checks the 
+\begin_inset Quotes eld
+\end_inset
+
+depth
+\begin_inset Quotes erd
+\end_inset
+
+ of a nested introduction and does not allow a depth that exceeds the given
+ maximum 
+\family typewriter
+<arg>
+\family default
+.
+ The default value for 
+\family typewriter
+<arg>
+\family default
+ is 10.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--no_line
+\end_layout
+
+\begin_layout Standard
+When 
+\family typewriter
+ac++
+\family default
+ manipulates files, e.g.
+ by inserting generated code, it also inserts 
+\family typewriter
+#line
+\family default
+ directives.
+ Inserting these directives can be disabled with the 
+\family typewriter
+--no_line
+\family default
+ option.
+ Normally, 
+\family typewriter
+#line
+\family default
+ directives are only generated by C preprocessors.
+ The directives are important for back-end compiler error messages and source
+ code debuggers.
+ Without the 
+\family typewriter
+#line
+\family default
+ generation these numbers correspond to the lines in the generated code,
+ while they correspond to the source code written by the programmer otherwise.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--gen_size_type <arg>
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ac++
+\family default
+ generates a 
+\family typewriter
+new
+\family default
+ operator, which has 
+\family typewriter
+size_t
+\family default
+ in its argument type list.
+ As the generated code shall not include the respective header file (to
+ avoid portability problems), the weaver normally generates the name of
+ the right type.
+ However, in case of cross-compilation the type on the target platform might
+ differ.
+ Then it is possible to provide a string with this option, which is directly
+ used in the constructor's argument list.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--problem...
+\end_layout
+
+\begin_layout Standard
+An option like this is used to enable a back-end compiler-specific code
+ generation workaround.
+ This is sometimes needed, because the C++ compilers differ in their degree
+ of standard conformance.
+ For details about the workarounds needed for each back-end refer to section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:back-end"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--no_problem...
+\end_layout
+
+\begin_layout Standard
+This option can be used to disable a back-end compiler-specific code generation
+ workaround which is enabled by default.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--warn_...
+\end_layout
+
+\begin_layout Standard
+With this option the weaver is instructed to print specific warnings that
+ are otherwise suppressed.
+ Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:warnings"
+
+\end_inset
+
+ lists the names of warnings currently supported by the weaver.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--no_warn_...
+\end_layout
+
+\begin_layout Standard
+The warnings listed in table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:warnings"
+
+\end_inset
+
+ can be suppressed with 
+\family typewriter
+--no_warn_
+\family default
+<
+\emph on
+Name
+\emph default
+>.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Warning Name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Condition
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+deprecated
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+a deprecated syntax is being used
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+macro
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+macro-generated code would have to be transformed
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:warnings"
+
+\end_inset
+
+ac++
+\family default
+ Warnings
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--builtin_operators
+\end_layout
+
+\begin_layout Standard
+This option is needed if you want to use the pointcut function builtin().
+ For more information on this feature consult the language reference manual.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--data_joinpoints
+\end_layout
+
+\begin_layout Standard
+This option is needed if you want to use the pointcut functions get(), set(),
+ and ref().
+ For more information on this feature consult the language reference manual.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+--attributes/--no_attributes
+\end_layout
+
+\begin_layout Standard
+This option is needed if you want to use attributes in C++11-Style (e.g.
+ [[noreturn]]).
+ It is enabled by default and can be disabled with
+\family typewriter
+ --no_attributes
+\family default
+.
+ For more information on this feature consult the language reference.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-I <arg>
+\end_layout
+
+\begin_layout Standard
+The option 
+\family typewriter
+-I
+\family default
+ adds the directory 
+\family typewriter
+<arg>
+\family default
+ to the list of directories to be searched for header files.
+ It can be used more than once.
+ The compiler 
+\family typewriter
+ac++
+\family default
+ needs to know all directories, where header files for the current translation
+ unit might be located.
+\end_layout
+
+\begin_layout Standard
+In case of system headers there are often a lot of these directories.
+ To make the setup of 
+\family typewriter
+ac++
+\family default
+ more convenient we provide the 
+\family typewriter
+ag++ --gen_config
+\family default
+ command.
+ The command calls the 
+\family typewriter
+g++
+\family default
+ compiler to get all these paths.
+ Users of non-supported back-end compilers have to find out this list on
+ their own.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-D <name>[=<value>]
+\end_layout
+
+\begin_layout Standard
+With 
+\family typewriter
+-D
+\family default
+ a preprocessor macro 
+\family typewriter
+<name>
+\family default
+ will be defined.
+ Without the optional value assignment the macro will get the value 
+\family typewriter
+1
+\family default
+.
+ The option can be used more than once.
+\end_layout
+
+\begin_layout Standard
+In most cases your source code expects some standard macros to be defined
+ like 
+\family typewriter
+win32
+\family default
+, 
+\family typewriter
+linux
+\family default
+, or 
+\family typewriter
+i386
+\family default
+.
+ And even if your code doesn't use them directly, they are often required
+ to be set correctly by system header files.
+ Thus, for the 
+\family typewriter
+ac++
+\family default
+ parser a correct set of these macros has to be defined.
+ For 
+\family typewriter
+g++
+\family default
+ users we provide a command called 
+\family typewriter
+ag++
+\family default
+ that calls the compiler to get the list of these macros.
+ Users of non-supported back-end compilers have to find out this list on
+ their own.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+-U <name>
+\end_layout
+
+\begin_layout Standard
+This option can be used to undefine a previously defined macro.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:option_include"
+
+\end_inset
+
+-include <arg>
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+-include
+\family default
+ option can be used to include a file 
+\family typewriter
+<arg>
+\family default
+ into the compiled translation unit(s) even though there is no explicit
+ 
+\family typewriter
+#include
+\family default
+ directive given in the source code.
+ If multiple 
+\family typewriter
+-include
+\family default
+ options are given on the command line, the files are included in the same
+ order (from left to right).
+ If you use the option in STU mode make sure that the back-end compiler
+ is not forced to include the same files again (read details in 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "sec:dup-forced-includes"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Subsection
+Examples
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ac++
+\family default
+ 
+\begin_inset Newline newline
+\end_inset
+
+Displays all options with a short description.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ac++ -I examples/Trace -p examples/Trace -d examples/Trace-out
+\family default
+ 
+\begin_inset Newline newline
+\end_inset
+
+Transforms the complete project from directory 
+\begin_inset Quotes eld
+\end_inset
+
+examples/Trace
+\begin_inset Quotes erd
+\end_inset
+
+ into the directory 
+\begin_inset Quotes eld
+\end_inset
+
+examples/Trace-out
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is the whole program transformation (WPT) mode, which also performs
+ a simple dependency check.
+\end_layout
+
+\begin_layout Standard
+The following examples describe the compiler like interface (STU Mode).
+ All dependency handling has to be done by the user.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ac++ -c main.cc -p.
+
+\family default
+ 
+\begin_inset Newline newline
+\end_inset
+
+Transforms only the translation unit 
+\family typewriter
+main.cc
+\family default
+.
+ The default name for the output file is 
+\family typewriter
+ac.out
+\family default
+.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ac++ -c main.cc -o main.acc -p.
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+Transforms the file 
+\family typewriter
+main.cc
+\family default
+ into the new file 
+\family typewriter
+main.acc
+\family default
+.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ac++ -c main.cc -o main.acc -p.
+ -a trace.ah
+\family default
+ 
+\begin_inset Newline newline
+\end_inset
+
+Transforms the file 
+\family typewriter
+main
+\family default
+.
+\family typewriter
+cc
+\family default
+ into the new file 
+\family typewriter
+main.acc
+\family default
+ with the aspect located in 
+\family typewriter
+trace.ah
+\family default
+.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+ac++ -i -v9 -p.
+ -d includes
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+Creates the manipulated project header files and stores them into the directory
+ 
+\family typewriter
+includes
+\family default
+.
+ ATTENTION: This works only once, because the 
+\family typewriter
+includes
+\family default
+ directory is located inside the project directory tree and the aspect header
+ files exists twice then.
+\end_layout
+
+\begin_layout Section
+
+\family sans
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Platform-Notes"
+
+\end_inset
+
+
+\family default
+Platform Notes
+\end_layout
+
+\begin_layout Subsection
+Ports
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+ac++
+\family default
+ compiler was originally developed on RedHat Linux systems.Today most of
+ the development is still done under Linux (Debian and OpenSuse), but Windows
+ has become a second development platform.
+ This means that the Windows and Linux ports are the most tested.
+ The MacOS X ports were compiled, because they were demanded by users, but
+ they are far less tested than our development platform ports.
+\end_layout
+
+\begin_layout Subsubsection
+Linux
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+ac++
+\family default
+ binary was tested on\SpecialChar ldots
+
+\end_layout
+
+\begin_layout Itemize
+Debian 3.0, \SpecialChar ldots
+, 8.0 and various Ubuntu versions.
+ Note that Debian and Ubuntu packages of AspectC++ are integrated into the
+ distributions.
+ They can be easily installed with 
+\family typewriter
+\size small
+apt-get install aspectc++
+\family default
+\size default
+.
+\end_layout
+
+\begin_layout Itemize
+OpenSuse 8.2, ..., 13.2
+\end_layout
+
+\begin_layout Subsubsection
+Windows
+\end_layout
+
+\begin_layout Standard
+Windows systems have different filename conventions than UNIX systems.
+ Although ac++ was originally developed on Linux and does not use or need
+ the Cygwin environment, path names are allowed to contain '
+\family typewriter
+
+\backslash
+
+\family default
+' characters and drive names like '
+\family typewriter
+C:
+\family default
+'.
+ The UNIX filename delimiters '
+\family typewriter
+/
+\family default
+' are also accepted.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Comment
+status collapsed
+
+\begin_layout Plain Layout
+The 
+\family typewriter
+ac++
+\family default
+ compiler saves files always conforming to the Windows newline conventions,
+ i.e.
+ lines always end with a CR and a LF character.
+ As input files the UNIX and Windows conventions are accepted.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+MacOS X
+\end_layout
+
+\begin_layout Standard
+No specific information available, yet.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:back-end"
+
+\end_inset
+
+Back-End Compiler Support
+\end_layout
+
+\begin_layout Standard
+The C++ compiler that should be used to compile the output of 
+\family typewriter
+ac++
+\family default
+ (back-end compiler) plays a very important role for 
+\family typewriter
+ac++
+\family default
+, because compilers normally come with header files, which 
+\family typewriter
+ac++
+\family default
+ must be able to parse.
+ None of the back-end compilers listed here has totally standard conforming
+ header files, which makes it very hard for 
+\family typewriter
+ac++
+\family default
+ to parse all this code.
+\end_layout
+
+\begin_layout Standard
+GNU 
+\family typewriter
+g++
+\family default
+ (including Cygwin/GNU 
+\family typewriter
+g++
+\family default
+ under Windows) and 
+\family typewriter
+clang++
+\family default
+ are our best supported compilers.
+ Users of 
+\family typewriter
+clang++
+\family default
+ can invoke it via 
+\family typewriter
+ag++
+\family default
+ by using the 
+\family typewriter
+ag++
+\family default
+ option 
+\family typewriter
+--c_compiler clang++
+\family default
+.
+\end_layout
+
+\begin_layout Subsubsection
+GNU g++
+\end_layout
+
+\begin_layout Standard
+There are a lot of GNU g++ specific C++ extensions as well as several builtin
+ functions and types.
+ To enable all these extensions the option 
+\family typewriter
+--gnu
+\family default
+ (or 
+\family typewriter
+--gnu-2.95
+\family default
+ if g++ 2.9x header files should be parsed) has to be used.
+ If a configuration file is generated with 
+\family typewriter
+ag++ --gen_config
+\family default
+, this option will be automatically inserted (either 
+\family typewriter
+--gnu
+\family default
+ or 
+\family typewriter
+--gnu-2.95
+\family default
+ depending on your compiler).
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+ac++
+\family default
+ parser aims at being compatible with g++ and nearly all of the header files
+ that come with g++ 3.x and 2.9x can be parsed.
+ The workaround to install the old g++ 2.95 header and to modify your 
+\family typewriter
+puma.config
+\family default
+ file so that 
+\family typewriter
+ac++
+\family default
+ finds these old files while parsing your code is no longer needed starting
+ from version 0.8pre2.
+\end_layout
+
+\begin_layout Standard
+Compilers from the g++ family do not support explicit template specialization
+ in a non-namespace scope.
+ However, this feature is needed by ac++ in the code generation process.
+ A workaround for this problem is automatically enabled when you use the
+ 
+\family typewriter
+--gnu
+\family default
+ or 
+\family typewriter
+--gnu-2.95
+\family default
+ option.
+ To explictly enable or disable the workaround use 
+\family typewriter
+--problem_spec_scope
+\family default
+ or 
+\family typewriter
+--no_problem_spec_scope
+\family default
+.
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:cygwin_back_end"
+
+\end_inset
+
+Cygwin/GNU g++
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+ac++
+\family default
+ compiler can also be used with the Cygwin/GNU g++ compiler under Windows.
+ Note, that 
+\family typewriter
+ac++
+\family default
+ itself is not a Cygwin application and, thus, does not support Cygwin-specific
+ path names like 
+\family typewriter
+/home/olaf
+\family default
+, which is relative to the cygwin installation directory.
+ If you generate your parser configuration file automatically with 
+\family typewriter
+ag++ --gen_config
+\family default
+ the contained include paths will automatically be converted from Cygwin
+ paths names to Windows path names using the 
+\family typewriter
+cygpath
+\family default
+ command.
+ However, be careful when you set the 
+\family typewriter
+PUMA_CONFIG
+\family default
+ environment variable or when you pass any other path name to 
+\family typewriter
+ac++
+\family default
+.
+ Furthermore, 
+\family typewriter
+ac++
+\family default
+ and 
+\family typewriter
+ag++
+\family default
+ don't support Cygwin file links.
+ This might also cause compilation problems.
+ A known problem is that in some Cygwin versions 
+\family typewriter
+g++
+\family default
+ itself is a link to 
+\family typewriter
+g++-4
+\family default
+.
+ This means that it will not be found by 
+\family typewriter
+ag++
+\family default
+.
+ It helps to provide the proper compiler name with the 
+\family typewriter
+--c_compiler g++-4
+\family default
+ option.
+\end_layout
+
+\begin_layout Subsubsection
+MS VC++
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+ac++
+\family default
+ parser aims at being compatible with Microsoft Visual C++ 7 and later.
+ This compiler comes with a large number of non-standard language extensions.
+ To enable support for these extensions in the 
+\family typewriter
+ac++
+\family default
+ parser the command line option 
+\family typewriter
+--vc
+\family default
+ must be provided either on the command line or in your configuration file.
+\end_layout
+
+\begin_layout Standard
+It is not recommended to use 
+\family typewriter
+ac++
+\family default
+ with Visual C++ 6 as this compiler has some problems with the generated
+ code, even though the generated code is standard complient.
+\end_layout
+
+\begin_layout Standard
+We recently found a bug in Visual C++ 6 and 7, which is related to local
+ classes defined in header files.
+ As 
+\family typewriter
+ac++
+\family default
+ sometimes generates such classes a workaround has to be enabled until Microsoft
+ fixes the problem.
+ The workaround can be enabled with the command line option 
+\family typewriter
+--problem_local_class
+\family default
+ and disabled with 
+\family typewriter
+--no_problem_local_class
+\family default
+.
+ In the current 
+\family typewriter
+ac++
+\family default
+ version the workaround is enabled by default if the executable was compiled
+ for the Windows platform.
+\end_layout
+
+\begin_layout Section
+
+\family sans
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Problems"
+
+\end_inset
+
+
+\family default
+Problems & Workarounds
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:pitfalls"
+
+\end_inset
+
+Common Pifalls
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Include-Cycles"
+
+\end_inset
+
+Include Cycles
+\end_layout
+
+\begin_layout Standard
+In versions prior to 1.0pre1 include cycles could occur in many situations
+ and workarounds could not always be found.
+ In version 1.0pre1 include cycles can only occur in the case of aspect code
+ with introductions.
+ Advice for code join points cannot produce cycles.
+\end_layout
+
+\begin_layout Standard
+The reason for the remaining possible cycles is that 
+\family typewriter
+ac++
+\family default
+ generates 
+\family typewriter
+#include <aspect-header>
+\family default
+ in every file that contains the definition of a target class of an introduction.
+ Without this generation pattern definitions from the aspect header would
+ not be accessible by introduced code.
+ However, if the aspect header directly or indirectly includes the target
+ file, there is a cycle, which might cause parse errors.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/include_cycle.eps
+	lyxscale 50
+	width 9cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:inc_cycle"
+
+\end_inset
+
+Include cycle problem
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:inc_cycle"
+
+\end_inset
+
+ illustrates the include cycle problem by giving an example.
+ Here an aspect 
+\family typewriter
+\size small
+Problem
+\family default
+\size default
+ uses the type 
+\family typewriter
+\size small
+Target
+\family default
+\size default
+ and therefore includes 
+\family typewriter
+\size small
+Target.h
+\family default
+\size default
+.
+ At the same time the aspect introduces a slice into the class 
+\family typewriter
+\size small
+Target
+\family default
+\size default
+.
+ As the slice might depend on definitions or 
+\family typewriter
+\size small
+#include
+\family default
+\size default
+s in 
+\family typewriter
+\size small
+Problem.ah
+\family default
+\size default
+, the weaver generates the 
+\family typewriter
+\size small
+#include
+\begin_inset space ~
+\end_inset
+
+"Problem.ah
+\family default
+\size default
+" in 
+\family typewriter
+\size small
+Target.h
+\family default
+\size default
+.
+ This causes the include cycle.
+ Include guards (which should always be used!) avoid duplicate definitions,
+ but do not solve the problem.
+ It might still be the case that the parser complains about undefined types.
+\end_layout
+
+\begin_layout Standard
+To avoid these cycles introductions can always be separated from the aspect
+ by means of slices.
+ Slice declarations and slice member definitions can be located in arbitrary
+ aspect header files.
+ The aspect weaver will only include these aspect headers in the target
+ classes' header/implementation files and thereby avoid the cycle.
+ For a slice reference within an advice declaration even a forward declaration
+ of the slice is sufficient.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/no_include_cycle.eps
+	lyxscale 50
+	width 9cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:no_inc_cycle"
+
+\end_inset
+
+Include cycle avoidance
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:no_inc_cycle"
+
+\end_inset
+
+ shows how the include cycle from the example in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:inc_cycle"
+
+\end_inset
+
+ can be avoided.
+ Here the function 
+\family typewriter
+\size small
+dump
+\family default
+\size default
+ is implemented in a separate slice class 
+\family typewriter
+\size small
+Dump
+\family default
+\size default
+ that is stored in an aspect header file 
+\family typewriter
+\size small
+Dump.ah
+\family default
+\size default
+.
+ The implementation of 
+\family typewriter
+\size small
+Dump
+\family default
+\size default
+ could rely on defintions and 
+\family typewriter
+\size small
+#include
+\family default
+\size default
+s in 
+\family typewriter
+\size small
+Dump.ah
+\family default
+\size default
+ (
+\family typewriter
+\size small
+stdio.h
+\family default
+\size default
+ in this example), but not on defintions in 
+\family typewriter
+\size small
+Problem.ah
+\family default
+\size default
+.
+ Therefore, the aspect weaver generates 
+\family typewriter
+\size small
+#include
+\begin_inset space ~
+\end_inset
+
+"Dump.ah"
+\family default
+\size default
+ and not 
+\family typewriter
+\size small
+#include
+\begin_inset space ~
+\end_inset
+
+"Problem.ah"
+\family default
+\size default
+ in 
+\family typewriter
+\size small
+Target.h
+\family default
+\size default
+.
+\end_layout
+
+\begin_layout Standard
+Note that in the case of 
+\series bold
+non-inline
+\series default
+ introductions the #include directive is generated in the file that contains
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+link-once element
+\begin_inset Quotes erd
+\end_inset
+
+ of the target class, which is never a header file.
+ You can, for example,  exploit this feature to produce cyclic class relationshi
+ps.
+ The included file will be the aspect header file that contains the definition
+ of the non-inline slice member.
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:dup-forced-includes"
+
+\end_inset
+
+Duplicate Forced Includes in STU Mode
+\end_layout
+
+\begin_layout Standard
+In the Single Translation Unit (STU) mode 
+\family typewriter
+ac++
+\family default
+ handles forced includes (see 
+\family typewriter
+-include
+\family default
+ option in section 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "sec:option_include"
+
+\end_inset
+
+) in the following way:
+\end_layout
+
+\begin_layout Description
+internal
+\begin_inset space ~
+\end_inset
+
+includes: If the included file is part of your project, the file content
+ will be expanded in the compiled translation unit.
+\end_layout
+
+\begin_layout Description
+external
+\begin_inset space ~
+\end_inset
+
+includes: If the included file is 
+\emph on
+not
+\emph default
+ part of the project, ac++ generates an #include directive with the absolute
+ path name of the file.
+\end_layout
+
+\begin_layout Standard
+In both cases the back-end compiler should not be forced to include the
+ same file again.
+ For example, 
+\family typewriter
+g++
+\family default
+ users should not use the 
+\family typewriter
+\size small
+-include
+\family default
+\size default
+ option with 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ and with 
+\family typewriter
+g++
+\family default
+, because otherwise symbols might be defined twice.
+\end_layout
+
+\begin_layout Subsubsection
+Compiling libraries
+\end_layout
+
+\begin_layout Standard
+There are certain restrictions on the code structure if 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ should generate transformed header files for an aspect-oriented C++ 
+\emph on
+library
+\emph default
+.
+ For instance, all header files need "include guards" and should not depend
+ on the context by which they are included.
+ Furthermore all headers must have the extension 
+\family typewriter
+\size small
+.h
+\family default
+\size default
+.
+\end_layout
+
+\begin_layout Standard
+Furthermore, users have to be careful 
+\emph on
+not
+\emph default
+ to generate transformed headers into the project directory tree (
+\family typewriter
+\size small
+-p
+\family default
+\size default
+ option).
+ Otherwise, the 
+\emph on
+next
+\emph default
+ compilation of the library is likely to fail, because 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ would search aspect header files in the generated directory tree.
+\end_layout
+
+\begin_layout Subsubsection
+Project structure
+\end_layout
+
+\begin_layout Standard
+The AspectC++ weaver 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ expects that "projects" do not overlap, have no cyclic dependencies, and
+ can be described by a list of directory names (
+\family typewriter
+\size small
+-p
+\family default
+\size default
+ option).
+ AspectC++ needs the notion of a "project" in order to restrict the set
+ files that are affected by the aspects.
+ Sometimes big applications are organized in multiple projects within the
+ same workspace and have arbitrary dependencies (include relations) to each
+ other.
+ For these applications selecting the 
+\family typewriter
+\size small
+-p
+\family default
+\size default
+ option is sometimes difficult.
+ Often treating the whole workspace as one AspectC++ project is the best
+ solution.
+\end_layout
+
+\begin_layout Subsubsection
+The 
+\family typewriter
+\size small
+--aspect_header
+\family default
+\size default
+ option
+\end_layout
+
+\begin_layout Standard
+This option can be used to avoid that 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ automatically searches all aspect header files in the project directory
+ tree.
+ It is to be made sure by the user that each aspect header file is included
+ 
+\emph on
+only once
+\emph default
+.
+ If no aspect headers should be taken into account, the option 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+\size small
+-a 0
+\family default
+\size default
+
+\begin_inset Quotes erd
+\end_inset
+
+ has to be used.
+\end_layout
+
+\begin_layout Subsection
+Unimplemented Features
+\end_layout
+
+\begin_layout Subsubsection
+Multi-Threading Support
+\end_layout
+
+\begin_layout Standard
+C++ has no integrated thread model like Java.
+ Therefore, the woven AspectC++ code cannot rely on any available thread
+ synchronization mechanism.
+ As a result the implementation of the 
+\family typewriter
+\size small
+cflow
+\family default
+\size default
+ pointcut functions is currently 
+\emph on
+not thread-safe
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+We are urgently investigating how thread synchronization and thread local
+ storage can be integrated into AspectC++.
+\end_layout
+
+\begin_layout Subsubsection
+C++ 11/14/...
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:C++-11"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ac++
+\family default
+ does not fully support the latest language features introduced with the
+ C++ 11 standard.
+ These features, such as lambda functions or move constructors, are accepted
+ by the underlying parser (the Clang framework, which is used in 
+\family typewriter
+ac++
+\family default
+ 2.x), but the weaver can't deal with these features, yet.
+ Therefore, it is safe to use C++ 11 code as long as the code affected by
+ advice conforms to C++ 2003.
+\end_layout
+
+\begin_layout Subsubsection
+Parse Errors
+\end_layout
+
+\begin_layout Standard
+If 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ stops processing because of parse errors this might be due to an incompatibilit
+y or missing feature in the underlying C++ parser.
+\end_layout
+
+\begin_layout Standard
+In the case that the error is found in your own code, i.e.
+ code you are able to modify, you could use the following workaround:
+\end_layout
+
+\begin_layout LyX-Code
+
+\size small
+#ifdef __acweaving
+\end_layout
+
+\begin_layout LyX-Code
+
+\size small
+// ...
+ simplified version of the code for ac++
+\end_layout
+
+\begin_layout LyX-Code
+
+\size small
+#else
+\end_layout
+
+\begin_layout LyX-Code
+
+\size small
+// ...
+ original code
+\end_layout
+
+\begin_layout LyX-Code
+
+\size small
+#endif
+\end_layout
+
+\begin_layout Standard
+Even if your own AspectC++ code contains only harmless C++ code you might
+ experience parsing problems due to header files from libraries which your
+ application code includes, especially in the case of template libraries.
+ In this situation it might help to copy the file with the parse error into
+ a different directory.
+ Then you have to change the code in this file to avoid the error message
+ by simplifying it.
+ The final step is to extend the 
+\family typewriter
+\size small
+puma.config
+\family default
+\size default
+ file by a 
+\family typewriter
+\size small
+
+\begin_inset Quotes eld
+\end_inset
+
+-I <path>
+\family default
+\size default
+
+\begin_inset Quotes erd
+\end_inset
+
+ entry for the directory where you placed the copy.
+ As the result 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ will now parse the simplified version while the original file is untouched
+ and used while the C++ compiler runs.
+\end_layout
+
+\begin_layout Subsubsection
+Templates
+\end_layout
+
+\begin_layout Standard
+Currently 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ is able to parse a lot of the (really highly complicated) C++ templates,
+ but weaving is restricted to non-templated code only.
+ That means you can not weave in templates or even affect calls to template
+ functions or members of template classes.
+ However, template instances can be matched by match expressions in the
+ pointcut language and calls to members of class templates or template functions
+ can be affected by advice.
+\end_layout
+
+\begin_layout Subsubsection
+Macros
+\end_layout
+
+\begin_layout Standard
+In versions prior to 1.0 the weaver was not able at all to transform code
+ that was generated by macro expansion.
+ It simply printed a warning and continued without transforming the code.
+ To turn this warning off the command line option 
+\family typewriter
+\size small
+--no_warn_macro
+\family default
+\size default
+ could be used (see Table 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "tab:warnings"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+The current solution is to expand a macro whenever it is affected by aspects
+ and do the weaving afterwards.
+ While this works fine for most cases, problems may occur if the macro definitio
+n used by the (cross-)compiler differs from the one used by ac++.
+ Future releases will thus distinguish between macros definitions that belong
+ to the project and can safely be expanded and macros that were defined
+ outside the project.
+\end_layout
+
+\begin_layout Subsubsection
+Unimplemented Language Elements
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+cflow
+\family default
+ does not yet support exposure of context information.
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
+base
+\family default
+ only works as expected if all classes that should be matched by the pointcut
+ function's argument are known in the translation unit.
+ Therefore, the aspect header file has to contain the right set of include
+ directives.
+\end_layout
+
+\begin_layout Subsubsection
+Support for Plain C Code
+\end_layout
+
+\begin_layout Standard
+Currently 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ generates C++ code, which cannot be compiled by a C compiler.
+ As for many hardware platforms in the embedded domain no C++ compiler is
+ available we are actively looking for a solution.
+\end_layout
+
+\begin_layout Subsubsection
+Support for C++ language extensions
+\end_layout
+
+\begin_layout Standard
+The parser does not yet fully support the language features of C++ 11 and
+ more recent standards (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:C++-11"
+
+\end_inset
+
+).
+ Furthermore, most but not all g++ specific language extensions are implemented.
+\end_layout
+
+\begin_layout Subsubsection
+Constructor/Destructor Generation
+\end_layout
+
+\begin_layout Standard
+If advice for construction/destruction joinpoints is given and no constructor/de
+structor is defined explicitly, 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ will generate it.
+ However, currently 
+\family typewriter
+\size small
+ac++
+\family default
+\size default
+ assumes that the copy constructor has one argument of type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+\size small
+const <Classname>&
+\family default
+\size default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This leads to problems if the implicitly declared copy constructor has
+ an argument of type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+\size small
+<Classname>&
+\family default
+\size default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Therefore, you should not define construction/destruction advice for classes
+ with this copy constructor signature.
+\end_layout
+
+\begin_layout Subsubsection
+Functions with variable argument lists
+\end_layout
+
+\begin_layout Standard
+There is no support for execution advice on functions with variable argument
+ lists.
+ A warning will be issued.
+ There is no portable way to generate a wrapper function for this class
+ of functions.
+\end_layout
+
+\begin_layout Subsubsection
+Restrictions on calling 
+\family typewriter
+\size small
+tjp->proceed()
+\end_layout
+
+\begin_layout Standard
+Due to a problem with result object construction/destruction of intercepted
+ functions, the 
+\family typewriter
+\size small
+tjp->proceed()
+\family default
+\size default
+ function may only be called 
+\emph on
+once
+\emph default
+ during around advice.
+\end_layout
+
+\begin_layout Subsubsection
+Advice on advice
+\end_layout
+
+\begin_layout Standard
+Join points within advice code are not matched by pointcut expressions.
+\end_layout
+
+\begin_layout Subsubsection
+JoinPoint-API for slices
+\end_layout
+
+\begin_layout Standard
+There is a joinpoint-API for slices introduced into a target class.
+ It provides static type information about the target's baseclasses and
+ members as well as dynamic information, such as a pointer to each member.
+ However, the baseclass part of the slice may not access the JoinPoint-API.
+ This is partly natural, as, for instance, member types might depend on
+ the introduced baseclass.
+ Yet, not even the target's classname is available.
+ Future versions might make this possible.
+\end_layout
+
+\begin_layout Standard
+The identifier 'JoinPoint' is only to be used to access the joinpoint-API.
+ Even though it would conceptually make sense to allow, for instance, a
+ local variable to be called 'JoinPoint', it is not supported, yet.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Code Transformation Patterns
+\end_layout
+
+\begin_layout Standard
+This appendix documents some internals of the 
+\family typewriter
+ac++
+\family default
+ weaver implementation.
+\end_layout
+
+\begin_layout Subsection
+Inclusion of Aspect Header Files
+\end_layout
+
+\begin_layout Standard
+The weaver has to guarantee that aspect header files are only compiled in
+ a translation unit if they are affecting the shadows of code join point
+ that are located within the translation unit.
+ If an aspect header has to be included because of this reason, the same
+ check has to be performed again, because the aspect header might contain
+ code join points that are affected by other aspects.
+\end_layout
+
+\begin_layout Standard
+In order to implement this behavior a forward declaration of the advice
+ invocation function is generated and a macro 
+\family typewriter
+__ac_need_<
+\emph on
+mangled_ah_filename
+\emph default
+>
+\family default
+ is defined in each file that contains a join point shadow, which is affected
+ by an aspect that is defined in an aspect header whose mangled files name
+ is 
+\family typewriter
+<
+\emph on
+mangled_ah_filename
+\emph default
+>
+\family default
+.
+ Multiple inclusions shall be avoided.
+ Therefore, another macro 
+\family typewriter
+__ac_have_<
+\emph on
+mangled_ah_filename
+\emph default
+>
+\family default
+ is set wherever an aspect header is included by generated code.
+ The following code is an example that shows the code which is generated
+ at the end of each translation unit for each known aspect header of the
+ project:
+\end_layout
+
+\begin_layout LyX-Code
+#ifdef __ac_need_<
+\family typewriter
+\emph on
+mangled_ah_
+\family default
+1
+\emph default
+>
+\end_layout
+
+\begin_layout LyX-Code
+#ifndef __ac_have_<
+\family typewriter
+\emph on
+mangled_ah_
+\family default
+1
+\emph default
+>
+\end_layout
+
+\begin_layout LyX-Code
+#define __ac_have_<
+\family typewriter
+\emph on
+mangled_ah_
+\family default
+1
+\emph default
+>
+\end_layout
+
+\begin_layout LyX-Code
+#include "
+\emph on
+ah_1
+\emph default
+"
+\end_layout
+
+\begin_layout LyX-Code
+#endif
+\end_layout
+
+\begin_layout LyX-Code
+// other aspect headers that are needed if ah_1 is needed
+\end_layout
+
+\begin_layout LyX-Code
+#ifndef __ac_have_<
+\family typewriter
+\emph on
+mangled_ah_
+\family default
+\emph default
+4>
+\end_layout
+
+\begin_layout LyX-Code
+#define __ac_have_<
+\family typewriter
+\emph on
+mangled_ah_
+\family default
+\emph default
+4>
+\end_layout
+
+\begin_layout LyX-Code
+#include "
+\emph on
+ah_
+\emph default
+4"
+\end_layout
+
+\begin_layout LyX-Code
+#endif
+\end_layout
+
+\begin_layout LyX-Code
+#endif // __ac_need_<
+\family typewriter
+\emph on
+mangled_ah_
+\family default
+1
+\emph default
+>
+\end_layout
+
+\begin_layout Standard
+This code transformation pattern might result in multiple 
+\family typewriter
+#include
+\family default
+ directives for the same aspect header files.
+ This is correct, as there might be cyclic dependencies between the aspect
+ headers.
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\end_body
+\end_document

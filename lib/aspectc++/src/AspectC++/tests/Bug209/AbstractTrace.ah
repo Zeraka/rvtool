@@ -1,0 +1,22 @@
+#ifndef __Abstract_Trace_ah__
+#define __Abstract_Trace_ah__
+
+#include <iostream>
+
+using namespace std;
+
+aspect AbstractTrace { 
+public:
+  pointcut pc1() = call("% ...::B::%(...)");  
+  pointcut pc2() = execution("% ...::B::%(...)");
+
+  advice pc1() : after () {
+    cout << "after call " << JoinPoint::signature () << "\n";
+  }
+
+  advice pc2() : after () {
+    cout << "after execution " << JoinPoint::signature () << "\n";
+  }
+};
+
+#endif // __Abstract_Trace_ah__

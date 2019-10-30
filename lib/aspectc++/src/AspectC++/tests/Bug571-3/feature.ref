@@ -1,0 +1,4 @@
+before execution of "memberfunc" in B
+around 1 execution of "memberfunc" in B
+after execution of "memberfunc" in B
+in C

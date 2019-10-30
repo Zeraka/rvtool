@@ -1,0 +1,127 @@
+/*
+ * measureAspect.ah
+ * 
+ * measure the runtime of target 
+ */
+#ifndef __MEASURE_ASPECT
+#define __MEASURE_ASPECT
+ 
+#include <algorithm>  // for std::sort
+#include <fstream>
+#include <sched.h>
+#include <cstdio>
+
+#include "doMeasurement.h"
+#include "ArgumentSizeCalculator.h"
+#include "SaveStack.h"
+
+#define RUNS 20
+#define SUMS 500
+#define COUNTSKIP 5
+
+void *frameAddress;
+void *stackBeforeAction;
+
+static int weirdCount;
+static double average;
+static cycle_t calibration;
+static AC::Action nullAction;
+      
+aspect measure {
+    // returns average, stores summed up results to buf of length len
+    void __attribute__ ((noinline)) runTests(AC::Action &action, cycle_t *buf, unsigned len, cycle_t calibration = 0) {
+       register unsigned i,j;
+       double avg = 0;
+       weirdCount = 0;
+       average = 0;
+       for(i = 0; i < len; i++) {      
+         buf[i] = 0;
+
+	// Accumulate RUNS runs, and calcualate mean
+	 j = RUNS;
+	 while(j--) {
+           cycle_t result = doMeasurement(action);
+           buf[i]  += result;
+         }
+         buf[i] /= RUNS;
+
+         if (calibration > buf[i]) { // something weird happened
+            buf[i] = 0;
+	    weirdCount++;
+         } else {
+            buf[i] -= calibration;
+         }
+
+         avg += buf[i];
+       }
+       
+       average = avg / (double)len;
+    }
+    
+    pointcut virtual measureTarget () = 0; 
+    advice call(measureTarget()) : order("measure", !"measure");        
+	advice call(measureTarget()) : around() {       
+       cycle_t runtimes[SUMS];
+       register unsigned i = COUNTSKIP;
+       ptrdiff_t overhead;
+       std::ofstream out("out.txt", std::ios_base::app);
+
+       if(sched_yield()) 
+	 perror("doMeasurement");
+       
+       while(i--)
+          doMeasurement(tjp->action()); // warm up caches
+   
+       size_t param_size = ArgumentSizeCalculator<JoinPoint>::RES;
+       nullAction._wrapper = dispatch<JoinPoint, JoinPoint::ARGS>::doit;
+       
+       // do calibration
+       runTests(nullAction, runtimes, SUMS);
+       std::sort(runtimes, runtimes + SUMS);
+       calibration = runtimes[SUMS/2];
+
+#ifdef DEBUG      
+       out << "\n results of calibration runs:\n";
+       for (i = 0; i < SUMS; i++) 
+          out << runtimes[i] << ", ";   
+#endif
+      
+       // Expected overhead of measureAspect:
+       // Action Object, Arguments, Stackalignment
+       overhead = (ptrdiff_t)stackBeforeAction - (ptrdiff_t)frameAddress;
+
+//       calibration = 0;      //  disable calibration
+       frameAddress = 0; // reset frameAddress
+       runTests(tjp->action(), runtimes, SUMS, calibration);
+
+
+       // sort the array for median processing
+       std::sort(runtimes, runtimes + SUMS);
+ 
+       out << "\nMeasure times of target: " << tjp->signature() << "\n";              
+       out << "\n Calibration took (in cycles): " << calibration;       
+       out << "\n Average runtime: " << average;
+       out << "\n Median is " << runtimes[SUMS/2];
+       out << "\n esp overhead is " << overhead;
+       out << "\n Number of arguments is: " << JoinPoint::ARGS;
+       out << "\n Total Size of arguments: " << param_size;
+       out << "\n Number of runs with calibration bigger than run: " << weirdCount;
+       out << "\n Total runs of target: " << SUMS;
+
+       if (frameAddress) {
+          ptrdiff_t stackUsed = 
+            (ptrdiff_t)stackBeforeAction - (ptrdiff_t)frameAddress - overhead;
+          out << "\n Stack used: " << stackUsed << std::endl;
+       } else {
+          out << "\n Callee did not set used stack" << std::endl;
+       }   
+#ifdef DEBUG      
+       out << "\n runtimes are: ";
+       for (i = 0; i < SUMS; i++) 
+          out << runtimes[i] << ", ";   
+#endif
+       out.close();
+    }
+};
+
+#endif

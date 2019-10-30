@@ -1,0 +1,7 @@
+Name Mangling: func() should be invoked several times:
+======================================================
+void func()
+void func()
+void func()
+void func()
+void func()

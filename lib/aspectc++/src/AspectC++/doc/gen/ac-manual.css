@@ -1,0 +1,116 @@
+/* some adjustments to the LxY-generated style */
+
+/* include aspectc++ logo */
+body {
+    background-image: url("ac++logo.png");
+    background-repeat: no-repeat;
+    background-size: 12em;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* links shall be red */
+a:link {
+    color: red;
+}
+a:visited {
+    color: red;
+}
+a:active {
+    color: red;
+}
+a.tocentry:visited { color: red; }
+a[href]:hover {
+    color: black;
+    background-color : red;
+}
+
+/* floats and their captions shall have no border */
+div.float {
+border: none;
+text-align: center;
+}
+
+div.float-caption {
+text-align: center;
+border: none;
+padding: 1ex;
+margin: 1ex;
+}
+
+/* lyx code shall have equal space on top and below */
+/* also preserve whitespace */
+div.lyx_code {
+    font-family: monospace;
+    margin-top: 1ex;
+    margin-bottom: 1ex;
+    margin-left: 3ex;
+    margin-right: 0ex;
+    text-align: left;
+}
+div.lyx_code_item {
+    white-space: pre;
+}
+
+/* same formatting for listing environments */
+pre.listings {
+    font-family: monospace;
+    margin-top: 1ex;
+    margin-bottom: 1ex;
+    margin-left: 3ex;
+    margin-right: 0ex;
+    text-align: left;
+}
+
+/* 'standard' shall also have equal space */
+/* use 'justify' as text alignment */
+div.standard {
+margin-top: 1ex;
+margin-bottom: 1ex;
+text-align: justify;
+}
+
+/* fix indentation of toc entries */
+ div.toc {
+   margin: 0em 0em;
+   border-style: solid;
+   border-width: 2px 0px;
+   padding: 1em 0em;
+ }
+div.lyxtoc-0 {
+    margin: 0em 0em 0em 2em;
+    font-size: xx-large;
+    font-weight: bold;
+}
+div.lyxtoc-1 {
+    margin: 0em 0em 0em 0em;
+    font-size: x-large;
+    font-weight: bold;
+}
+div.lyxtoc-2 {
+    margin: 0em 0em 0em 0em;
+    font-size: large;
+    font-weight: normal;
+}
+div.lyxtoc-3 { margin: 0em 0em 0em 2em; font-size: medium; }
+div.lyxtoc-4 { margin: 0em 0em 0em 0em; }
+div.lyxtoc-5 { margin: 0em 0em 0em 0em; }
+div.lyxtoc-6 { margin: 0em 0em 0em 0em; }
+
+/* fix descriptions */
+dl.description {
+    margin-left:3em;
+}
+dt.description_label { 
+    display: inline-block;
+    margin: 0.5em 1em 0em 0em;
+    text-indent: -3em;
+}
+dd.description_item { 
+    margin: 0em 0em 0em 0em;
+    display: inline;
+}
+dd.description_item:after{
+  display: block;
+  content: '';
+}
+

@@ -1,0 +1,14 @@
+NamePointcuts: test use of named pointcuts in different scopes
+==============================================================
+advice on pGlobal
+advice on pGlobal2
+advice on A::pA
+advice on B::pA
+advice on C::pA
+advice on N1::pN1
+advice on N1::N2::pN2
+advice on N3::pN1
+advice on pTestParam in advice
+advice on pTestParam in aspect
+advice on pGlobalParam
+=============================================================

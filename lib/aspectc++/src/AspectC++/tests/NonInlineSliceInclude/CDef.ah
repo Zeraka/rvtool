@@ -1,0 +1,15 @@
+#ifndef __CDef_ah__
+#define __CDef_ah__
+
+#include <stdio.h>
+#include "C.h"
+#include "CDecl.ah"
+
+slice
+CDecl::CSlice *CDecl::CSlice::f () {
+    C::T _a_type_from_C_used_for_me;
+    printf ("  function f () introducd by an aspect\n");
+    return this;
+}
+
+#endif // __CDef_ah__

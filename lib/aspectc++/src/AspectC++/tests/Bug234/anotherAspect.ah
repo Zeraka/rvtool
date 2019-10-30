@@ -1,0 +1,9 @@
+#ifndef __anotherAspect_ah__
+#define __anotherAspect_ah__
+
+#include "introTarget.h"
+
+aspect anotherAspect {
+};
+
+#endif /* __anotherAspect_ah__ */

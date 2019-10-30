@@ -1,0 +1,540 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+/* C preprocessor expression parser */
+
+%name PreExprParser
+%extra_argument {int *result}
+
+%token_type {char*}
+%type primary_expression {PreExpr*}
+%type unary_expression {PreExpr*}
+%type constant_expression {PreExpr*}
+%type conditional_expression {PreExpr*}
+%type pre_expression {PreExpr*}
+/*
+%token_destructor {delete $$;}
+%destructor primary_expression {delete $$;}
+%destructor unary_expression {delete $$;}
+%destructor constant_expression {delete $$;}
+%destructor conditional_expression {delete $$;}
+%destructor pre_expression {delete $$;}
+*/
+%right TOK_EXPR_QUESTION TOK_EXPR_COLON.
+%left TOK_EXPR_OR.
+%left TOK_EXPR_AND.
+%left TOK_EXPR_BITOR.
+%left TOK_EXPR_BITXOR.
+%left TOK_EXPR_BITAND.
+%left TOK_EXPR_EQ TOK_EXPR_NOTEQ.
+%left TOK_EXPR_LESS TOK_EXPR_GREATER TOK_EXPR_LEQ TOK_EXPR_GEQ.
+%left TOK_EXPR_SHIFTL TOK_EXPR_SHIFTR.
+%left TOK_EXPR_PLUS TOK_EXPR_MINUS.
+%left TOK_EXPR_STAR TOK_EXPR_DIV TOK_EXPR_MOD.
+%left TOK_PRE_UNARY.
+
+%nonassoc TOK_EXPR_WSPACE.
+
+%include {
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "Puma/Limits.h"
+#include "Puma/PreExpr.h"
+#include "Puma/Location.h"
+#include "Puma/ErrorStream.h"
+#include "Puma/PreExprParser.h"
+#include "Puma/PreExprLexer.h"
+
+#ifdef _MSC_VER
+#define strtoull(nptr,endptr,base) _strtoui64(nptr,endptr,base)
+#define strtold(nptr,endptr) strtod(nptr,endptr)
+#endif
+
+using namespace Puma;
+
+void *PreExprParserAlloc (void *(*mallocProc)(size_t));
+void PreExprParser       (void *pParser, int TokenID, char *TokenValue, int *result);
+void PreExprParserFree   (void *pParser, void (*freeProc)(void*));
+void PreExprParserTrace  (FILE *TraceFILE, char *zTracePrompt);
+
+namespace Puma {
+
+extern int          TRACE_CPP;
+static bool         parse_error;
+static bool         at_eos;
+static char        *current_token;
+static ErrorStream *err;
+static Location     location;
+
+// Constructor.
+PreExpr::PreExpr (ErrorStream *_err, Location _location) {
+  err      = _err;
+  location = _location;
+  _result  = false;
+}
+
+// Convert char to integer.
+long double PreExpr::convertChar(char *value) {
+  long double cval;
+
+  char *p = value;
+  if (*++p == '\\') {
+    p++;
+    if (*p == 'x' || *p == 'X') {
+      char *copy = new char[strlen (value) + 1];
+      strcpy (copy, value);
+      *(copy + 1) = '0';
+      cval = strtoull (copy + 1, NULL, 16);
+      delete[] copy;
+    }
+    else if (*p >= '0' && *p <= '9') {
+      cval = strtoull (p, NULL, 8);
+      if (cval > 255) cval = 255;
+    }
+    else {
+      switch (*p) {
+        case 'a': cval = 7; break;
+        case 'b': cval = 8; break;
+        case 't': cval = 9; break;
+        case 'n': cval = 10; break;
+        case 'v': cval = 11; break;
+        case 'f': cval = 12; break;
+        case 'r': cval = 13; break;
+        default: cval = *p;
+      }
+    }
+  } else
+    cval = (long double) value[1];
+
+  return cval;
+}
+
+// Evaluate the given expression string.
+void PreExpr::evaluatePreExpr (char *token_list) {
+  parse_error = false;
+  at_eos = false;
+  int result = 0, token = 0;
+  bool empty_expr = true;
+
+  // Generate the Lemon parser.
+  void *pParser = PreExprParserAlloc (::malloc);
+
+#ifndef NDEBUG
+  // Enable tracing if requested.
+  if (TRACE_CPP)
+    PreExprParserTrace (stdout, "CPP_EXPR_TRACE: ");
+#endif
+
+  // Initialize the scan buffer with the expression string.
+  PreExprLexer &lexer = PreExprLexer::instance ();
+  LexerBuffer lexer_buffer;
+  lexer_buffer.init (token_list);
+  PreExprLexer::State lexer_state (lexer, lexer_buffer);
+
+  while (lexer_state.next ()) {
+    if (lexer_state.error ()) {
+      *err << sev_error << location
+        << "Invalid token '" << lexer_state.text ().c_str () << "' in preprocessor expression" << endMessage;
+      break;
+    }
+    else {
+      token = lexer_state.id();
+      if (token != TOK_EXPR_WSPACE) {
+        empty_expr = false;
+        current_token = StrCol::dup(lexer_state.text().c_str());
+        // Parse the current token.
+        if (TRACE_CPP)
+          printf ("%sToken '%s' %i\n", "CPP_EXPR_TRACE: ", current_token, token);
+        PreExprParser (pParser, token, current_token, &result);
+      }
+    }
+  }
+
+  // Finish and then free the parser.
+  if (! parse_error && ! empty_expr) {
+    at_eos = true; // Catch EOS parse errors
+    PreExprParser (pParser, 0, (char*) 0, &result);
+  }
+  PreExprParserFree (pParser, ::free);
+
+  if (empty_expr) {
+    *err << location << sev_warning
+         << "empty expression in conditional"
+         << endMessage;
+  }
+
+  if (result && ! parse_error)
+    _result = true;
+  else
+    _result = false;
+}
+
+// Handle positive and negative value overflow
+long double overflow(long double value) {
+  if (value > ULLONG_MAX)
+  {
+    value = overflow(value - ULLONG_MAX);
+  }
+  else if (value < LLONG_MIN)
+  {
+    value = overflow(LLONG_MAX - (-value + LLONG_MIN - 1));
+  }
+  return value;
+}
+
+} // namespace Puma
+}
+
+%stack_size 1000
+
+%stack_overflow {
+    *err << location << sev_fatal
+         << "giving up, preprocessor expression parser stack overflow (>1000)"
+         << endMessage;
+    parse_error = true;
+}
+
+%syntax_error {
+    *err << location << sev_error;
+    if (at_eos)
+      *err << "unexpected end of conditional";
+    else
+      *err << "unexpected token `" << current_token << "' in conditional";
+    *err << endMessage;
+    parse_error = true;
+}
+
+
+/***********************************************************************/
+/* preprocessor expression *********************************************/
+/***********************************************************************/
+
+pre_expression ::= conditional_expression(cde).
+    {
+        if (cde->val > 0)
+          *result = 1;
+        else
+          *result = 0;
+        delete cde;
+    }
+
+/***********************************************************************/
+/* conditional expression **********************************************/
+/***********************************************************************/
+
+conditional_expression(cde) ::= constant_expression(ce).
+    {
+        cde = ce;
+    }
+conditional_expression(cde) ::= constant_expression(ce) TOK_EXPR_QUESTION(qm)
+                                conditional_expression(cde1)
+                                TOK_EXPR_COLON(c) conditional_expression(cde2).
+    {
+        if (ce->val > 0) {
+          cde = cde1;
+          delete cde2;
+        } else {
+          cde = cde2;
+          delete cde1;
+        }
+        delete ce;
+        delete[] qm;
+        delete[] c;
+    }
+
+/***********************************************************************/
+/* constant expression *************************************************/
+/***********************************************************************/
+
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_OR(o) constant_expression(ce2).
+    {
+        ce = new PreExpr ();
+        if (ce1->val > 0 || ce2->val > 0)
+          ce->val = 1;
+        else
+          ce->val = 0;
+        delete ce1;
+        delete ce2;
+        delete[] o;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_AND(a) constant_expression(ce2).
+    {
+        ce = new PreExpr ();
+        if (ce1->val > 0 && ce2->val > 0)
+          ce->val = 1;
+        else
+          ce->val = 0;
+        delete ce1;
+        delete ce2;
+        delete[] a;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_BITOR(b) constant_expression(ce2).
+    {
+        if (ce1->val < 0 && ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() | ce2->toSignedInt()));
+        else if (ce1->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() | ce2->toUnsignedInt()));
+        else if (ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() | ce2->toSignedInt()));
+        else
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() | ce2->toUnsignedInt()));
+        delete ce1;
+        delete ce2;
+        delete[] b;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_BITXOR(b) constant_expression(ce2).
+    {
+        if (ce1->val < 0 && ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() ^ ce2->toSignedInt()));
+        else if (ce1->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() ^ ce2->toUnsignedInt()));
+        else if (ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() ^ ce2->toSignedInt()));
+        else
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() ^ ce2->toUnsignedInt()));
+        delete ce1;
+        delete ce2;
+        delete[] b;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_BITAND(a) constant_expression(ce2).
+    {
+        if (ce1->val < 0 && ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() & ce2->toSignedInt()));
+        else if (ce1->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() & ce2->toUnsignedInt()));
+        else if (ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() & ce2->toSignedInt()));
+        else
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() & ce2->toUnsignedInt()));
+        delete ce1;
+        delete ce2;
+        delete[] a;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_EQ(e) constant_expression(ce2).
+    {
+        ce = new PreExpr ();
+        if (ce1->val == ce2->val)
+          ce->val = 1;
+        else
+          ce->val = 0;
+        delete ce1;
+        delete ce2;
+        delete[] e;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_NOTEQ(n) constant_expression(ce2).
+    {
+        ce = new PreExpr ();
+        if (ce1->val != ce2->val)
+          ce->val = 1;
+        else
+          ce->val = 0;
+        delete ce1;
+        delete ce2;
+        delete[] n;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_LESS(l) constant_expression(ce2).
+    {
+        ce = new PreExpr ();
+        if (ce1->val < ce2->val)
+          ce->val = 1;
+        else
+          ce->val = 0;
+        delete ce1;
+        delete ce2;
+        delete[] l;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_GREATER(g) constant_expression(ce2).
+    {
+        ce = new PreExpr ();
+        if (ce1->val > ce2->val)
+          ce->val = 1;
+        else
+          ce->val = 0;
+        delete ce1;
+        delete ce2;
+        delete[] g;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_LEQ(l) constant_expression(ce2).
+    {
+        ce = new PreExpr ();
+        if (ce1->val <= ce2->val)
+          ce->val = 1;
+        else
+          ce->val = 0;
+        delete ce1;
+        delete ce2;
+        delete[] l;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_GEQ(g) constant_expression(ce2).
+    {
+        ce = new PreExpr ();
+        if (ce1->val >= ce2->val)
+          ce->val = 1;
+        else
+          ce->val = 0;
+        delete ce1;
+        delete ce2;
+        delete[] g;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_PLUS(p) constant_expression(ce2).
+    {
+        ce = new PreExpr (overflow(ce1->val + ce2->val));
+        delete ce1;
+        delete ce2;
+        delete[] p;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_MINUS(m) constant_expression(ce2).
+    {
+        ce = new PreExpr (overflow(ce1->val - ce2->val));
+        delete ce1;
+        delete ce2;
+        delete[] m;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_STAR(s) constant_expression(ce2).
+    {
+        ce = new PreExpr (overflow(ce1->val * ce2->val));
+        delete ce1;
+        delete ce2;
+        delete[] s;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_DIV(d) constant_expression(ce2).
+    {
+        ce = new PreExpr (floorl(ce1->val / ce2->val));
+        delete ce1;
+        delete ce2;
+        delete[] d;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_MOD(m) constant_expression(ce2).
+    {
+        if (ce1->val < 0 && ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() % ce2->toSignedInt()));
+        else if (ce1->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() % ce2->toUnsignedInt()));
+        else if (ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() % ce2->toSignedInt()));
+        else
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() % ce2->toUnsignedInt()));
+        delete ce1;
+        delete ce2;
+        delete[] m;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_SHIFTL(sl) constant_expression(ce2).
+    {
+        if (ce1->val < 0 && ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() << ce2->toSignedInt()));
+        else if (ce1->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() << ce2->toUnsignedInt()));
+        else if (ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() << ce2->toSignedInt()));
+        else
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() << ce2->toUnsignedInt()));
+        delete ce1;
+        delete ce2;
+        delete[] sl;
+    }
+constant_expression(ce) ::= constant_expression(ce1) TOK_EXPR_SHIFTR(sr) constant_expression(ce2).
+    {
+        if (ce1->val < 0 && ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() >> ce2->toSignedInt()));
+        else if (ce1->val < 0)
+          ce = new PreExpr (overflow(ce1->toSignedInt() >> ce2->toUnsignedInt()));
+        else if (ce2->val < 0)
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() >> ce2->toSignedInt()));
+        else
+          ce = new PreExpr (overflow(ce1->toUnsignedInt() >> ce2->toUnsignedInt()));
+        delete ce1;
+        delete ce2;
+        delete[] sr;
+    }
+constant_expression(ce) ::= unary_expression(ue).
+    {
+        ce = ue;
+    }
+
+/***********************************************************************/
+/* unary expression ****************************************************/
+/***********************************************************************/
+
+unary_expression(ue) ::= primary_expression(pe).
+    {
+        ue = pe;
+    }
+unary_expression(ue) ::= TOK_EXPR_PLUS(p) unary_expression(uex).         [TOK_PRE_UNARY]
+    {
+        uex->val = overflow(+uex->val); ue = uex;
+        delete[] p;
+    }
+unary_expression(ue) ::= TOK_EXPR_MINUS(m) unary_expression(uex).         [TOK_PRE_UNARY]
+    {
+        uex->val = overflow(-uex->val); ue = uex;
+        delete[] m;
+    }
+unary_expression(ue) ::= TOK_EXPR_TILDE(t) unary_expression(uex).           [TOK_PRE_UNARY]
+    {
+        if (uex->val < 0)
+          uex->val = ~uex->toSignedInt();
+        else
+          uex->val = ~uex->toUnsignedInt();
+        ue = uex;
+        delete[] t;
+    }
+unary_expression(ue) ::= TOK_EXPR_NOT(n) unary_expression(uex).      [TOK_PRE_UNARY]
+    {
+        uex->val = !uex->val; ue = uex;
+        delete[] n;
+    }
+
+/***********************************************************************/
+/* primary expression **************************************************/
+/***********************************************************************/
+
+primary_expression(pe) ::= TOK_EXPR_OCT(v).
+    {
+        pe = new PreExpr (strtoull (v, NULL, 8));
+        delete[] v;
+    }
+primary_expression(pe) ::= TOK_EXPR_DEC(v).
+    {
+        pe = new PreExpr (strtoull (v, NULL, 10));
+        delete[] v;
+    }
+primary_expression(pe) ::= TOK_EXPR_HEX(v).
+    {
+        pe = new PreExpr (strtoull (v, NULL, 16));
+        delete[] v;
+    }
+primary_expression(pe) ::= TOK_EXPR_CHAR(v).
+    {
+        pe = new PreExpr (overflow(PreExpr::convertChar (v)));
+        delete[] v;
+    }
+primary_expression(pe) ::= TOK_EXPR_FLOAT(v).
+    {
+        *err << location << sev_warning
+             << "floating constant in preprocessor expression, truncate to integer"
+             << endMessage;
+        pe = new PreExpr (overflow(floorl(strtold (v, NULL))));
+        delete[] v;
+    }
+primary_expression(pe) ::= TOK_EXPR_LPAREN(lp) conditional_expression(cp) TOK_EXPR_RPAREN(rp).
+    {
+        pe = cp;
+        delete[] lp;
+        delete[] rp;
+    }

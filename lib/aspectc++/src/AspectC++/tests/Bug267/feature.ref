@@ -1,0 +1,6 @@
+Bug267: around advice without proceed
+=====================================
+replaced void C::f() by advice!
+replaced int C::g(int) by advice!
+replaced void C::h() by advice!
+=====================================

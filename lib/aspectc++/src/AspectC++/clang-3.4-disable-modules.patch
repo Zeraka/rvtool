@@ -1,0 +1,12 @@
+Index: lib/Lex/HeaderSearch.cpp
+===================================================================
+--- lib/Lex/HeaderSearch.cpp	(revision 222625)
++++ lib/Lex/HeaderSearch.cpp	(working copy)
+@@ -954,6 +954,7 @@
+                                 const DirectoryEntry *Root,
+                                 bool IsSystem) {
+   SmallVector<const DirectoryEntry *, 2> FixUpDirectories;
++  return false;
+   
+   StringRef DirName = FileName;
+   do {

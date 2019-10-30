@@ -1,0 +1,15 @@
+ExecAdviceRecursive: checks exec advice for recursive fcts
+==========================================================
+before int fak1(int)
+before int fak1(int)
+around-before int fak2(int)
+around-before int fak2(int)
+around-before int fak2(int)
+around-after  int fak2(int)
+around-after  int fak2(int)
+around-after  int fak2(int)
+after  int N::fak3(int)
+after  int N::fak3(int)
+after  int N::fak3(int)
+after  int N::fak3(int)
+==========================================================

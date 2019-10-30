@@ -1,0 +1,60 @@
+#ifndef __Intro_ah__
+#define __Intro_ah__
+
+#include <stdio.h>
+
+class Foo;
+
+aspect Intro {
+  pointcut dest () = "C"||"D"||"E"||"F";
+public:
+  static const int val = 2;
+  advice dest () : slice struct { unsigned long int I1; };
+  advice dest () : slice struct { signed short (I2); };
+    advice dest () : slice struct { int Foo::*(*I3); };
+    advice dest () : slice struct { double Foo::*(* const (*I4(int,long))[47 + 11]); };
+    advice dest () : slice struct { void I5(Intro::Int*),(*I6); };
+    advice dest () : slice struct SL0 { static float pi; };
+  advice dest () && !"E": slice struct SL05 { struct S1 {
+    S1 ();
+    ~S1 ();
+    void f ();
+  } IS1; };
+  //  advice dest () : struct { struct Y {}; } IS2, *IS3; <== invalid C++ code!
+  advice dest () : slice struct { struct Z { struct Y {}; } IS2, *IS3; };
+  typedef int Int;
+  advice dest () : slice struct SL1 {
+    SL1 () {}
+    SL1 (Intro::Int);
+  };
+  advice dest () && !"E" : slice struct SL2 { ~SL2 (); };
+  advice dest () : slice struct SL3 { const Intro::Int square (Intro::Int); };
+  advice dest () : slice struct { void *operator new (size_t), *pp; };
+  advice dest () : slice struct SL4 { void g(); };
+  advice dest () : slice struct { static const int v = (8 + 15 ) * sizeof(int) / Intro::val; };
+};
+
+slice void Intro::SL4::g() { printf ("introduced ...::g()\n"); }
+slice float Intro::SL0::pi = 3.14f;
+slice Intro::SL1::SL1 (Intro::Int) : I3 (0) {
+  printf ("introduced constructor\n");
+}
+slice Intro::SL2::~SL2 () {
+  square (Intro::val);
+  printf ("introduced destructor\n"); 
+}
+slice const Intro::Int Intro::SL3::square (Intro::Int arg) {
+  printf ("introduced ...::square(Intro::Int)\n");
+  return arg * arg;
+}
+
+slice void Intro::SL05::S1::f () {
+}
+
+slice Intro::SL05::S1::S1 () {
+}
+
+slice Intro::SL05::S1::~S1 () {
+}
+
+#endif // __Intro_ah__

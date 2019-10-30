@@ -1,0 +1,19 @@
+ExecAdviceNewDelete: execution advice for heap operations
+=========================================================
+executing heap operation "void *C::operator new(<<<replaced>>>)"
+  tjp->that() is 0 (should be 0)
+executing heap operation "void C::operator delete(void *)"
+  tjp->that() is 0 (should be 0)
+executing heap operation "void *operator new(<<<replaced>>>)"
+  tjp->that() is 0 (should be 0)
+executing heap operation "void operator delete(void *)"
+  tjp->that() is 0 (should be 0)
+executing heap operation "void *operator new[](<<<replaced>>>)"
+  tjp->that() is 0 (should be 0)
+executing heap operation "void operator delete[](void *)"
+  tjp->that() is 0 (should be 0)
+executing heap operation "void *operator new(<<<replaced>>>)"
+  tjp->that() is 0 (should be 0)
+executing heap operation "void A::operator delete(void *)"
+  tjp->that() is 0 (should be 0)
+=========================================================

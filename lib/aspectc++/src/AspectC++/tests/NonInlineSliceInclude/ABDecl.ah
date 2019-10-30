@@ -1,0 +1,27 @@
+#ifndef __ABDecl_ah__
+#define __ABDecl_ah__
+
+#include <stdio.h>
+
+// Forward declarations
+class A;
+class B;
+
+aspect ABCrossed {
+
+    // introduce references into A and B (crossed)
+    advice "A" : slice class ASlice {
+      B *_bref; 
+    public:
+      void f1 () { printf ("  function ASlice::f1()\n"); }
+      void f2 ();
+    };
+    advice "B" : slice class BSlice {
+      A *_aref; 
+    public:
+      void f1 () { printf ("  function BSlice::f1()\n"); }
+      void f2 ();
+    };
+};
+
+#endif //  __ABDecl_ah__

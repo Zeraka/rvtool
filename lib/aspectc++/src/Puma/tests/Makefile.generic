@@ -1,0 +1,37 @@
+#ifeq ($(MAKELEVEL),0)
+#$(error Sorry, this makefile is not intended to be \
+#used directly. Please use the makefile in the toplevel \
+#directory of the Puma source tree instead)
+#endif
+
+ROOT ?= ../..
+CCPARSER ?= $(ROOT)/examples/parser/parser
+CCPARSERFLAGS := $(CCPARSEROPTFLAGS)
+
+#ifeq ($(filter -p, $(ACFLAGS)),)
+#  CCPARSERFLAGS +=
+#endif
+
+SOURCES := $(wildcard *.cc)
+TESTDIR := $(shell pwd|sed -e s+/.*/++)
+
+all: $(patsubst %.cc,%.parse, $(SOURCES))
+
+%.parse:
+	-$(CCPARSER) $(CCPARSERFLAGS) $*.cc 2>&1
+
+ref:   refclean $(patsubst %.cc,%.ref, $(SOURCES))
+
+%.ref:
+	@cp parse.out parse.ref
+
+refclean:
+	@rm -f parse.ref
+
+clean:
+	@rm -f parse.out
+
+.PHONY: clean all ref refclean
+
+# don't remove any intermediate files
+.SECONDARY:

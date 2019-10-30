@@ -1,0 +1,120 @@
+
+Creating instance of the class type: A::InA
+===========================================================================
+constr("A"): A::InA::InA()
+call  ("A"): void A::InA::foo()
+exec  ("A"): void A::InA::foo()
+get   ("A"): int A::InA::x
+set   ("A"): int A::InA::x
+ref   ("A"): int A::InA::x
+destr ("A"): A::InA::~InA()
+
+Creating instance of the class type: A::B::InB
+===========================================================================
+constr("A"): A::B::InB::InB()
+constr("A::B"): A::B::InB::InB()
+call  ("A"): void A::B::InB::foo()
+call  ("A::B"): void A::B::InB::foo()
+exec  ("A"): void A::B::InB::foo()
+exec  ("A::B"): void A::B::InB::foo()
+get   ("A"): int A::B::InB::x
+get   ("A::B"): int A::B::InB::x
+set   ("A"): int A::B::InB::x
+set   ("A::B"): int A::B::InB::x
+ref   ("A"): int A::B::InB::x
+ref   ("A::B"): int A::B::InB::x
+destr ("A"): A::B::InB::~InB()
+destr ("A::B"): A::B::InB::~InB()
+
+Creating instance of the class type: A::B::C::InC
+===========================================================================
+constr("A"): A::B::C::InC::InC()
+constr("A::B"): A::B::C::InC::InC()
+constr("A::B::C"): A::B::C::InC::InC()
+constr("A::B::C::InC"): A::B::C::InC::InC()
+call  ("A"): void A::B::C::InC::foo()
+call  ("A::B"): void A::B::C::InC::foo()
+call  ("A::B::C"): void A::B::C::InC::foo()
+call  ("A::B::C::InC"): void A::B::C::InC::foo()
+exec  ("A"): void A::B::C::InC::foo()
+exec  ("A::B"): void A::B::C::InC::foo()
+exec  ("A::B::C"): void A::B::C::InC::foo()
+exec  ("A::B::C::InC"): void A::B::C::InC::foo()
+get   ("A"): int A::B::C::InC::x
+get   ("A::B"): int A::B::C::InC::x
+get   ("A::B::C"): int A::B::C::InC::x
+get   ("A::B::C::InC"): int A::B::C::InC::x
+set   ("A"): int A::B::C::InC::x
+set   ("A::B"): int A::B::C::InC::x
+set   ("A::B::C"): int A::B::C::InC::x
+set   ("A::B::C::InC"): int A::B::C::InC::x
+ref   ("A"): int A::B::C::InC::x
+ref   ("A::B"): int A::B::C::InC::x
+ref   ("A::B::C"): int A::B::C::InC::x
+ref   ("A::B::C::InC"): int A::B::C::InC::x
+destr ("A"): A::B::C::InC::~InC()
+destr ("A::B"): A::B::C::InC::~InC()
+destr ("A::B::C"): A::B::C::InC::~InC()
+destr ("A::B::C::InC"): A::B::C::InC::~InC()
+
+Creating instance of the class type: A::B::C::InC::Inner
+===========================================================================
+constr("A"): A::B::C::InC::Inner::Inner()
+constr("A::B"): A::B::C::InC::Inner::Inner()
+constr("A::B::C"): A::B::C::InC::Inner::Inner()
+constr("A::B::C::InC::Inner"): A::B::C::InC::Inner::Inner()
+call  ("A"): void A::B::C::InC::Inner::foo()
+call  ("A::B"): void A::B::C::InC::Inner::foo()
+call  ("A::B::C"): void A::B::C::InC::Inner::foo()
+call  ("A::B::C::InC::Inner"): void A::B::C::InC::Inner::foo()
+exec  ("A"): void A::B::C::InC::Inner::foo()
+exec  ("A::B"): void A::B::C::InC::Inner::foo()
+exec  ("A::B::C"): void A::B::C::InC::Inner::foo()
+exec  ("A::B::C::InC::Inner"): void A::B::C::InC::Inner::foo()
+get   ("A"): int A::B::C::InC::Inner::x
+get   ("A::B"): int A::B::C::InC::Inner::x
+get   ("A::B::C"): int A::B::C::InC::Inner::x
+get   ("A::B::C::InC::Inner"): int A::B::C::InC::Inner::x
+set   ("A"): int A::B::C::InC::Inner::x
+set   ("A::B"): int A::B::C::InC::Inner::x
+set   ("A::B::C"): int A::B::C::InC::Inner::x
+set   ("A::B::C::InC::Inner"): int A::B::C::InC::Inner::x
+ref   ("A"): int A::B::C::InC::Inner::x
+ref   ("A::B"): int A::B::C::InC::Inner::x
+ref   ("A::B::C"): int A::B::C::InC::Inner::x
+ref   ("A::B::C::InC::Inner"): int A::B::C::InC::Inner::x
+destr ("A"): A::B::C::InC::Inner::~Inner()
+destr ("A::B"): A::B::C::InC::Inner::~Inner()
+destr ("A::B::C"): A::B::C::InC::Inner::~Inner()
+destr ("A::B::C::InC::Inner"): A::B::C::InC::Inner::~Inner()
+
+Creating instance of the class type: A::B::C::InC::Inner::InnerInner
+===========================================================================
+constr("A"): A::B::C::InC::Inner::InnerInner::InnerInner()
+constr("A::B"): A::B::C::InC::Inner::InnerInner::InnerInner()
+constr("A::B::C"): A::B::C::InC::Inner::InnerInner::InnerInner()
+call  ("A"): void A::B::C::InC::Inner::InnerInner::foo()
+call  ("A::B"): void A::B::C::InC::Inner::InnerInner::foo()
+call  ("A::B::C"): void A::B::C::InC::Inner::InnerInner::foo()
+exec  ("A"): void A::B::C::InC::Inner::InnerInner::foo()
+exec  ("A::B"): void A::B::C::InC::Inner::InnerInner::foo()
+exec  ("A::B::C"): void A::B::C::InC::Inner::InnerInner::foo()
+get   ("A"): int A::B::C::InC::Inner::InnerInner::x
+get   ("A::B"): int A::B::C::InC::Inner::InnerInner::x
+get   ("A::B::C"): int A::B::C::InC::Inner::InnerInner::x
+set   ("A"): int A::B::C::InC::Inner::InnerInner::x
+set   ("A::B"): int A::B::C::InC::Inner::InnerInner::x
+set   ("A::B::C"): int A::B::C::InC::Inner::InnerInner::x
+ref   ("A"): int A::B::C::InC::Inner::InnerInner::x
+ref   ("A::B"): int A::B::C::InC::Inner::InnerInner::x
+ref   ("A::B::C"): int A::B::C::InC::Inner::InnerInner::x
+destr ("A"): A::B::C::InC::Inner::InnerInner::~InnerInner()
+destr ("A::B"): A::B::C::InC::Inner::InnerInner::~InnerInner()
+destr ("A::B::C"): A::B::C::InC::Inner::InnerInner::~InnerInner()
+
+Slice test:
+# members of A::InA: 2 (should be 2)
+# members of A::B::InB: 2 (should be 2)
+# members of A::B::C::InC: 3 (should be 3)
+# members of A::B::C::InC::Inner: 5 (should be 5)
+# members of A::B::C::InC::Inner::InnerInner: 2 (should be 2)

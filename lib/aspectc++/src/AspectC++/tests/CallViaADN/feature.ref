@@ -1,0 +1,15 @@
+CallViaADN: Calls that require argument-dependent name lookup
+=============================================================
+calling void declared_friend_1(const A &)
+calling void declared_friend_2(const A &)
+calling void defined_friend_1(const A &)
+calling void defined_friend_2(const A &)
+-------------------------------------------------------------
+calling void N::declared_friend(const N::B &)
+calling void N::defined_friend_1(const N::B &)
+calling void N::defined_friend_2(const N::B &)
+-------------------------------------------------------------
+calling bool QT::operator ==(const QT::QString &,const QT::QString &)
+calling bool Peer::TorrentPeer::operator ==(const Peer::TorrentPeer &)
+calling bool QT::operator ==(const QT::QString &,const QT::QString &)
+=============================================================

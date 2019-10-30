@@ -1,0 +1,24 @@
+DESC="Check option --keep_woven"
+
+main()
+{
+  mkdir -p src/bin
+  BIN=src/bin/test15${EXT}
+
+  EXEC="${AGCC} --keep_woven -p src -v1 -o ${BIN} src/*.cc"
+  if  ( ${EXEC} );then true;
+  else
+    ERR_MSG="Execution failed '${EXEC}'";
+    return 1;
+  fi;
+
+  if [ -f Test.acc -a -f main.acc ];then true;
+  else
+    ERR_MSG="Woven files do not exist.";
+  fi;
+}
+
+cleanup()
+{
+   rm -rf puma.config src/bin *.acc
+}

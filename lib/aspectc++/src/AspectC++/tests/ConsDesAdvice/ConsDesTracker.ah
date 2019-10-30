@@ -1,0 +1,57 @@
+#ifndef __ConsDesTracker_ah__
+#define __ConsDesTracker_ah__
+
+#include <stdio.h>
+#include "c1.h"
+
+aspect ConsDesTracker {
+  advice construction ("C4") : around () {
+    printf ("  instead of %s\n", tjp->signature ());
+    tjp->proceed ();
+  }
+  advice destruction ("C4") : after () {
+    printf ("  after %s\n", tjp->signature ());
+  }
+  advice (destruction ("%") || construction("%")) && within("C4"): after () {
+    printf ("  after cons/dest within %s\n", tjp->signature ());
+  }
+  advice args() && (construction ("C%" && !"ConsDesTracker") ||
+                    destruction ("C1"||"C2")) : before () {
+    printf ("  before %s\n", tjp->signature ());
+  }
+  advice construction ("%") && that (obj) : before (C1 *obj) {
+    printf ("  before %s, that C1 %d\n", JoinPoint::signature (), obj->id ());
+  }
+  advice construction ("%") && that (obj) : after (Unique *obj) {
+    printf ("  after %s, that Unique %d\n",
+      JoinPoint::signature (), obj->id ());
+  }
+  advice construction ("C2") : around () {
+    printf ("  instead of %s\n", tjp->signature ());
+  }
+  advice within ("C1") && call("% ...::dump(...)") : around () {
+    printf ("  dump: ");
+    tjp->proceed ();
+  }
+  advice construction ("C1") : before () {
+    printf ("  before %s\n", tjp->signature ());
+  }
+  advice construction ("%") && args(i) : after (int i) {
+    printf ("  after integer constructor %d\n", i);
+  }
+  advice construction ("Unconstructable") : before () {} 
+
+  advice construction("Bug530") : before() {
+    printf ("  before %s\n", JoinPoint::signature());
+  }
+
+  advice construction("Bug530") : after() {
+    printf ("  after %s\n", JoinPoint::signature());
+  }
+
+  advice construction("TXXX<...>") : before() {
+    printf ("  before %s\n", JoinPoint::signature());
+  }
+};
+
+#endif // __ConsDesTracker_ah__

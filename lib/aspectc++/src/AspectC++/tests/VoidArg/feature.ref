@@ -1,0 +1,45 @@
+VoidArg: checks advice for functions with void argument (#206)
+==============================================================
+  -> before advice 1 for joinpoint "void myClass::inlineMethod()"
+  -> around advice 1 for joinpoint "void myClass::inlineMethod()"
+  >>>
+  -> before advice 2 for joinpoint "void myClass::inlineMethod()"
+  -> around advice 2 for joinpoint "void myClass::inlineMethod()"
+  >>>
+  -> before advice 1 for joinpoint "void myClass::inlineMethod()"
+  -> around advice 1 for joinpoint "void myClass::inlineMethod()"
+  >>>
+  -> before advice 2 for joinpoint "void myClass::inlineMethod()"
+  -> around advice 2 for joinpoint "void myClass::inlineMethod()"
+  >>>
+  in myClass::inlineMethod()
+  -> after advice 2 for joinpoint "void myClass::inlineMethod()"
+  <<<
+  -> after advice 1 for joinpoint "void myClass::inlineMethod()"
+  <<<
+  -> after advice 2 for joinpoint "void myClass::inlineMethod()"
+  <<<
+  -> after advice 1 for joinpoint "void myClass::inlineMethod()"
+  <<<
+  -> before advice 1 for joinpoint "void myClass::method()"
+  -> around advice 1 for joinpoint "void myClass::method()"
+  >>>
+  -> before advice 2 for joinpoint "void myClass::method()"
+  -> around advice 2 for joinpoint "void myClass::method()"
+  >>>
+  -> before advice 1 for joinpoint "void myClass::method()"
+  -> around advice 1 for joinpoint "void myClass::method()"
+  >>>
+  -> before advice 2 for joinpoint "void myClass::method()"
+  -> around advice 2 for joinpoint "void myClass::method()"
+  >>>
+  in myClass::method()
+  -> after advice 2 for joinpoint "void myClass::method()"
+  <<<
+  -> after advice 1 for joinpoint "void myClass::method()"
+  <<<
+  -> after advice 2 for joinpoint "void myClass::method()"
+  <<<
+  -> after advice 1 for joinpoint "void myClass::method()"
+  <<<
+==============================================================

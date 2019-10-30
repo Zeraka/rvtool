@@ -1,0 +1,336 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+/* Match-conditionals parser. */
+
+%name CMatchParser
+%extra_argument {CTreeMatcher::match_state *mstate}
+
+%token_type {CTree *}
+%type conditional {int}
+%type tree_match {int}
+%type selection {int}
+%type match_condition {int}
+%type match_mode {int}
+
+%left M_ELIF.
+%left M_OR.
+%left M_AND.
+%left M_XOR.
+%left M_SEQ.
+%left M_IF.
+%left M_UNARY.
+
+%include {
+#include "Puma/CTreeMatcher.h"
+#include "Puma/CMatchParser.h"
+#include "Puma/CWildcardTokens.h"
+#include "Puma/CTokens.h"
+#include "Puma/CTree.h"
+#include <stdlib.h>
+
+using namespace Puma;
+
+void *CMatchParserAlloc (void *(*mallocProc)(size_t));
+void CMatchParser       (void *pParser, int tokenID, CTree *token, 
+                           CTreeMatcher::match_state *mstate);
+void CMatchParserFree   (void *pParser, void (*freeProc)(void*));
+void CMatchParserTrace  (FILE *TraceFILE, char *zTracePrompt);
+
+namespace Puma {
+
+
+// Traverse the match-condition tree.
+void CTreeMatcher::travConditionTree (CTree *node, void *pParser, 
+                                      match_state *mstate) const {
+  if (! node || ! pParser || ! mstate) return;
+
+  int id;
+  CTree *son;
+  const char *type;
+  bool element_node = false;
+
+  for (int i = 0; i < node->Sons () && mstate->value != -1; i++) {
+    son = node->Son (i);
+    if (! son) 
+      continue;
+    type = son->NodeName ();
+    id = MATCHTREE;
+
+    // Visit the current son.
+    if (type == CT_AnyCondition::NodeId ()) {
+      if (element_node)
+        id = M_ELEMENT_NO;
+      else {
+        travConditionTree (son, pParser, mstate);
+        continue;
+      }
+    } else if (type == CT_Token::NodeId ()) {
+      if (! son->token ()) 
+        continue;
+
+      if (son->token ()->is_wildcard ()) {
+        switch (son->token ()->type ()) {
+          case TOK_WC_EXACT   : id = M_EXACT;      break;
+          case TOK_WC_FIRST   : id = M_FIRST;      break;
+          case TOK_WC_LAST    : id = M_LAST;       break;
+          case TOK_WC_PRUNE   : id = M_PRUNE;      break;
+          case TOK_WC_LEAF    : id = M_LEAF;       break;
+          case TOK_WC_COLLECT : id = M_COLLECT;    break;
+          case TOK_WC_NODENAME: id = M_NODENAME;   break;
+          case TOK_WC_NOT     : id = M_NOT;        break;
+          case TOK_WC_AND     : id = M_AND;        break;
+          case TOK_WC_XOR     : id = M_XOR;        break;
+          case TOK_WC_OR      : id = M_OR;         break;
+          case TOK_WC_SEQ     : id = M_SEQ;        break;
+          case TOK_WC_ELEMENT : id = M_ELEMENT;
+            element_node = true;
+            break;
+          case TOK_WC_ELIF    : id = M_ELIF;       break;
+          case TOK_WC_ENDIF   : id = M_ENDIF;      break;
+          case TOK_WC_IF      : id = M_IF; 
+            mstate->depth++;
+            mstate->selected[mstate->depth] = 0; 
+            break;
+          default             : id = 0;            break;
+        }
+      } else if (son->token ()->is_core ()) {
+        switch (son->token ()->type ()) {
+          case TOK_OPEN_ROUND : id = M_OPEN_ROUND;  break;
+          case TOK_CLOSE_ROUND: id = M_CLOSE_ROUND; break;
+          default             : id = MATCHTREE;     break;
+        }
+      } else 
+        id = son->token ()->type ();
+    } 
+        
+    // Parse the current node.
+    CMatchParser (pParser, id, son, mstate);
+  }
+}
+
+// Evaluate the given match-condition.
+bool CTreeMatcher::evalMatchCondition (CTree *tree, CTree *condition,
+                                       CMatch *matchObj, int mode) const {
+  if (! tree || ! condition || ! matchObj) 
+    return false;
+
+  Array<int> selected; 
+  selected[0] = 0;
+  match_state mstate = {0, tree, matchObj, mode, 0, selected,
+                        (CTreeMatcher*)this};
+
+  // Generate the Lemon parser.
+  void *pParser = CMatchParserAlloc ((void* (*)(size_t))malloc);
+  //CMatchParserTrace(stdout, "TRACE: ");
+
+  // Parse the match-condition tree.
+  travConditionTree (condition, pParser, &mstate);
+
+  // Finish and then free the parser.
+  CMatchParser (pParser, 0, (CTree*)0, &mstate);
+  CMatchParserFree (pParser, (void (*)(void*))::free);
+
+  return (mstate.value <= 0) ? false : true;
+}
+
+
+} // namespace Puma
+}
+
+%syntax_error {
+    mstate->value = -1;
+}
+
+/***********************************************************************/
+/*  match-condition ****************************************************/
+/***********************************************************************/
+
+match_condition ::= conditional(c).        
+    { 
+        mstate->value = c; 
+    }
+ 
+/***********************************************************************/
+/* conditionals ********************************************************/
+/***********************************************************************/
+
+conditional(c) ::= M_OPEN_ROUND conditional(co) M_CLOSE_ROUND.
+    { 
+        c = co;
+    }
+conditional(c) ::= conditional M_SEQ conditional(co2).
+    {   
+        /* The sequence or implication. */
+        /* A B | seq                    */
+        /* ----+-----                   */
+        /* 1 1 |  1                     */
+        /* 1 0 |  0                     */
+        /* 0 1 |  1                     */
+        /* 0 0 |  0 (!)                 */
+        c = co2; 
+    }
+conditional(c) ::= conditional(co1) M_OR conditional(co2).
+    { 
+        /* The alternative. */
+        /* A B |  or        */
+        /* ----+-----       */
+        /* 1 1 |  1         */
+        /* 1 0 |  1         */
+        /* 0 1 |  1         */
+        /* 0 0 |  0         */
+        c = (co1 || co2) ? 1 : 0; 
+    }
+conditional(c) ::= conditional(co1) M_XOR conditional(co2).
+    { 
+        /* The exclusive alternative. */
+        /* A B | xor                  */
+        /* ----+-----                 */
+        /* 1 1 |  0                   */
+        /* 1 0 |  1                   */
+        /* 0 1 |  1                   */
+        /* 0 0 |  0                   */
+        c = ((co1 && ! co2) || (! co1 && co2)) ? 1 : 0; 
+    }
+conditional(c) ::= conditional(co1) M_AND conditional(co2).
+    { 
+        /* The conjunction. */
+        /* A B | and        */
+        /* ----+-----       */
+        /* 1 1 |  1         */
+        /* 1 0 |  0         */
+        /* 0 1 |  0         */
+        /* 0 0 |  0         */
+        c = (co1 && co2) ? 1 : 0; 
+    }
+conditional(c) ::= M_NOT conditional(co). [M_UNARY]
+    {
+        /* The negation. */
+        /* A | not       */
+        /* --+-----      */
+        /* 1 |  0        */
+        /* 0 |  1        */
+        c = ! co; 
+    }
+conditional(c) ::= M_COLLECT conditional. [M_UNARY]
+    {
+        /* The collector. */
+        /* A | collect    */
+        /* --+-----       */
+        /* 1 |  1         */
+        /* 0 |  1         */
+        c = 1; 
+    }
+conditional(c) ::= M_IF selection(s) M_ENDIF.
+    {
+        /* The selection.                                 */
+        /* E.g.: if <conditional>                         */
+        /*       elif <conditional>                       */
+        /*       elif <conditional>                       */
+        /*       endif                                    */
+        /* The conditionals are evaluated till the first  */
+        /* true conditional is found. The following elifs */
+        /* are skipped and their conditionals are not     */
+        /* evaluated anymore.                             */
+        c = s;
+        mstate->depth--;
+    }
+conditional(c) ::= M_NODENAME MATCHTREE(mt). [M_UNARY]
+    {
+        /* It's checked whether the root node of the */
+        /* current syntax tree has the given name.   */
+        /* Regular expressions are allowed, too.     */
+        if (mstate->selected[mstate->depth]) 
+            c = 0;
+        else 
+            c = mstate->matcher->matchNodeName (mstate->tree, mt);
+    }
+conditional(c) ::= tree_match(tm).
+    {
+        c = tm;
+    }
+    
+/***********************************************************************/
+/* selections **********************************************************/
+/***********************************************************************/
+
+selection(s) ::= conditional(c).
+    {
+        if (! mstate->selected[mstate->depth])
+            s = mstate->selected[mstate->depth] = c;
+        else
+            s = 1;
+    }
+selection(s) ::= selection M_ELIF conditional(c).
+    {
+        if (! mstate->selected[mstate->depth])
+            s = mstate->selected[mstate->depth] = c;
+        else
+            s = 1;
+    }
+
+/***********************************************************************/
+/* tree matches ********************************************************/
+/***********************************************************************/
+
+tree_match(tm) ::= match_mode(m) MATCHTREE(mt). [M_UNARY]
+    { 
+        if (mstate->selected[mstate->depth]) 
+            tm = 0;
+        else 
+            tm = mstate->matcher->matchTree (m, *mstate, mstate->tree, mt);
+    }
+tree_match(tm) ::= M_ELEMENT match_mode(m) MATCHTREE(mt). [M_UNARY]
+    {
+        if (mstate->selected[mstate->depth]) 
+            tm = 0;
+        else if (mstate->mode == CTreeMatcher::ANY_LIST)
+            tm = mstate->matcher->matchList (m, *mstate, mt);
+        else
+            tm = mstate->matcher->matchTree (m, *mstate, mstate->tree, mt);
+    }
+tree_match(tm) ::= M_ELEMENT M_ELEMENT_NO(f) match_mode(m) MATCHTREE(mt). [M_UNARY]
+    {
+        if (mstate->selected[mstate->depth]) 
+            tm = 0;
+        else if (mstate->mode == CTreeMatcher::ANY_LIST)
+            tm = mstate->matcher->matchList (m, *mstate, mt, f);
+        else
+            tm = mstate->matcher->matchTree (m, *mstate, mstate->tree, mt);
+    }
+tree_match(tm) ::= M_ELEMENT M_ELEMENT_NO(f) M_ELEMENT_NO(l) match_mode(m)
+                   MATCHTREE(mt). [M_UNARY]
+    {
+        if (mstate->selected[mstate->depth]) 
+            tm = 0;
+        else if (mstate->mode == CTreeMatcher::ANY_LIST)
+            tm = mstate->matcher->matchList (m, *mstate, mt, f, l);
+        else
+            tm = mstate->matcher->matchTree (m, *mstate, mstate->tree, mt);
+    }
+
+/***********************************************************************/
+/* match modes *********************************************************/
+/***********************************************************************/
+
+match_mode(m) ::= /* empty */. { m = CTreeMatcher::MATCH_ALL; }
+match_mode(m) ::= M_EXACT.     { m = CTreeMatcher::MATCH_EXACT; }
+match_mode(m) ::= M_FIRST.     { m = CTreeMatcher::MATCH_FIRST; }
+match_mode(m) ::= M_LAST.      { m = CTreeMatcher::MATCH_LAST; }
+match_mode(m) ::= M_LEAF.      { m = CTreeMatcher::MATCH_LEAF; }
+match_mode(m) ::= M_PRUNE.     { m = CTreeMatcher::MATCH_PRUNE; }

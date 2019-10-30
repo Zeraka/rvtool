@@ -1,0 +1,35 @@
+  execution ("int main()")
+AnonymousStuff: tests if ac++ can deal with anonymous classes,
+                namespace, etc.
+=============================================================
+    call ("void <unnamed>::g1()")
+  execution ("void <unnamed>::g1()")
+  in unnamed namespace
+    call ("void f()")
+  execution ("void f()")
+    call ("void <unnamed>::C::cfunc()")
+  execution ("void <unnamed>::C::cfunc()")
+  in unnamed namespace
+    call ("void <unnamed>::<unnamed>::g2()")
+  execution ("void <unnamed>::<unnamed>::g2()")
+  in unnamed namespace
+    call ("void f()")
+    call within g2() to ("void f()")
+  execution ("void f()")
+    call ("void <unnamed>::g1()")
+    call within g2() to ("void <unnamed>::g1()")
+  execution ("void <unnamed>::g1()")
+  in unnamed namespace
+    call ("void f()")
+  execution ("void f()")
+    call ("void <unnamed>::C::cfunc()")
+  execution ("void <unnamed>::C::cfunc()")
+  in unnamed namespace
+  execution ("const <unnamed>::C &<unnamed>::C::staticcfunc(<unnamed>::C &)")
+  in unnamed namespace
+    call ("void <unnamed>::C::cfunc()")
+  execution ("void <unnamed>::C::cfunc()")
+  in unnamed namespace
+  execution ("FooBar::MyEnum <unnamed>::A::B::f(FooBar::FooBar2::C &)")
+  in unnamed namespace
+=============================================================

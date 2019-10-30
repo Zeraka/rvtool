@@ -1,0 +1,1 @@
+my_trace_call CALLING: int mySimpleTemplateClass<10>::getArraySize()

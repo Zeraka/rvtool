@@ -1,0 +1,59 @@
+#ifndef __ObserverPattern_ah__
+#define __ObserverPattern_ah__
+
+#include <set>
+#include <map>
+using namespace std;
+
+aspect ObserverPattern {
+
+public:
+  // interfaces for each role
+  class Subject {};
+  class Observer {
+  public:
+    virtual void update (Subject *) = 0;
+  };
+
+private:
+
+  // data structures to manage subjects and observers
+  typedef set<Observer*> ObserverSet;
+  typedef map<Subject*,ObserverSet> SubjectMap;
+  typedef SubjectMap::value_type SubjectMapPair;
+
+  SubjectMap _perSubjectObservers;
+
+  // to be defined by the concrete derived aspect
+  pointcut virtual subjectChange (Subject &subject) = 0;
+  virtual void updateObserver (Subject *subject, Observer *observer) = 0;
+
+ public:
+
+  void addObserver (Subject *subject, Observer *observer) {
+    SubjectMap::iterator subject_pos = _perSubjectObservers.find (subject);
+    if (subject_pos != _perSubjectObservers.end ()) {
+      ObserverSet &oset = (*subject_pos).second;
+      oset.insert (observer);
+    }
+    else {
+      ObserverSet oset;
+      oset.insert (observer);
+      _perSubjectObservers.insert (SubjectMapPair (subject, oset));
+    }
+  }
+
+  // here all registered observers are informed about a subject change
+  advice subjectChange (subject) : after (Subject &subject) {
+    SubjectMap::iterator subject_pos = _perSubjectObservers.find (&subject);
+    if (subject_pos != _perSubjectObservers.end ()) {
+      ObserverSet &oset = (*subject_pos).second;
+      for (ObserverSet::iterator iter = oset.begin (); iter != oset.end ();
+	   ++iter)
+	updateObserver (&subject, *iter);
+    }
+  }
+
+};
+
+#endif // __ObserverPattern_ah__

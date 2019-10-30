@@ -1,0 +1,4 @@
+Bug 353: first token shouldn't be join-point
+=====================================================
+should compile without error ...
+=====================================================

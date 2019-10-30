@@ -1,0 +1,11 @@
+#ifndef __A2_ah__
+#define __A2_ah__
+
+typedef int T;
+
+aspect A2 {
+public:
+  advice "C" : slice struct { T _var; };
+};
+
+#endif // __A2_ah__

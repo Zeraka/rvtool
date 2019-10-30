@@ -1,0 +1,16 @@
+========== const call =========
+call: void A::__leave() const
+  JoinPoint::That is const: 0
+  JoinPoint::Target is const: 1
+exec: void A::__leave() const
+  JoinPoint::That is const: 1
+  JoinPoint::Target is const: 1
+const leave
+======== non-const call =======
+call: void A::__leave()
+  JoinPoint::That is const: 0
+  JoinPoint::Target is const: 0
+exec: void A::__leave()
+  JoinPoint::That is const: 0
+  JoinPoint::Target is const: 0
+non-const leave

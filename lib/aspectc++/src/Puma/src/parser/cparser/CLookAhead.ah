@@ -1,0 +1,440 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __CLookAhead_ah__
+#define __CLookAhead_ah__
+
+#include <bitset>
+#include <iostream>
+
+aspect CLookAhead {
+
+  // FIRST sets and init functions
+  advice "Puma::CSyntax": slice struct {
+    tokenset _typedef_name_1;
+    tokenset _identifier_1;
+    tokenset _literal_1;
+    tokenset _cmpd_str_1;
+    tokenset _str_literal_1;
+    tokenset _prim_expr_1;
+    tokenset _id_expr_1;
+    tokenset _cmpd_literal_1;
+    tokenset _postfix_expr_1;
+    tokenset _postfix_expr1_1;
+    tokenset _cast_expr1_1;
+    tokenset _cast_expr2_1;
+    tokenset _label_stmt_1;
+    tokenset _cmpd_stmt_1;
+    tokenset _select_stmt_1;
+    tokenset _iter_stmt_1;
+    tokenset _jump_stmt_1;
+    tokenset _decl_spec_1;
+    tokenset _misc_spec_1;
+    tokenset _storage_class_spec_1;
+    tokenset _fct_spec_1;
+    tokenset _type_spec_1;
+    tokenset _simple_type_spec_1;
+    tokenset _type_name_1;
+    tokenset _elaborated_type_spec_1;
+    tokenset _enum_spec_1;
+    tokenset _enum_spec1_1;
+    tokenset _direct_declarator1_1;
+    tokenset _cv_qual_seq_1;
+    tokenset _cv_qual_1;
+    tokenset _class_head_1;
+    tokenset _class_key_1;
+    tokenset _enum_key_1;
+
+    virtual void init_typedef_name () {
+      _typedef_name_1.set (TOK_ID);
+    }
+    virtual void init_identifier () {
+      _identifier_1.set (TOK_ID);
+    }
+    virtual void init_literal () {
+      init_cmpd_str ();
+      _literal_1 = _cmpd_str_1;
+      _literal_1.set (TOK_INT_VAL);
+      _literal_1.set (TOK_ZERO_VAL);
+      _literal_1.set (TOK_CHAR_VAL);
+      _literal_1.set (TOK_FLT_VAL);
+    }
+    virtual void init_cmpd_str () {
+      init_str_literal ();
+      _cmpd_str_1 = _str_literal_1;
+    }
+    virtual void init_str_literal () {
+      _str_literal_1.set (TOK_STRING_VAL);
+    }
+    virtual void init_prim_expr () {
+      init_literal ();
+      init_id_expr ();
+      _prim_expr_1 = _literal_1;
+      _prim_expr_1 |= _id_expr_1;
+      _prim_expr_1.set (TOK_OPEN_ROUND);
+    }
+    virtual void init_id_expr () {
+      _id_expr_1.set (TOK_ID);
+    }
+    virtual void init_cmpd_literal () {
+      _cmpd_literal_1.set (TOK_OPEN_ROUND);
+    }
+    virtual void init_postfix_expr () {
+      init_prim_expr ();
+      init_cmpd_literal ();
+      _postfix_expr_1 = _prim_expr_1;
+      _postfix_expr_1 |= _cmpd_literal_1;
+    }
+    virtual void init_postfix_expr1 () {
+      _postfix_expr1_1.set (TOK_DECR);
+      _postfix_expr1_1.set (TOK_INCR);
+      _postfix_expr1_1.set (TOK_DOT);
+      _postfix_expr1_1.set (TOK_PTS);
+      _postfix_expr1_1.set (TOK_OPEN_ROUND);
+      _postfix_expr1_1.set (TOK_OPEN_SQUARE);
+    }
+    
+    virtual void init_cast_expr1 () {
+      init_cast_expr2 ();
+      _cast_expr1_1 = _cast_expr2_1;
+    }
+
+    virtual void init_cast_expr2 () {
+      _cast_expr2_1.set (TOK_OPEN_ROUND);
+    }
+
+    virtual void init_label_stmt () {
+      init_identifier ();
+      _label_stmt_1 = _identifier_1;
+      _label_stmt_1.set (TOK_CASE);
+      _label_stmt_1.set (TOK_DEFAULT);
+    }
+
+    virtual void init_cmpd_stmt () {
+      _cmpd_stmt_1.set (TOK_OPEN_CURLY);
+    }
+
+    virtual void init_select_stmt () {
+      _select_stmt_1.set (TOK_SWITCH);
+      _select_stmt_1.set (TOK_IF);
+    }
+
+    virtual void init_iter_stmt () {
+      _iter_stmt_1.set (TOK_FOR);
+      _iter_stmt_1.set (TOK_WHILE);
+      _iter_stmt_1.set (TOK_DO);
+    }
+    
+    virtual void init_jump_stmt () {
+      _jump_stmt_1.set (TOK_BREAK);
+      _jump_stmt_1.set (TOK_CONTINUE);
+      _jump_stmt_1.set (TOK_RETURN);
+      _jump_stmt_1.set (TOK_GOTO);
+    }
+
+    virtual void init_decl_spec () {
+      init_storage_class_spec ();
+      init_type_spec ();
+      init_fct_spec ();
+      init_misc_spec ();
+      _decl_spec_1 = _storage_class_spec_1;
+      _decl_spec_1 |= _type_spec_1;
+      _decl_spec_1 |= _fct_spec_1;
+      _decl_spec_1 |= _misc_spec_1;
+    }
+
+    virtual void init_misc_spec () {
+      _misc_spec_1.set (TOK_TYPEDEF);
+    }
+
+    virtual void init_storage_class_spec () {
+      _storage_class_spec_1.set (TOK_AUTO);
+      _storage_class_spec_1.set (TOK_REGISTER);
+      _storage_class_spec_1.set (TOK_STATIC);
+      _storage_class_spec_1.set (TOK_EXTERN);
+    }
+
+    virtual void init_fct_spec () {
+      _fct_spec_1.set (TOK_INLINE);
+    }
+
+    virtual void init_type_spec () {
+      init_simple_type_spec ();
+      init_class_spec ();
+      init_enum_spec ();
+      init_elaborated_type_spec ();
+      init_cv_qual ();
+      _type_spec_1 = _simple_type_spec_1;
+      _type_spec_1 |= _class_spec_1;
+      _type_spec_1 |= _enum_spec_1;
+      _type_spec_1 |= _elaborated_type_spec_1;
+      _type_spec_1 |= _cv_qual_1;
+    }
+
+    virtual void init_simple_type_spec () {
+      init_type_name ();
+      // init_prim_types (); <-- done by CSyntax::configure()
+      _simple_type_spec_1 = _type_name_1;
+      _simple_type_spec_1 |= _prim_types;
+    }
+
+    virtual void init_type_name () {
+      init_typedef_name ();
+      _type_name_1 = _typedef_name_1;
+    }
+
+    virtual void init_elaborated_type_spec () {
+      init_class_key ();
+      _elaborated_type_spec_1 = _class_key_1;
+      _elaborated_type_spec_1.set (TOK_ENUM);
+    }
+
+    virtual void init_enum_key () {
+      _enum_key_1.set (TOK_ENUM);
+    }
+
+    virtual void init_enum_spec () {
+      init_enum_spec1 ();
+      _enum_spec_1 = _enum_spec1_1;
+    }
+
+    virtual void init_enum_spec1 () {
+      init_enum_key ();
+      _enum_spec1_1 = _enum_key_1;
+    }
+
+    virtual void init_direct_declarator1 () {
+      _direct_declarator1_1.set (TOK_OPEN_SQUARE);
+      _direct_declarator1_1.set (TOK_OPEN_ROUND);
+    }
+
+    virtual void init_cv_qual_seq () {
+      init_cv_qual ();
+      _cv_qual_seq_1 = _cv_qual_1;
+    }
+
+    virtual void init_cv_qual () {
+      _cv_qual_1 = _cv_quals;
+    }
+
+    virtual void init_class_head () {
+      init_class_key ();
+      _class_head_1 = _class_key_1;
+    }
+
+    virtual void init_class_key () {
+      _class_key_1.set (TOK_STRUCT);
+      _class_key_1.set (TOK_UNION);
+    }
+  };
+
+  // dedicated lookahead rules
+  advice "Puma::CSyntax::TypedefName": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_typedef_name_1);
+    }
+  };
+  advice "Puma::CSyntax::Identifier": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_identifier_1);
+    }
+  };
+  advice "Puma::CSyntax::Literal": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_literal_1);
+    }
+  };
+  advice "Puma::CSyntax::CmpdStr": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_cmpd_str_1);
+    }
+  };
+  advice "Puma::CSyntax::StrLiteral": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_str_literal_1);
+    }
+  };
+  advice "Puma::CSyntax::PrimExpr": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_prim_expr_1);
+    }
+  };
+  advice "Puma::CSyntax::IdExpr": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_id_expr_1);
+    }
+  };
+  advice "Puma::CSyntax::PostfixExpr": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_postfix_expr_1);
+    }
+  };
+  advice "Puma::CSyntax::PostfixExpr1": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_postfix_expr1_1);
+    }
+  };
+  advice "Puma::CSyntax::CastExpr1": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_cast_expr1_1);
+    }
+  };
+  advice "Puma::CSyntax::CastExpr2": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_cast_expr2_1);
+    }
+  };
+  advice "Puma::CSyntax::AssExpr1": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->is_ass_expr ();
+    }
+  };
+  advice "Puma::CSyntax::LabelStmt": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_label_stmt_1);
+    }
+  };
+  advice "Puma::CSyntax::CmpdStmt": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_cmpd_stmt_1);
+    }
+  };
+  advice "Puma::CSyntax::SelectStmt": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_select_stmt_1);
+    }
+  };
+  advice "Puma::CSyntax::IterStmt": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_iter_stmt_1);
+    }
+  };
+  advice "Puma::CSyntax::JumpStmt": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_jump_stmt_1);
+    }
+  };
+  advice "Puma::CSyntax::DeclSpec": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_decl_spec_1);
+    }
+  };
+  advice "Puma::CSyntax::MiscSpec": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_misc_spec_1);
+    }
+  };
+  advice "Puma::CSyntax::StorageClassSpec": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_storage_class_spec_1);
+    }
+  };
+  advice "Puma::CSyntax::FctSpec": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_fct_spec_1);
+    }
+  };
+  advice "Puma::CSyntax::SimpleTypeSpec": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_simple_type_spec_1);
+    }
+  };
+  advice "Puma::CSyntax::TypeName": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_type_name_1);
+    }
+  };
+  advice "Puma::CSyntax::ElaboratedTypeSpec": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_elaborated_type_spec_1);
+    }
+  };
+  advice "Puma::CSyntax::EnumKey": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_enum_key_1);
+    }
+  };
+  advice "Puma::CSyntax::EnumSpec": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_enum_spec_1);
+    }
+  };
+  advice "Puma::CSyntax::EnumSpec1": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_enum_spec1_1);
+    }
+  };
+  advice "Puma::CSyntax::DirectDeclarator1": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_direct_declarator1_1);
+    }
+  };
+  advice "Puma::CSyntax::CvQualSeq": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_cv_qual_seq_1);
+    }
+  };
+  advice "Puma::CSyntax::CvQual": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_cv_qual_1);
+    }
+  };
+  advice "Puma::CSyntax::ParamDeclList": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return !s->look_ahead (TOK_CLOSE_ROUND) && !s->look_ahead (TOK_ELLIPSIS);
+    }
+  };
+  advice "Puma::CSyntax::ClassHead": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_class_head_1);
+    }
+  };
+  advice "Puma::CSyntax::ClassKey": slice struct {
+    static inline bool lookahead(CSyntax *s) {
+      return s->predict_1 (s->_class_key_1);
+    }
+  };
+
+  // default lookahead -> yields true for all rules
+  advice "Puma::CSyntax::%" : slice struct {
+    static bool lookahead(void *) { return true; }
+  };
+
+  // make sure the FIRST sets are properly initialized
+  advice execution ("void Puma::CSyntax::configure(...)") : after() {
+    // later (when all rules have an init function) it should be sufficient
+    // to call init_translation_unit()
+    tjp->that()->init_postfix_expr();
+    tjp->that()->init_postfix_expr1();
+    tjp->that()->init_cast_expr1();
+    tjp->that()->init_label_stmt();
+    tjp->that()->init_cmpd_stmt();
+    tjp->that()->init_select_stmt();
+    tjp->that()->init_iter_stmt();
+    tjp->that()->init_jump_stmt();
+    tjp->that()->init_decl_spec();
+    tjp->that()->init_simple_type_spec();
+    tjp->that()->init_type_name();
+    tjp->that()->init_elaborated_type_spec();
+    tjp->that()->init_enum_spec();
+    tjp->that()->init_direct_declarator1 ();
+    tjp->that()->init_cv_qual_seq ();
+  }
+};
+
+#endif /* __CLookAhead_ah__ */

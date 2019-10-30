@@ -1,0 +1,5 @@
+VirtualPointcuts: checks virtual pointcut lookup
+================================================
+Advice on virtual pct 'f()': void b()
+Advice on pure virtual pct 'g()': void b()
+================================================

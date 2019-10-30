@@ -1,0 +1,197 @@
+#ifndef __genericprofiler_ah__
+#define __genericprofiler_ah__
+
+#include <iostream>
+#include <cstdlib>
+#include <map>
+#include <set>
+
+
+// GenericProfiler - generic aspect to gather profiling information
+// (Group, name and signature of each executed function, how often the function
+// was executed and how many clock cycles were spent executing it.)
+// While the names and signatures are determined automatically, the group
+// is a user defined value that may be used to arbitrarily define a group
+// of functions. Depending on the output format an overall execution time for
+// each group will be summarized.  
+// For each group an own profiling aspect derived from GenericProfiler must be
+// defined.
+// 
+// The derived aspects must define a match expression for the functions
+// to be profiled:
+//
+//    pointcut virtual measureFct () = ... ;
+//
+// One of the derived aspects should also register a function to print the
+// profiling information. The registration may be done for example as an
+// after() advive for the main() function, or with help of the atexit() call.
+// Example implementations of the statistic functions are print_group_stat()
+// and csv_stat().
+//
+// The GenericProfiler aspect uses the time stamp counter of the x86
+// processors to measure the execution time in clock cycles.
+// When the profiling aspect should be used on other architectures
+// the rdtsc() function and possibly the definition of the typedef
+// ClockTicks and the function duration() must be replaced accordingly.
+
+
+
+namespace Profiler {
+
+  typedef unsigned long long int ClockTicks;
+
+  // rdtsc() - read the time stamp counter of x86 processors  
+  extern inline ClockTicks rdtsc() {
+    unsigned long long int x;
+    __asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
+    return x;
+  }
+
+  // duration() - calculate time spent between start and stop
+  extern inline ClockTicks duration(ClockTicks start, ClockTicks end) {
+    if (end > start) {
+      return (end - start);
+    } else { // counter overflow
+      return (ClockTicks)(-1LL) - end + start;
+    }
+  }
+
+  // Data structure used to gather the profiling information
+  // New Data objects link themselves to existing ones at creation
+  // time.
+  struct Data {
+    static Data *&first () { static Data *data = 0; return data; }
+    struct Data *_next;
+    unsigned _calls;
+    ClockTicks _time;
+    const char *_name;
+    const char* _title;
+    unsigned _depth;
+    Data (const char* n, const char* t) : _calls(0), _time(0L),
+					  _name (n), _title(t), _depth(0) {
+      Data *head = first ();
+      first () = this;
+      _next = head;
+    }
+
+    static Profiler::ClockTicks& groupTime (const char* groupname) {
+      static map <const char*, Profiler::ClockTicks> data;
+      return data[groupname];
+    }
+  };
+}
+
+
+// GenericProfiler aspect
+aspect GenericProfiler {
+
+  // user defined title for a group of functions
+  const char* _title;
+  int _grpdepth;
+
+  GenericProfiler (const char* t = NULL) : _title(t), _grpdepth(0) {}
+
+  // Do not measure the Profiler's own methods
+  pointcut dontMeasure () = "% Profiler::...::%(...)" ||
+    "% GenericProfiler::...::%(...)";
+
+  // Pure virtual pointcut: to be specified in a derived aspect
+  pointcut virtual measureFct () = 0;
+
+  // Execution advice for the functions that are to be measured.
+  // For each JoinPoint the advice code will be transformed into
+  // a new template function instantiation. Therefore a new Data object
+  // will be created whenever a function is executed the first time.
+  // Further executions of the same function will reuse this object,
+  // enabling it to count the number of invocations and the overall
+  // time consumed.
+  // When the function is called recursively, only measure the duration
+  // of the outmost invocation.
+  advice execution(measureFct() && !dontMeasure()) : around() {
+    static Profiler::Data data (JoinPoint::signature (), _title);
+    _grpdepth++;
+    data._depth++;
+    if (data._depth == 1) {
+      Profiler::ClockTicks start = Profiler::rdtsc();
+      tjp->proceed();
+      Profiler::ClockTicks end = Profiler::rdtsc();
+      Profiler::ClockTicks duration = Profiler::duration (start, end);
+      data._time += duration;
+      if (_grpdepth == 1)
+        Profiler::Data::groupTime(data._title) += duration;
+      } else {
+      tjp->proceed();
+    }
+    data._calls++;
+    data._depth--;
+    _grpdepth--;
+  };
+
+
+  // Prints the profiling statistics gathered by *all* profiling aspects
+  // sorted by groups of functions.
+  static void print_group_stat () {
+
+    // gather information about the different groups
+    set<const char*> groups;
+    for (Profiler::Data *curr = Profiler::Data::first ();
+        curr; curr = curr->_next) {
+      if (curr->_title != NULL)
+        groups.insert(curr->_title);
+    }
+
+    // print statistics about the groups and their members 
+    for (set<const char*>::iterator iter = groups.begin();
+        iter != groups.end(); iter++) {
+      std::cout << "group: " << *iter << std::endl;
+
+      for (Profiler::Data *curr = Profiler::Data::first ();
+          curr; curr = curr->_next) {
+        if (curr->_title == *iter) {
+          std::cout << "    function:    " << curr->_name << std::endl;
+          std::cout << "    no of execs: " << curr->_calls << std::endl;
+          std::cout << "    total time:  " << curr->_time << std::endl << std::endl;
+        }
+      }
+      std::cout << "total time: " << Profiler::Data::groupTime(*iter) << std::endl;
+      std::cout << "---" << std::endl << std::endl;
+    }
+
+    // print statistics about functions that do not belong to a group
+    for (Profiler::Data *curr = Profiler::Data::first ();
+        curr; curr = curr->_next) {
+      if (curr->_title == NULL) {
+        std::cout << "function:    " << curr->_name << std::endl;
+        std::cout << "no of execs: " << curr->_calls << std::endl;
+        std::cout << "total time:  " << curr->_time << std::endl << std::endl;
+      }
+    }
+  }
+
+
+  // Print an unsorted summary using the csv format 
+  static void csv_stat () {
+    std::cout << "group ;  group time (clock cycles) ;"
+        << "function ; number of executions ; "
+        << "total time (clock cycles)" << std::endl;
+    for (Profiler::Data *curr = Profiler::Data::first ();
+        curr; curr = curr->_next) {
+      if (curr->_title == NULL) {
+        std::cout << " ; ; ";
+      } else {
+        std::cout << curr->_title << " ; " ;
+        std::cout << Profiler::Data::groupTime (curr->_title) << " ; ";
+      }
+      std::cout << curr->_name << " ; "
+          << curr->_calls << " ; "
+          << curr->_time << std::endl;
+    }
+  }
+
+  // Function that may be registered, when no summary is requested
+  static void no_stat() {}
+
+};
+
+
+#endif

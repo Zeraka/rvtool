@@ -1,0 +1,32 @@
+Installation
+------------
+
+Installation on systems with g++ is straightforward. Unpack the tarball,
+enter the created directory "aspectc++" and you are ready to
+test the examples. 
+
+
+Examples
+--------
+
+To play with the examples type "make" in the top level directory to
+run ac++ on the examples under the examples/ directory. After that,
+the examples are automatically executed. To run a specific example,
+change to the directory and type "make run" to start the generated binary.
+
+
+Documentation
+-------------
+
+The documentation for AspectC++ can be downloaded at http://www.aspectc.org.
+There are serveral manuals from a brief AspectC++ language overview to
+detailed compiler descriptions.
+
+
+Contact
+-------
+
+Visit http://www.aspectc.org for more information and updated versions.
+
+If you want any information about the AspectC++ project or have any comments, 
+feel free to send us mail via info@aspectc.org. 

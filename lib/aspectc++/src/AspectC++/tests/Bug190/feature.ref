@@ -1,0 +1,2 @@
+before function "void f(int)"
+before function "void f(float)"

@@ -1,0 +1,8 @@
+  call const int getMBS()
+  get const int MaxBufferSize
+  get const int MaxBufferSize
+  builtin int operator +(int,int)
+  get const int MaxBufferSize
+0
+  get const int MaxBufferSize
+10

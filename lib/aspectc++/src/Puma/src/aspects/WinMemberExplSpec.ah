@@ -1,0 +1,80 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __WinMemberExplSpec__
+#define __WinMemberExplSpec__
+
+/********************************************************/
+/* Win member template explicit specialization          */
+/* support aspect                                       */
+/********************************************************/
+
+
+namespace Puma {
+  class CCSyntax;
+  class CTree;
+} 
+
+namespace Puma {
+  slice class WinMemberExplSpecSyntax;
+}
+
+aspect WinMemberExplSpec {
+  /********************************************************/
+  /* Win member template explicit specialization          */
+  /********************************************************/
+
+  // pointcut definitions
+  pointcut syntax () = classes ("Puma::CCSyntax");
+
+  // introduce new rule to class CCSyntax
+  advice syntax () : slice class Puma::WinMemberExplSpecSyntax;
+
+  // try first to parse a member template explicit specialization
+  advice execution ("% Puma::CCSyntax::rule_member_template_decl()") : around () {
+    if (tjp->that ()->member_explicit_specialization ()) {
+      *tjp->result () = tjp->that ()->builder ().get_node ();
+    } else
+      tjp->proceed ();
+  }
+
+protected:
+  WinMemberExplSpec () {}
+};
+
+namespace Puma {
+  slice class WinMemberExplSpecSyntax {
+    CTree * rule_member_explicit_specialization ();
+    virtual bool member_explicit_specialization ();
+  };
+}
+
+slice Puma::CTree * Puma::WinMemberExplSpecSyntax::rule_member_explicit_specialization () {
+  // 4: TEMPLATE  <  >  member_decl
+  if (! (parse (Puma::TOK_TEMPLATE) && parse (Puma::TOK_LESS) && parse (Puma::TOK_GREATER)))
+    return (CTree*)0;
+  semantic ().enter_template_param_list (0);
+  return member_decl () ?
+    semantic ().explicit_specialization () : (Puma::CTree*)0;
+}
+
+slice bool Puma::WinMemberExplSpecSyntax::member_explicit_specialization () {
+  return parse (&WinMemberExplSpecSyntax::rule_member_explicit_specialization);
+}
+
+#endif /* __WinMemberExplSpec__ */

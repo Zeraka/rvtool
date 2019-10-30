@@ -1,0 +1,110 @@
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{acc}[2002/12/18 v0.2 Standard LaTeX package]
+\RequirePackage{ifthen}
+\RequirePackage{graphics}
+
+%
+% set font to helvetica
+%
+\RequirePackage{helvet}
+\renewcommand{\familydefault}{phv}
+
+%
+% setup page geometry
+% the geometry package works better with pdflatex
+%
+\RequirePackage{geometry}
+\geometry{a4paper,dvips,pdftex,textwidth=15cm,textheight=23cm,twosideshift=0pt}
+
+%
+% setup fancyhdr
+%
+\RequirePackage{fancyhdr}
+\fancypagestyle{plain}{%
+  %
+  % two side book class setup
+  % odd page  - left head: chapter  - left foot: page number
+  % even page - right head: section - right foot: page number
+  % no head on plain pages
+  %
+  \fancyhf{}%
+  \fancyhead[LE,RO]{\slshape \rightmark}
+  \fancyhead[LO,RE]{\slshape \leftmark}
+  \fancyfoot[LE,RO]{\bfseries \thepage}
+  %
+  % rules for head and foot
+  % also on plain pages
+  %
+  \renewcommand{\headrulewidth}{.4pt}
+  \renewcommand{\footrulewidth}{.4pt}
+  \renewcommand{\plainfootrulewidth}{.4pt}
+}
+\pagestyle{plain}
+
+%
+% Variables to change some details
+%
+% version number for this document
+%
+\newcommand{\@version}{1}
+\newcommand{\version}[1]{ \renewcommand{\@version}{#1} }
+%
+%
+\newcommand\otherlogo[1]{\gdef\@otherlogo{#1}}
+\otherlogo{}
+%
+\newcommand\remark[1]{\gdef\@remark{#1}}
+\remark{}
+%
+\newcommand{\doctype}[1]{\gdef\@doctype{#1}}
+\doctype{Studie:}
+%
+\newcommand\credit[1]{\gdef\@credit{#1}}
+
+%
+%
+%
+\newcommand\layoutlogos{
+
+        \newlength{\@otherlogowidth}
+        \settowidth{\@otherlogowidth}{\@otherlogo}
+
+	\noindent
+	\begin{minipage}{\@otherlogowidth}
+	{\@otherlogo}
+	\end{minipage}
+	\hspace*{\fill}
+}
+
+%
+% redefine \maketitle macro
+%
+\renewcommand{\maketitle}{
+    \null
+    \thispagestyle{empty}
+
+	{\layoutlogos}
+
+	\vskip 3cm
+	\begin{center}\leavevmode
+	{\Huge\raggedright {\@doctype}\\ {\@title}\par}
+        \rule{\textwidth}{1mm}
+	\vskip 3mm
+	{\Large\raggedleft {\@author}\par}
+	\vskip 15mm
+	{\Large\raggedleft Version {\@version}\par}
+	\end{center}
+	\vfill
+	{\large\raggedleft {\@remark}\par}
+	\vskip 1cm
+	\null
+%
+	\newpage
+%
+	\null
+	\thispagestyle{empty}
+	\vfill
+	{\@credit}
+	\null
+	\cleardoublepage
+}

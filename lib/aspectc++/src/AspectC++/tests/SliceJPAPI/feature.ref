@@ -1,0 +1,19 @@
+SliceJPAPI: The static joinpoint API
+====================================
+Introspecting class/struct 'Target'
+------------------------------------
+MEMBERS 1: 1
+------------------------------------
+BASECLASSES 2: 0
+MEMBERS 2: 3
+member 1: i
+member 2: j
+member 3: MEMBERS1
+------------------------------------
+increased no of members by 2
+member 1: i
+member 2: j
+member 3: MEMBERS1
+member 4: MEMBERS2
+member 5: BASECLASSES
+====================================

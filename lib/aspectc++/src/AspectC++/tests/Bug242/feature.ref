@@ -1,0 +1,4 @@
+Bug242: wrong include guard generation
+======================================
+The introduced fill char is '_'
+======================================

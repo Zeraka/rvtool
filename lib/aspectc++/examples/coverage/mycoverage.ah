@@ -1,0 +1,14 @@
+#ifndef __mycoverage_ah__
+#define __mycoverage_ah__
+
+#include "coverage.ah"
+
+// Example specialization of the GenericCoverageAspect
+// checks the coverage of all functions and methods
+
+aspect MyCoverage : public GenericCoverageAspect {
+  pointcut virtual coverage() = "% ...::%(...)"; 
+};
+
+
+#endif

@@ -1,0 +1,34 @@
+#ifndef __Trace_ah__
+#define __Trace_ah__
+
+#include <iostream>
+using namespace std;
+
+template <int I> struct ArgPrinter {
+  template <class JP> static inline void work (JP &tjp) {
+    ArgPrinter<I - 1>::work (tjp);
+    cout << "Arg " << I << ": " << *tjp.template arg<I - 1> () << endl;
+  }
+};
+
+template <> struct ArgPrinter<0> {
+  template <class JP> static inline void work (JP &tjp) {}
+};
+
+aspect Trace {
+  template <class JP> void print_args (JP &tjp) {
+    ArgPrinter<JP::ARGS>::work (tjp);
+  }
+  advice call("% A::%(...)" || "% no_args()") : before()  {
+    tjp->arg(0); // TODO: a workaround, because on demand code generation
+                   // does not check the instantiated template
+    cout << JoinPoint::filename () << ":" << JoinPoint::line () << endl;
+    print_args (*tjp); 
+  }
+};
+
+#endif // __Trace_ah__
+
+
+
+

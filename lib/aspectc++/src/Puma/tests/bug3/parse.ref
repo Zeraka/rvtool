@@ -1,0 +1,1 @@
+bug3_1.cc:3: error: must #include <typeinfo> before using typeid

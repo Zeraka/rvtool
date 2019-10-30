@@ -1,0 +1,12 @@
+#ifndef __trace_ah__
+#define __trace_ah__
+
+#include <stdio.h>
+
+aspect TraceCall {
+  advice call("% ...::%(...)" && !"% printf(...)") : before () {
+    printf ("calling %s\n", JoinPoint::signature());
+  }
+};
+
+#endif

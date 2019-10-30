@@ -1,0 +1,119 @@
+~~~ Construct: CTest::CTest()
+Basic Checks:
+
+array 1-Dim:
+~~~ Get: int a[5] @ a+2 < 5 > | a[2|5]
+~~~ Set: int a[5] @ a+0 < 1 > | a[0|5] := 11
+~~~ Ref: int a[5] @ a+1 < 3 > | a[1|5]
+~~~ Ref: int a[5] @ a+0 < 11 > | a[0|5]
+~~~ Ref: int a[5] @ a+2 < 5 > | a[2|5]
+
+array 2-Dim:
+~~~ Get: int b[2][3] @ b+3 < 1 > | b[1|2][0|3]
+~~~ Set: int b[2][3] @ b+2 < 6 > | b[0|2][2|3] := 12
+~~~ Ref: int b[2][3] @ b+5 < 5 > | b[1|2][2|3]
+~~~ Ref: int b[2][3] @ b+1 < b+3[3] > | b[1|2]
+~~~ Ref: int b[2][3] @ b+0 < b+0[3] > | b[0|2]
+~~~ Ref: int b[2][3] @ b+0 < 2 > | b[0|2][0|3]
+~~~ Ref: int b[2][3] @ b+1 < 4 > | b[0|2][1|3]
+~~~ Ref: int b[2][3] @ b+1 < b+3[3] > | b[1|2]
+
+array 3-Dim Member:
+~~~ Get: int T::m[2][3][2] @ t.m+3 < 0 > -> t ? true | 1 | t.m[0|2][1|3][1|2]
+~~~ Set: int T::m[2][3][2] @ t.m+4 < 20 > -> t ? true | 1 | t.m[0|2][2|3][0|2] := 42
+
+array 3-Dim Member (internal):
+~~~ Get: int T::m[2][3][2] @ t.m+0 < 3 > -> t ? true | 1 | t.m[0|2][0|3][0|2]
+~~~ Set: int T::m[2][3][2] @ t.m+1 < 4 > -> t ? true | 1 | t.m[0|2][0|3][1|2] := 13
+
+array 1-Dim Private (internal):
+~~~ Get: int T::p[3] @ t.p+0 < 22 > -> t ? true | 1 | t.p[0|3]
+~~~ Set: int T::p[3] @ t.p+2 < 44 > -> t ? true | 1 | t.p[2|3] := 99
+
+array 1-Dim Static:
+~~~ Get: int T::s[2] @ T::s+0 < 60 > | T::s[0|2]
+~~~ Set: int T::s[2] @ T::s+1 < 90 > | T::s[1|2] := 23
+~~~ Get: int T::s[2] @ T::s+1 < 23 > | T::s[1|2]
+~~~ Set: int T::s[2] @ T::s+0 < 60 > | T::s[0|2] := 17
+
+
+Checking dual Weaving:
+
+array 1-Dim:
+  ~~ Idx: a+0 [ 4 ]
+~~~ Get: int a[5] @ a+4 < 9 > | a[4|5]
+  ~~ Idx: a+0 [ 1 ]
+~~~ Set: int a[5] @ a+1 < 3 > | a[1|5] := 99
+
+array 3-Dim Member:
+  ~~ Idx: t.m+0 [ 1 ]
+  ~~ Idx: t.m+3 [ 2 ]
+  ~~ Idx: t.m+10 [ 0 ]
+~~~ Get: int T::m[2][3][2] @ t.m+10 < 2000 > -> t ? true | 1 | t.m[1|2][2|3][0|2]
+  ~~ Idx: t.m+0 [ 1 ]
+  ~~ Idx: t.m+3 [ 0 ]
+  ~~ Idx: t.m+6 [ 1 ]
+~~~ Set: int T::m[2][3][2] @ t.m+7 < 400 > -> t ? true | 1 | t.m[1|2][0|3][1|2] := 21
+
+
+Checking partial dual Weaving:
+
+partial one:
+  ~~ Idx: t.m+0 [ 1 ]
+~~~ Get: int T::m[2][3][2] @ t.m+10 < 2000 > -> t ? true | 1 | t.m[1|2][2|3][0|2]
+  ~~ Idx: t.m+0 [ 1 ]
+~~~ Set: int T::m[2][3][2] @ t.m+7 < 21 > -> t ? true | 1 | t.m[1|2][0|3][1|2] := 21
+
+partial two:
+  ~~ Idx: t.m+3 [ 2 ]
+~~~ Get: int T::m[2][3][2] @ t.m+10 < 2000 > -> t ? true | 1 | t.m[1|2][2|3][0|2]
+  ~~ Idx: t.m+3 [ 0 ]
+~~~ Set: int T::m[2][3][2] @ t.m+7 < 21 > -> t ? true | 1 | t.m[1|2][0|3][1|2] := 21
+
+partial three:
+  ~~ Idx: t.m+10 [ 0 ]
+~~~ Get: int T::m[2][3][2] @ t.m+10 < 2000 > -> t ? true | 1 | t.m[1|2][2|3][0|2]
+  ~~ Idx: t.m+6 [ 1 ]
+~~~ Set: int T::m[2][3][2] @ t.m+7 < 21 > -> t ? true | 1 | t.m[1|2][0|3][1|2] := 21
+
+
+Checking proceed:
+ ## proceed()
+~~~ Get: int b[2][3] @ b+1 < 4 > | b[0|2][1|3]
+ ## proceed()
+~~~ Set: int b[2][3] @ b+3 < 1 > | b[1|2][0|3] := 32
+
+
+Checking action:
+ ## action()
+~~~ Get: int b[2][3] @ b+4 < 3 > | b[1|2][1|3]
+ ## action()
+~~~ Set: int b[2][3] @ b+5 < 5 > | b[1|2][2|3] := 48
+
+
+Checking tunneling:
+ ## operator
+~~~ Set: int T::s[2] @ T::s+1 < 23 > | T::s[1|2] := 666
+ ## operator
+~~~ Get: int T::s[2] @ T::s+0 < 17 > | T::s[0|2]
+~~~ Set: int T::s[2] @ T::s+0 < 17 > | T::s[0|2] := 239
+
+
+Checking qualified accesses:
+~~~ Get: int T::m[2][3][2] @ t.m+11 < 2500 > -> t ? true | 1 | t.m[1|2][2|3][1|2]
+~~~ Set: int T::m[2][3][2] @ t.m+11 < 2500 > -> t ? true | 1 | t.m[1|2][2|3][1|2] := 7500
+~~~ Ref: int T::m[2][3][2] @ t.m+7 < 21 > -> t ? true | 1 | t.m[1|2][0|3][1|2]
+
+
+Checking interaction with other types:
+~~~ Ref: std::map<int,char,std::less<int>,std::allocator<std::pair<const int,char> > > TestMap @ <unknown> < ~~OBJ~~ >
+~~~ Set (alias): char <unknown> @ <unknown> < 3 > := a
+~~~ Get: int *TestPointer @ <unknown> < ~~ADDR~~ >
+~~~ Get: int *TestPointer @ <unknown> < ~~ADDR~~ >
+
+
+Checking interaction with construction advice:
+~~~ Get: int CTest::m[12] @ cTest.m+6 < 0 > -> cTest ? true | 1 | cTest.m[6|12]
+
+
+Checking incomplete array type:

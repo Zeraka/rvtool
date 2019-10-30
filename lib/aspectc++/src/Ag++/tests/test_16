@@ -1,0 +1,39 @@
+DESC="Check if option argument of a long GCC option is passed correctly to GCC if the
+option argument is separated from the option by '='"
+
+main()
+{
+
+  # check long option with '=' as separator
+  EXEC="${AGCC} -p src -v2 --param=ssp-buffer-size=4 -o test_16.out src/*.cc"
+  if  ( ${EXEC} );then true;else
+    ERR_MSG="Execution failed: '${EXEC}'";
+    return 1;
+  fi;
+
+  OPT_COUNTER=`grep 'Options (G++):' ${STDOUT_FILE}|grep -c '\-\-param=\"ssp-buffer-size=4\"'`
+  if [ ${OPT_COUNTER} -eq 1 ];then true;else
+    ERR_MSG="The option '--param=\"ssp-buffer-size=4\"' has not been passed to gcc";
+    return 1;
+  fi;
+
+  # check long option with whitespace as separator
+  EXEC="${AGCC} -p src -v2 --param ssp-buffer-size=2 -o test_16.out src/*.cc"
+  if  ( ${EXEC} );then true;else
+    ERR_MSG="Execution failed: '${EXEC}'";
+    return 1;
+  fi;
+
+  OPT_COUNTER=`grep 'Options (G++):' ${STDOUT_FILE}|grep -c '\-\-param \"ssp-buffer-size=2\"'`
+  if [ ${OPT_COUNTER} -eq 1 ];then true;else
+    ERR_MSG="The option '--param \"ssp-buffer-size=4\"' has not been passed to gcc";
+    return 1;
+  fi;
+
+}
+
+cleanup()
+{
+  rm -f test_16.config
+  rm -f test_16.out
+}

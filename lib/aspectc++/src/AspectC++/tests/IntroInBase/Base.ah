@@ -1,0 +1,11 @@
+#ifndef __Base_ah__
+#define __Base_ah__
+
+typedef int SomeType;
+
+aspect Base {
+    pointcut virtual target_class () = 0;
+    advice target_class() : slice struct { SomeType _something; };
+};
+
+#endif // __Base_ah__

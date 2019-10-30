@@ -1,0 +1,6 @@
+RightlessCalls: Calls using inaccesible types
+=============================================================
+calling Map::Iter MapIter::prev(): inaccessible result type
+calling int Map::Iter::value(): inaccessible target object type
+calling Map::Iter friendFunc(): inaccessible result, no object type
+=============================================================

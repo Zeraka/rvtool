@@ -1,0 +1,8 @@
+#ifndef __CDecl_ah__
+#define __CDecl_ah__
+
+aspect CDecl {
+  advice "C" : slice class CSlice { public: CSlice *f (); };
+};
+
+#endif //  __CDecl_ah__

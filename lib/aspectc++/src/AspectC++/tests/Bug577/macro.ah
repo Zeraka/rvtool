@@ -1,0 +1,9 @@
+#ifndef __macro_ah__
+#define __macro_ah__
+
+#define M aspect A { advice execution("% main(...)") : after () { \
+  printf ("... seems to work!\n"); \
+  printf ("=================================\n"); \
+} };
+
+#endif // __macro_ah__

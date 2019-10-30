@@ -1,0 +1,13 @@
+AspectPrivileges: Check whether aspects are friends of all classes
+==================================================================
+printing private attribute
+  private attribute: 0
+increasing private attribute by calling private member function
+  in private function
+printing private attribute again
+  private attribute: 1
+writing into private attribute of introduced class
+writing into private attribute of a union
+calling private member function of template
+  in private T::f()
+==================================================================

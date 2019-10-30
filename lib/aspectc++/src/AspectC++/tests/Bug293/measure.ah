@@ -1,0 +1,12 @@
+#ifndef MEASURE_AH
+#define MEASURE_AH
+
+#include "measureAspect.ah"
+
+aspect measureThat : public measure {
+  pointcut measureTarget() = "void ...::measurePoint()";
+};
+
+
+#endif
+

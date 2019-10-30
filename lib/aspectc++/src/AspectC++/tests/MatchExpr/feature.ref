@@ -1,0 +1,168 @@
+MatchExpr: match expression semantics implemented correctly?
+==============================================================
+CONS C(int) is matched by ...
+CONS C(int) is matched by ...
+CONS C(int) is matched by ...
+CONS C(int) is matched by ...
+const/volatile function qualifiers:
+-----------------------------------
+FUNC void C::f () is matched by ...
+'% C::f()'
+'% ...::%(...)'
+FUNC void C::f() const is matched by ...
+'% C::f() const'
+'% C::f()'
+'% ...::%(...)'
+FUNC void C::f() volatile is matched by
+'% C::f() volatile'
+'% C::f()'
+'% ...::%(...)'
+FUNC void C::f() const volatile is matched by
+'% C::f() const volatile'
+'% C::f() volatile'
+'% C::f() const'
+'% C::f()'
+'% ...::%(...)'
+==============================================================
+qualified names with '...'
+--------------------------
+FUNC void N1::N2::Inside::o () is matched by ...
+'void N1::...::Inside::...::o ()'
+'void ...::N2::...::% ()'
+'void ...::N1::...::o ()'
+'void N1::...::o ()'
+'void N1::N2::Inside::o ()'
+'% ...::%(...)'
+FUNC void N1::N2::Inside::p () is matched by ...
+'void ...::N2::...::% ()'
+'% ...::%(...)'
+FUNC void N3::o () is matched by ...
+'% ...::%(...)'
+FUNC void N3::p () is matched by ...
+'% ...::%(...)'
+FUNC void o () is matched by ...
+'% ...::%(...)'
+'% %(...)'
+FUNC void p () is matched by ...
+'void p ()'
+'% ...::%(...)'
+'% %(...)'
+==============================================================
+const / non-const function results
+----------------------------------
+FUNC const char r1 () is matched by ...
+'const % %()'
+'% ...::%(...)'
+'% %(...)'
+FUNC const float r2 () is matched by ...
+'const float %()'
+'float %()'
+'const % %()'
+'% ...::%(...)'
+'% %(...)'
+FUNC char r3 () is matched by ...
+'% ...::%(...)'
+'% %(...)'
+FUNC float r4 () is matched by ...
+'float %()'
+'% ...::%(...)'
+'% %(...)'
+==============================================================
+const / volatile pointers
+-------------------------
+FUNC char * p1 () is matched by ...
+'% * %()'
+'% ...::%(...)'
+'% %(...)'
+FUNC char * const p2 () is matched by ...
+'char * const %()'
+'% * %()'
+'const % %()'
+'% ...::%(...)'
+'% %(...)'
+FUNC char * volatile p3 () is matched by ...
+'% * volatile %()'
+'% * %()'
+'% ...::%(...)'
+'% %(...)'
+FUNC char * const volatile p4 () is matched by ...
+'% * volatile const %()'
+'% * volatile %()'
+'char * const %()'
+'% * %()'
+'const % %()'
+'% ...::%(...)'
+'% %(...)'
+==============================================================
+check parameter type adjustments
+--------------------------------
+FUNC void conv1 () is matched by ...
+'void conv%(void)'
+'% ...::%(...)'
+'% %(...)'
+FUNC void conv1 (float) is matched by ...
+void conv%(const float)''
+'% ...::%(...)'
+'% %(...)'
+FUNC void conv1 (float *) is matched by ...
+'void conv%(float[32])'
+'% ...::%(...)'
+'% %(...)'
+FUNC void conv2 (const float) is matched by ...
+void conv%(const float)''
+'% ...::%(...)'
+'% %(...)'
+FUNC void conv2 (float [32]) is matched by ...
+'void conv%(float[32])'
+'% ...::%(...)'
+'% %(...)'
+==============================================================
+fancy operators
+---------------
+FUNC Op::operator double* () is matched by ...
+'% %::operator %(...)'
+'% ...::%(...)'
+FUNC Op &operator + (Op&, const Op&) is matched by ...
+'Op& operator +(Op&,Op&)'
+'% operator %(...)'
+'% ...::%(...)'
+'% %(...)'
+FUNC Op &Op::operator =(const Op &) is matched by ...
+'% %::operator %(...)'
+'% ...::%(...)'
+FUNC void Op::operator <<(int) is matched by ...
+'% %::operator <<(...)'
+'% %::operator %(...)'
+'% ...::%(...)'
+==============================================================
+check for enumerations in match expressions
+-------------------------------------------
+FUNC void fe1 (Enum1) is matched by ...
+'void fe% (Enum%)'
+'void fe1 (Enum1)'
+'% ...::%(...)'
+'% %(...)'
+FUNC static void EC::fe2 (EC::Enum2) is matched by ...
+'void EC::fe2 (EC::Enum2)'
+'% ...::%(...)'
+==============================================================
+check for addresses in template argument lists in match exprs
+-------------------------------------------------------------
+FUNC void void x1(T<&S::s>) is matched by ...
+void x%(T<&%::%>)
+void x%(T<&...::%>)
+void x%(T<%>)
+void x%(%)
+'% ...::%(...)'
+'% %(...)'
+FUNC void void x2(T<&ss>) is matched by ...
+void x%(T<&...::%>)
+void x%(T<&%>)
+void x%(T<%>)
+void x%(%)
+'% ...::%(...)'
+'% %(...)'
+==============================================================
+FUNC main () is matched by ...
+'% ...::%(...)'
+'% %(...)'

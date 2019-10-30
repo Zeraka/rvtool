@@ -1,0 +1,32 @@
+DESC="Generate puma configuration with alternate filename and use it afterwards"
+
+main()
+{
+  EXEC="${AGCC} --gen_config -o my.config"
+  if  ( ${EXEC} );then true;else
+    ERR_MSG="Failed executing '${EXEC}'";
+    return 1;
+  fi;
+
+  if [ ! -f my.config ];then
+    ERR_MSG="Puma configuration file was not created";
+    return 1;
+  fi;
+
+
+  EXEC="${AGCC} -p src -v2 --weave_only --config my.config  src/main.cc"
+  if  ( ${EXEC} );then true;else
+    ERR_MSG="Failed executing '${EXEC}'";
+    return 1;
+  fi;
+
+   if [ ! -f main.acc ];then
+    ERR_MSG="Weaved source file was not created";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+   rm -f my.config main.acc
+}

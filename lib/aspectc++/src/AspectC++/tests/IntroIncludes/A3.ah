@@ -1,0 +1,6 @@
+#ifndef __A3_ah__
+#define __A3_ah__
+
+#include "C.h"
+
+#endif // __A3_ah__

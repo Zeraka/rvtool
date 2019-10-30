@@ -1,0 +1,170 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __ext_ac_ah__
+#define __ext_ac_ah__
+
+#include <string.h>
+
+#include "Puma/CTokens.h"
+#include "Puma/Syntax.h"
+#include "Puma/CClassInfo.h"
+#include "Puma/CFunctionInfo.h"
+#include "Puma/CAttributeInfo.h"
+#include "Puma/CArgumentInfo.h"
+#include "Puma/CProtection.h"
+#include "Puma/ACIntroducer.h"
+#include "Puma/CCNameLookup.h"
+#include "Puma/CProject.h"
+
+#include <string.h>
+
+aspect ExtAC {
+  
+protected:
+  
+  // ******************
+  // C parser extension
+  // ******************
+  pointcut parser () = "Puma::Parser";
+  advice derived (parser ()) && !parser (): slice class {
+  public:
+    void introducer (Puma::ACIntroducer *i) { semantic ()._introducer = i; }
+    Puma::ACIntroducer *introducer () const { return semantic ()._introducer; }
+  };
+
+  // ***************************
+  // C and CC-Semantic extension
+  // ***************************
+
+  pointcut csemantic () = "Puma::CSemantic";
+
+  advice csemantic () : slice class ACSemantic {
+  public:
+    Puma::ACIntroducer *_introducer;
+  private:
+    Puma::CStructure *_saved_scope;
+
+    virtual void introduce_class_post (Puma::CT_ClassDef *cd);
+  };
+
+  pointcut ccsemantic () = "Puma::CCSemantic";
+
+  advice ccsemantic () : slice class ACCSemantic {
+  private:
+    virtual void introduce_class_post (Puma::CT_ClassDef *cd);
+  };
+  
+  // initialize introduced attributes
+  advice construction (csemantic ()) : after () {
+    tjp->that ()->_introducer       = 0;
+  }
+  
+  // extend the class handling  
+  advice within (derived (csemantic ())) &&
+    execution ("% ...::introduce_class(...)") : after () {
+    Puma::CT_ClassDef *cd = (Puma::CT_ClassDef*)*tjp->result ();
+    if (!cd)
+      return;
+    tjp->that ()->introduce_class_post (cd);
+  }
+
+  // extend the class handling  
+  advice call ("% ...::declareSpecialMembers()") &&
+    within ("Puma::CTree *Puma::CCSemantic::class_spec()") : before () {
+    if (tjp->that ()->_introducer) {
+      Puma::CT_ClassDef *cd = (Puma::CT_ClassDef*)
+        tjp->that ()->current_scope->Structure ()->Tree ();
+      // enter introducer with well-defined protection stack
+      tjp->that ()->_protection.push (Puma::CProtection::PROT_PRIVATE);
+      // perform introduction and whatever the weave wants to do here
+      tjp->that ()->_introducer->class_end (cd);
+      // restore the old protection stack
+      tjp->that ()->_protection.pop ();
+    }
+  }
+  
+  // perform an additional check on base classes with aspects
+  advice within (derived (csemantic ())) &&
+    execution ("% ...::add_base_classes(...)") : after () {
+
+    // obtain the first argument
+    Puma::CT_ClassDef *cd = (Puma::CT_ClassDef*)*tjp->result();
+    
+    // if necessary introduce base classes here
+    if (tjp->that ()->_introducer) {
+      tjp->that ()->_introducer->base_clause_end (cd,
+        tjp->that ()->syntax ().provider ()->current ());
+    }
+
+    // semantically handle introduced base classes
+    Puma::CT_BaseSpecList *bl = (Puma::CT_BaseSpecList*)cd->BaseIntros ();
+    if (cd->Object () && bl) {
+      int num = bl->Entries ();
+      for (int i = 0; i < num; i++)
+        tjp->that ()->addBaseClass (cd->Object ()->ClassInfo (),
+          (Puma::CT_BaseSpec*)bl->Entry (i));
+    }
+  }
+
+  // extend the translation unit handling -> finalization
+  advice within (derived (csemantic ())) &&
+    execution ("% ...::trans_unit(...)") : after () {
+    if (tjp->that ()->_introducer) {
+      tjp->that ()->_introducer->trans_unit_end ((Puma::CT_Program*)*tjp->result ());
+    }
+  }
+
+  advice within (derived (csemantic ())) &&
+    execution ("% ...::init(...)") : after () {
+    if (tjp->that ()->_introducer) {
+      tjp->that ()->_introducer->trans_unit_begin ();
+    }
+  }
+};
+
+
+slice void ExtAC::ACSemantic::introduce_class_post (Puma::CT_ClassDef *cd) {
+  if (_introducer) {
+    // handle introductions before a class, they shall be parsed in global scope
+    Puma::CStructure *saved_scope = current_scope;
+    current_scope = _db->FileInfo (0);
+    _introducer->class_before (cd);
+    current_scope = saved_scope;
+  }
+}
+
+slice void ExtAC::ACCSemantic::introduce_class_post (CT_ClassDef *cd) {
+  if (_introducer) {
+    // handle introductions before a class, they shall be parsed in global scope
+    Puma::CStructure *saved_scope = current_scope;
+    current_scope = _db->FileInfo (0);
+    _protection.push (Puma::CProtection::PROT_NONE);
+    _in_extern_decl.push (0);
+    CRecord* ocd = _outermost_class_def;
+    _outermost_class_def = 0;
+    _introducer->class_before (cd);
+    _outermost_class_def = ocd;
+    _in_extern_decl.pop ();
+    _protection.pop ();
+    current_scope = saved_scope;
+  }
+}
+
+
+#endif /* __ext_ac_h__ */

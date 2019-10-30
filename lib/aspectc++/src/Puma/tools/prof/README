@@ -1,0 +1,39 @@
+How to create histograms for profiling data
+-------------------------------------------
+
+1) Adapt the profiling aspect Puma/src/aspects/Profiler.ah to gather
+   profiling information about the functions and/or groups of functions
+   that you are interested in. Make sure that csv_stat will be registered
+   as output function.
+
+2) Compile Puma with the profiling extension enabled, for example:
+   make EXTENSIONS="winext gnuext acppext cc1xext profiling" -j2
+
+   This will enable the aspects GenericProfiler.ah and Profiler.ah
+
+3) Compile AspectC++ and Ag++
+
+4) Use the newly generated ag++ to compile your test program and save the
+   output into a file, for example:
+   ~/AspectC++-Project/AspectC++/bin/linux-release/ag++ helloworld.cc > helloworld.csv
+
+5) Make sure that "python", "gnuplot" and "epstopdf" are installed on your
+   system and can be found via the search path.
+
+6) execute the python program plot.py with your csv-file as argument, for example
+   python plot.py helloworld.csv
+
+   If everything works fine, this command will temporarily create files with
+   the same basename as your csv-file and the extensions .gp and .data.
+   Then gnuplot will be executed, resulting in the creation of an eps file.
+   The eps file will then be converted to a pdf file.
+
+   If several profiling aspects were defined, the plot.py program will create
+   a histogram with an overview and additional histograms for each group.
+   Each histogram will be saved both as eps and pdf.
+
+   Note: gnuplot always uses the best possible scaling. If you wish to have
+   comparable diagrams, you can name several csv files at once, for example
+
+   python plot.py test1.csv test2.csv
+

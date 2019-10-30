@@ -1,0 +1,7 @@
+NonInlineIntroIncludes: check for include generation in .cc
+===========================================================
+  function f () introducd by an aspect
+  function A::f1()
+  function A::f2 calls B::f1
+  function B::f1()
+===========================================================

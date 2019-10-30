@@ -1,0 +1,5 @@
+---- parse_opt_post Matches (4 in 1 files) ----
+common_post.cc (bin) line 156 : parse_opt_post(int key, char* arg, struct argp_state*)
+common_post.cc (bin) line 263 : const struct argp post_argp = { options, parse_opt_post,
+common_post.cc (bin) line 265 : const struct argp post_argp_disabled = { options_disabled, parse_opt_post,
+common_post.cc (bin) line 268 : const struct argp post_argp_nooutput = { options_nooutput, parse_opt_post,

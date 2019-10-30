@@ -1,0 +1,141 @@
+Änderungen bis zum HEAD
+=======================
+
+Aufräumen: Olaf
+
+[ * Call-Advice umstellen ]
+
+* ACFileID aufräumen (FileID vs. FileEntry)
+
+* ACToken konsequent in Phase 1 nutzen
+
+* WeavePos konsequent in Phase 2 nutzen
+
+* PP::token_text(token) vs. token.text() => kein token.text() mehr
+
+* Clang-Klassen von Puma-Code befreien
+
+[* TJP nicht generiert; Bindings? (PragmaOnceObserver)]
+
+[* using namespace Puma/clang nicht in *.h]
+
+[* zu viele dynamische Tests (__ac_..._is) z.B. in PragmaOnceObserver und That]
+
+[* CodeWeaver mergen]
+
+[* Mehr Tests mit Puma-Frontend]
+
+[* ClangWeaverBase verbessert]
+
+[* Codemanipulation in Weaver vor Transformer-Aufruf vermieden]
+
+Bugs: Olaf
+
+[* Warum funktioniert das mit AspectClang gebaute ac++ nicht? ]
+
+  - Problembbeschreibung ggf. an Benjamin übergeben
+
+
+Bugs: Benjamin
+
+[* komischer Fehler (AspectPrivileges, ArrayWrapper, PrivateResult)]
+
+[* Doppelte Einfügungen vom Introducer (Puma/CTree.h)]
+
+[* rename_args für Clang (ArrayMangling, MatchExpr)]
+
+[* Automatische Expansion von Makros bei der Codetransformation]
+
+  - ## Operator
+
+[* ClangASTVisitor korrigieren (Nested functions, local classes, ...)]
+
+  - Umstellung auf Nutzung von Traverse*Decl()
+
+[* Unbekannte Datentypen bei Intros (Markus Buschhoff)]
+
+[* Lokal deklarierte Funktionen nicht zu ernst nehmen]
+
+[* BYPASS-Klassen für externe Basisklassen]
+
+[* Qt-Examples]
+
+  - Assertion-Problem
+
+Tests: Benjamin
+
+[* Qt-Examples]
+
+
+Implementieren:
+
+* Line-Direktiven (Bug209)
+
+  - Testen mit Debugger
+  - update_line_directives für Clang implementieren
+    (ggf. in ClangIncludeExpander integrieren)
+  - richtige Direktiven in ClangWeaverBase einfügen (Olaf?)
+  - ClangIncludeExpander erzeugt falsche #line Direktiven: Sie beziehen
+    sich auf die Zeilennummern in Phase 2 und haben wegen der Code-
+    Manipulationen in Phase (AC-Namespace) einen Versatz zu den echten
+    Zeilennummern in der ursprünglichen Quelltextdatei.
+
+[* Introspection-Mechanismus]
+
+
+Änderungen bis zum Release
+==========================
+
+[ * IncludeExpander abschließen ]
+
+[ * Makro-Expansion (Test MacroCall + Qt Examples) ]
+
+[ * AspectC++-Tests => Bugs fixen. ]
+
+* Code-Weaver enthält keine frontend-spezifischen Teile mehr: Advice-Typen
+
+[ * Transformation in Weaver schöner machen => Clang-Implementierung ]
+
+[ * Puma-Abhängigkeiten: Project ]
+
+* aclang++ Frontend
+
+  - puma.config Anbindung vereinfachen/vermeiden
+
+
+Nice to have
+============
+
+* Korrekte Target-Definition für Clang -> Größenbestimming beim Cross-Compiling
+
+* Besserung Umgang mit -W...
+
+* Build-Server für MacOS
+
+
+Wichtige Arbeiten bis zum Release
+=================================
+
+* AspectC++ in Clang-Konfiguration mit libminipuma.a übersetzen können
+
+  - #includes aufräumen
+
+  - README aktualisieren
+
+* Line-Direktiven in Clang-Konfiguration implementieren (siehe oben)
+
+  -  Line-Direktiven überprüfen/reparieren
+
+* Code nochmal durchsehen und aufräumen
+
+  - Puma/Clang vereinheitlichen, ...
+
+* Windows-Build per Cross-Compiler ermöglichen (Clang!) oder
+  notfalls VM für natives Build aufsetzen
+
+* Build-Hosts auf Clang-Konfiguration umstellen
+
+* Testen
+
+  - wichtige Bugs fixen
+

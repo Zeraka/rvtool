@@ -1,0 +1,7 @@
+Bug239: distinguish call advice for operator ++
+===============================================
+before A A::operator ++(int)
+inside A A::operator ++(int)
+before A A::operator ++()
+inside A A::operator ++()
+===============================================

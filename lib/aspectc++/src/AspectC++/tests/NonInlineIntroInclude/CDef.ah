@@ -1,0 +1,13 @@
+#ifndef __Aspect_ah__
+#define __Aspect_ah__
+
+#include <stdio.h>
+#include "C.h"
+#include "CDecl.ah"
+
+advice "C" : void CDecl::f () {
+    C::T _a_type_from_C_used_for_me;
+    printf ("  function f () introducd by an aspect\n");
+}
+
+#endif // __Aspect_ah__

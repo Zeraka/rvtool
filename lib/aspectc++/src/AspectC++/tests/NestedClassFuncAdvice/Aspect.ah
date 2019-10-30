@@ -1,0 +1,17 @@
+#ifndef __Aspect_ah__
+#define __Aspect_ah__
+
+#include <stdio.h>
+
+aspect Aspect {
+
+  //  pointcut methods() = execution("% ...::func1(...)");
+  pointcut methods() = execution("% ...::%func%(...)");
+
+  advice methods() : before()
+  {
+            printf("before %s\n", thisJoinPoint->signature());
+ }
+
+};
+#endif // __Aspect_ah__

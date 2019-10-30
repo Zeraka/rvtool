@@ -1,0 +1,328 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __CCSemBinding_ah__
+#define __CCSemBinding_ah__
+
+#include "Puma/CCSemantic.h"
+
+// This aspect controls the parsing process on the C++ code level
+// by maintaining semantic information.
+
+aspect CCSemBinding {
+
+  advice execution("% Puma::CCSyntax::ClassName::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().class_name();
+  }
+
+  advice execution("% Puma::CCSyntax::EnumName::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().enum_name();
+  }
+
+  advice execution("% Puma::CCSyntax::TemplateName::build(...)") ||
+         execution("% Puma::CCSyntax::ClassTemplateName::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().template_name();
+  }
+
+  advice execution("% Puma::CCSyntax::OriginalNsName::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().original_ns_name();
+  }
+
+  advice execution("% Puma::CCSyntax::NamespaceAlias::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().namespace_alias();
+  }
+
+  advice execution("% Puma::CCSyntax::ColonColon::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().colon_colon();
+  }
+
+  advice execution("% Puma::CCSyntax::NestedNameSpec::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().nested_name_spec();
+  }
+
+  advice execution("% Puma::CCSyntax::NestedNameSpec::parse(...)") : around () {
+    tjp->arg<0>()->semantic().enter_nested_name();
+    tjp->proceed();
+    tjp->arg<0>()->semantic().leave_nested_name();
+  }
+
+  advice execution("% Puma::CCSyntax::NestedNameSpec1::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().nested_name_spec1();
+  }
+
+  advice call("% Puma::CCSyntax::PostfixExpr2::check(...)") &&
+    within("% Puma::CCSyntax::PostfixExpr::parse(...)") : after () {
+    if (*tjp->result ()) {
+      tjp->arg<0>()->semantic ().enter_postfix_expr ();
+      tjp->arg<0>()->semantic ().postfix_expr ();
+    }
+  }
+
+  advice call("% Puma::CCSyntax::PostfixExpr1::check(...)") &&
+    within("% Puma::CCSyntax::PostfixExpr::parse(...)") : after () {
+    if (*tjp->result ())
+      tjp->arg<0>()->semantic ().postfix_expr ();
+  }
+
+  advice execution("% Puma::CCSyntax::PostfixExpr::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().valid_id_expr ();
+    tjp->arg<0>()->semantic ().leave_postfix_expr ();
+  }
+
+  advice execution("% Puma::CCSyntax::PostfixExpr1::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().postfix_expr1();
+  }
+
+  advice execution("% Puma::CCSyntax::PostfixExpr1::parse(...)") : around () {
+    Puma::CCSemantic::MemberAccessOperator mao = Puma::CCSemantic::MAO_NONE;
+    if (tjp->arg<0>()->look_ahead (Puma::TOK_DOT))
+      mao = Puma::CCSemantic::MAO_DOT;
+    else if (tjp->arg<0>()->look_ahead (Puma::TOK_PTS))
+      mao = Puma::CCSemantic::MAO_PTS;
+    if (mao)
+      tjp->arg<0>()->semantic ().enter_member_access (mao);
+    tjp->proceed();
+    if (mao)
+      tjp->arg<0>()->semantic ().leave_member_access ();
+  }
+
+  advice execution("% Puma::CCSyntax::PostfixExpr2::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().postfix_expr2();
+  }
+
+  advice execution("% Puma::CCSyntax::PseudoDtorName::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().pseudo_dtor_name();
+  }
+
+  advice execution("% Puma::CCSyntax::NewTypeId::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_named_type ();
+  }
+
+  advice execution("% Puma::CCSyntax::NewTypeId::parse(...)") : after () {
+    tjp->arg<0>()->semantic().finish_declarator ();
+  }
+  
+  advice execution("% Puma::CCSyntax::NewDeclarator::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().abst_declarator();
+  }
+
+  advice execution("% Puma::CCSyntax::DirectNewDeclarator::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().direct_new_declarator();
+  }
+
+  advice execution("% Puma::CCSyntax::AssExpr::parse(...)") ||
+         execution("% Puma::CCSyntax::ConstExpr::parse(...)"): around () {
+    tjp->arg<0>()->semantic().enter_expr();
+    tjp->proceed();
+    tjp->arg<0>()->semantic().leave_expr();
+  }
+
+  advice execution("% Puma::CCSyntax::ConstExpr::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().const_expr();
+  }
+
+  advice execution("% Puma::CCSyntax::Condition1::parse(...)") : after () {
+    tjp->arg<0>()->semantic().finish_declarator ();
+  }
+
+  advice execution("% Puma::CCSyntax::Condition1::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().condition();
+  }
+
+  advice execution("% Puma::CCSyntax::SimpleDecl::build(...)"): after () {
+    if (*tjp->result ())
+      tjp->arg<0>()->semantic().obj_decl (*tjp->result());
+  }
+
+  advice execution("% Puma::CCSyntax::DeclSpecSeq1::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().decl_spec_seq1();
+  }
+
+  advice execution("% Puma::CCSyntax::SimpleTypeSpec::parse(...)") : after () {
+    tjp->arg<0>()->semantic().reset_search_scope (true);
+  }
+
+  advice execution("% Puma::CCSyntax::SimpleTypeSpec::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().simple_type_spec ();
+  }
+
+  advice execution("% Puma::CCSyntax::ElaboratedTypeSpec::parse(...)") : after () {
+    tjp->arg<0>()->semantic().reset_search_scope ();
+  }
+
+  advice execution("% Puma::CCSyntax::ElaboratedTypeSpec::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_tag ();
+  }
+
+  advice execution("% Puma::CCSyntax::EnumeratorDef::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().enumerator_def ();
+  }
+
+  advice call("% Puma::CCSyntax::Decl::check(...)") &&
+    within("% Puma::CCSyntax::LinkageSpec::parse(...)") : around () {
+    ((Puma::CCSyntax*)tjp->arg<0>())->semantic ().enter_extern_decl (false);
+    tjp->proceed ();
+    ((Puma::CCSyntax*)tjp->arg<0>())->semantic ().leave_extern_decl ();
+  }
+
+  advice call("% Puma::CSyntax::DeclSeq::check(...)") &&
+    within("% Puma::CCSyntax::LinkageSpec::parse(...)") : around () {
+    ((Puma::CCSyntax*)tjp->arg<0>())->semantic ().enter_extern_decl (true);
+    tjp->proceed ();
+    ((Puma::CCSyntax*)tjp->arg<0>())->semantic ().leave_extern_decl ();
+  }
+
+  advice execution("% Puma::CCSyntax::OriginalNsDef::build(...)") ||
+         execution("% Puma::CCSyntax::ExtensionNsDef::build(...)") ||
+         execution("% Puma::CCSyntax::UnnamedNsDef::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().namespace_def ();
+  }
+
+  advice (within("% Puma::CCSyntax::OriginalNsDef::parse(...)") ||
+          within("% Puma::CCSyntax::ExtensionNsDef::parse(...)") ||
+          within("% Puma::CCSyntax::UnnamedNsDef::parse(...)")) &&
+         call("% Puma::CCSyntax::NamespaceBody::check(...)"): before () {
+    Puma::CCSyntax *s = (Puma::CCSyntax*)tjp->arg<0>();
+    s->semantic().enter_scope (((Puma::CT_NamespaceDef*)(s->builder ().get_node()))->Object ()->Structure ());
+  }
+
+  advice execution("% Puma::CCSyntax::OriginalNsDef1::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_orig_ns ();
+  }
+
+  advice execution("% Puma::CCSyntax::ExtensionNsDef1::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_ns_extension ();
+  }
+
+  advice execution("% Puma::CCSyntax::UnnamedNsDef1::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_unnamed_ns ();
+  }
+
+  advice execution("% Puma::CCSyntax::NsAliasDef::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_ns_alias ();
+  }
+
+  advice execution("% Puma::CCSyntax::QualNsSpec::parse(...)") : after () {
+    tjp->arg<0>()->semantic().reset_search_scope ();
+  }
+
+  advice execution("% Puma::CCSyntax::UsingDecl::parse(...)") : after () {
+    tjp->arg<0>()->semantic().reset_search_scope ();
+  }
+
+  advice execution("% Puma::CCSyntax::UsingDecl::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().using_decl ();
+  }
+
+  advice execution("% Puma::CCSyntax::UsingDirective::parse(...)") : after () {
+    tjp->arg<0>()->semantic().reset_search_scope ();
+  }
+
+  advice execution("% Puma::CCSyntax::UsingDirective::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().using_directive ();
+  }
+
+  advice execution("% Puma::CCSyntax::InitDeclarator::parse(...)") : after () {
+    // leave possibly entered class scope
+    if (!*tjp->result ())
+      tjp->arg<0>()->semantic().finish_init_declarator ();
+  }
+  
+  advice execution("% Puma::CCSyntax::InitDeclarator::build(...)") : around () {
+    *tjp->result() = tjp->arg<0>()->semantic().init_declarator ();
+    tjp->arg<0>()->semantic().finish_init_declarator ();
+  }
+
+  advice execution("% Puma::CCSyntax::ArrayDelim::parse(...)") : around () {
+    Puma::CStructure *scope = tjp->arg<0>()->semantic ().array_delim ();
+    tjp->proceed();
+    tjp->arg<0>()->semantic ().array_delim (scope);
+  }
+
+  advice execution("% Puma::CCSyntax::PtrOperator::parse(...)") : after () {
+    tjp->arg<0>()->semantic().reset_search_scope ();
+  }
+
+  advice execution("% Puma::CCSyntax::DeclaratorId::parse(...)") : around () {
+    tjp->arg<0>()->semantic ().enter_entity_name ();
+    tjp->proceed();
+    tjp->arg<0>()->semantic ().reset_search_scope ();
+    tjp->arg<0>()->semantic ().leave_entity_name ();
+  }
+
+  advice within("% Puma::CCSyntax::DeclaratorId::parse(...)") &&
+         call("% Puma::CCSyntax::TypeName::check(...)") : after () {
+    tjp->arg<0>()->semantic().declarator_id (*tjp->result());
+  }
+
+  advice execution("% Puma::CCSyntax::DirectAbstDeclarator::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().direct_abst_declarator ();
+  }
+
+  advice execution("% Puma::CCSyntax::ParamDeclClause::parse(...)") : around () {
+    tjp->arg<0>()->semantic().enter_param_decl_clause ();
+    tjp->proceed ();
+    tjp->arg<0>()->semantic().leave_param_decl_clause ();
+  }
+
+  advice execution("% Puma::CCSyntax::ParamDeclClause::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().param_decl_clause ();
+  }
+
+  advice execution("% Puma::CCSyntax::ClassHead::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().add_base_classes ();
+  }
+
+  // TODO: base_clause is old style!
+  advice call("% Puma::CCSyntax::base_clause()") &&
+         within("% Puma::CCSyntax::ClassHead::parse(...)"): before () {
+    tjp->target()->semantic().reenter_class_scope ();
+  }
+
+  advice execution("% Puma::CCSyntax::ClassHead1::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_class ();
+  }
+
+  advice execution("% Puma::CCSyntax::ConvFctId::parse(...)") : around () {
+    typename JoinPoint::template Arg<0>::ReferredType::SearchScope sc;
+    tjp->arg<0>()->get_search_scope (sc);
+    tjp->arg<0>()->semantic ().reset_search_scope ();
+    Puma::CStructure *scope = tjp->arg<0>()->semantic ().conv_fct_id ();
+    tjp->proceed();
+    tjp->arg<0>()->semantic ().conv_fct_id (scope);
+    tjp->arg<0>()->set_search_scope (sc);
+  }
+
+  advice call("% Puma::CSyntax::type_spec_seq()") &&
+         within("% Puma::CCSyntax::ConvTypeId::parse(...)") : around () {
+    ((Puma::CCSyntax*)tjp->target())->semantic ().enter_conv_type_id ();
+    tjp->proceed ();
+    ((Puma::CCSyntax*)tjp->target())->semantic ().leave_conv_type_id ();
+  }
+
+  advice call("% Puma::CCSyntax::conv_declarator()") &&
+         within("% Puma::CCSyntax::ConvTypeId::parse(...)") : after () {
+    tjp->target()->semantic ().finish_declarator ();
+  }
+
+  advice execution("% Puma::CCSyntax::ConvTypeId::build(...)"): around () {
+    *tjp->result() = tjp->arg<0>()->semantic().introduce_named_type ();
+  }
+};
+
+#endif /* __CCSemBinding_ah__ */

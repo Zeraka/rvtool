@@ -1,0 +1,47 @@
+#ifndef __singletonmonitor_ah__
+#define __singletonmonitor_ah__
+
+#include <iostream>
+
+// Generic singleton monitor aspect
+//
+// A class obeying the singleton pattern should guarantee that
+// no more than a single object of this class will be ever created.
+// This generic aspect checks the behavior: it counts the instances
+// and emits an error message if more than one instance is created.
+
+// singletonmonitor::Counter is a helper class used to count the number
+// of objects created.
+// The usage of a template class and its intantiation with JoinPoint::That
+// ensures, that a new counter will be used for each singleton class,
+// while constructor and copy-constructor of the same class will use
+// the same counter.
+
+
+namespace singletonmonitor {
+  template<typename T> struct Counter {
+    static int _val;
+  };
+  template<typename T> int Counter<T>::_val = 0;
+}
+
+
+aspect GenericSingletonMonitor {
+  pointcut virtual singleton() = 0;
+
+  advice construction (singleton()) : before() {
+    using namespace singletonmonitor;
+    typedef Counter<JoinPoint::That> InstanceCounter;
+
+    InstanceCounter::_val++;
+    if (InstanceCounter::_val > 1) {
+    std::cerr << "Error: "
+	      << "created instance number "<< InstanceCounter::_val
+	      << " of singleton class by calling the constructor "
+	      << JoinPoint::signature()
+	      << std::endl;
+    }
+  };
+};
+
+#endif

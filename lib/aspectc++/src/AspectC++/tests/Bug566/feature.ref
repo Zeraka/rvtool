@@ -1,0 +1,10 @@
+A::A(const char *,unsigned int)
+0x1234, 4
+A::A(const char *,unsigned int,bool)
+0x1234, 4
+void A::matchFunc1(const char *,unsigned int)
+void A::matchFunc1(const char *,unsigned int)
+0x1234, 4
+void A::matchFunc2(const char *,unsigned int)
+void A::matchFunc2(const char *,unsigned int)
+0x1234, 4

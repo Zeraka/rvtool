@@ -1,0 +1,130 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __WinDeclSpecs__
+#define __WinDeclSpecs__
+
+/********************************************************/
+/* Win declaration specifiers support aspect            */
+/********************************************************/
+
+#include "Puma/CTokens.h"
+
+namespace Puma {
+  class CCSyntax;
+  class CCBuilder;
+  class CTree;
+} 
+
+namespace Puma {
+  slice class WinDeclSpecsSyntax;
+  slice class WinDeclSpecsBuilder;
+}
+
+aspect WinDeclSpecs {
+  /********************************************************/
+  /* Win declaration specifiers                           */
+  /********************************************************/
+  
+  // pointcut definitions
+  pointcut syntax () = classes ("Puma::CSyntax");
+  pointcut builder () = classes ("Puma::CBuilder");
+
+  advice syntax ()  : slice class Puma::WinDeclSpecsSyntax;
+  advice builder () : slice class Puma::WinDeclSpecsBuilder;
+  
+  // extended declaration specifiers
+  advice within (derived (syntax ())) && 
+         execution ("void Puma::%::init_misc_spec()") : after () {
+    tjp->that ()->_misc_spec_1.set (Puma::TOK_CDECL);
+    tjp->that ()->_misc_spec_1.set (Puma::TOK_STDCALL);
+    tjp->that ()->_misc_spec_1.set (Puma::TOK_FASTCALL);
+  }
+  
+  // extended cv qualifier
+  advice within (derived (syntax ())) && 
+         execution ("void Puma::%::init_cv_quals()") : after () {
+    tjp->that ()->_cv_quals.set (Puma::TOK_CDECL);
+    tjp->that ()->_cv_quals.set (Puma::TOK_STDCALL);
+    tjp->that ()->_cv_quals.set (Puma::TOK_FASTCALL);
+  }
+
+  // let first parse the win declaration specifiers
+  advice execution ("% Puma::CSyntax::rule_direct_declarator()") : around () {
+    Puma::CTree *&result = *(Puma::CTree**)tjp->result ();
+    if ((tjp->that ()->declarator_id () ||
+         (tjp->that ()->parse (Puma::TOK_OPEN_ROUND) && 
+          (tjp->that ()->win_decl_spec (),
+           tjp->that ()->declarator ()) &&
+          tjp->that ()->parse (Puma::TOK_CLOSE_ROUND))) &&  
+        tjp->that ()->opt (
+	 tjp->that ()->seq (&JoinPoint::That::direct_declarator1))) 
+      result = tjp->that ()->builder ().direct_declarator ();
+    else
+      result = (Puma::CTree*)0;
+  }
+
+  // let first parse the win declaration specifiers
+  advice execution ("% Puma::CSyntax::rule_direct_abst_declarator()") : around () {
+    Puma::CTree *&result = *(Puma::CTree**)tjp->result ();
+    if ((tjp->that ()->direct_abst_declarator1 () ||
+         (tjp->that ()->parse (Puma::TOK_OPEN_ROUND) && 
+          (tjp->that ()->win_decl_spec (),
+	   tjp->that ()->abst_declarator ()) &&
+	  tjp->that ()->parse (Puma::TOK_CLOSE_ROUND))) &&  
+        tjp->that ()->opt (
+	 tjp->that ()->seq (&JoinPoint::That::direct_abst_declarator1)))
+      result = tjp->that ()->semantic ().direct_abst_declarator ();
+    else
+      result = (Puma::CTree*)0;
+  }
+
+protected:
+  WinDeclSpecs () {}
+};
+
+slice class Puma::WinDeclSpecsSyntax {
+public:
+  // introduce new rule to class CSyntax
+  Puma::CTree * rule_win_decl_spec ();
+  virtual bool win_decl_spec ();
+};
+
+slice Puma::CTree * Puma::WinDeclSpecsSyntax::rule_win_decl_spec () {
+  static int win_decl_specs[] = { 
+    Puma::TOK_CDECL, Puma::TOK_STDCALL, Puma::TOK_FASTCALL, 0 
+  };
+  return parse (win_decl_specs) ? 
+    builder ().win_decl_spec () : (Puma::CTree*)0;
+}
+
+slice bool Puma::WinDeclSpecsSyntax::win_decl_spec () {
+  return parse (&WinDeclSpecsSyntax::rule_win_decl_spec);
+}
+
+slice class Puma::WinDeclSpecsBuilder {
+public:
+  // introduce new builder rule
+  virtual Puma::CTree * win_decl_spec ();
+};
+
+slice Puma::CTree * Puma::WinDeclSpecsBuilder::win_decl_spec () {
+  return get_node ();
+}
+
+#endif /* __WinDeclSpecs__ */

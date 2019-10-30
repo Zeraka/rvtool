@@ -1,0 +1,5 @@
+IntroInBase: checks if the right #include is generated
+======================================================
+before void C::f()
+before void C::g()
+======================================================

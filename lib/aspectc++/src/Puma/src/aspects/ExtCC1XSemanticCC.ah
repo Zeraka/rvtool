@@ -1,0 +1,79 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __ext_cc1x_semantic_cc_ah__
+#define __ext_cc1x_semantic_cc_ah__
+
+#include "Puma/ExtCC1XSemanticH.ah"
+#include "Puma/CC1XTree.h"
+#include "Puma/CCSemExpr.h"
+
+// ************************
+// C++1X-Semantic extension
+// ************************
+
+#ifndef HAVE_SEM_ERROR_MACROS
+#define HAVE_SEM_ERROR_MACROS
+
+#define ASPECT_SEM_MSG(loc__,mesg__) \
+  *_err << loc__->token ()->location () << mesg__ << endMessage
+
+#define ASPECT_SEM_ERROR(loc__,mesg__) \
+  ASPECT_SEM_MSG (loc__, sev_error << mesg__)
+
+#define ASPECT_SEM_ERROR__duplicate(token__,type__,name__) \
+  ASPECT_SEM_ERROR (token__, "duplicate " << type__ \
+    << " `" << name__->Text () << "'")
+
+#endif // HAVE_SEM_ERROR_MACROS
+
+slice Puma::CTree *Puma::ExtCC1XSemantic::static_assert_decl () {
+  CT_StaticAssert *sa = (CT_StaticAssert*)builder ().static_assert_decl ();
+  // Ignore the static assertion if it depends on a template parameter
+  if (sa && sa->Expr () && !CCSemExpr::isDependent (sa->Expr())) {
+    // Check the expression type:
+    // The constant-expression shall be
+    // an integral constant expression (5.19 [expr.const]).
+    if (CCSemExpr::isConstIntegralExpr (sa->Expr ())) {
+      // If the value of the expression when converted to bool is true,
+      // the declaration has no effect. Otherwise, the program is ill-formed,
+      // causing the implementation to produce a diagnostic message
+      // (1.4 [intro.compliance]) that includes the text of the string-literal,
+      // except that characters not in the basic source character set
+      // (2.2 [lex.charset]) are not required to appear in the
+      // diagnostic message.
+      CCSemExpr::castToType (&CTYPE_BOOL, sa->Expr ());
+      CExprValue *val = sa->Expr ()->Value ();
+      if (val && val->Constant () && sa->ErrorMessage ()) {
+        if (val->Constant ()->isNull ()) {
+          resolveExpr (sa->ErrorMessage ());
+          CStrLiteral *msg = sa->ErrorMessage ()->Value ()->StrLiteral ();
+          if (msg)
+            ASPECT_SEM_ERROR(sa, "static assertion failed: " << msg->String ());
+        }
+      }
+      else
+        ASPECT_SEM_ERROR(sa, "static assertion has invalid argument");
+    }
+    else
+      ASPECT_SEM_ERROR(sa, "static assertion requires constant integral argument");
+  }
+  return sa;
+}
+
+#endif /* __ext_cc1x_semantic_cc_ah__ */

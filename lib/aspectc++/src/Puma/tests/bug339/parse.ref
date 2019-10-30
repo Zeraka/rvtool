@@ -1,0 +1,21 @@
+instantiation unit: %Host<P>
+-------------------
+class Host { typedef P < 42 > T42 ; } ; 
+
+-------------------
+
+
+instantiation unit: %P<42>
+-------------------
+static const int I = 42;
+class P : H < I > { } ; 
+
+-------------------
+
+
+instantiation unit: %H<42>
+-------------------
+static const int I = 42;
+class H { } ; 
+
+-------------------

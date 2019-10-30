@@ -1,0 +1,40 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __ext_cc1x_syntax_cc_ah__
+#define __ext_cc1x_syntax_cc_ah__
+
+#include "Puma/ExtCC1XSyntaxH.ah"
+
+// **********************
+// C++1X-Syntax extension
+// **********************
+
+slice Puma::CTree *Puma::ExtCC1XSyntax::rule_static_assert_decl () { 
+  return (parse (TOK_STATIC_ASSERT) && parse (TOK_OPEN_ROUND) &&
+    const_expr () && parse(TOK_COMMA) && cmpd_str () &&
+    parse (TOK_CLOSE_ROUND)) ?
+        semantic ().static_assert_decl () : (Puma::CTree*)0;
+}
+
+slice bool Puma::ExtCC1XSyntax::static_assert_decl () {
+  return look_ahead (TOK_STATIC_ASSERT) &&
+          parse (&ExtCC1XSyntax::rule_static_assert_decl);
+}
+
+#endif /* __ext_cc1x_syntax_cc_ah__ */

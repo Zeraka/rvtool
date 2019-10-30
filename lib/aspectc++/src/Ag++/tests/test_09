@@ -1,0 +1,32 @@
+DESC="Multiple project paths"
+
+main()
+{
+  mkdir src/bin
+
+  BIN="src/bin/test09${EXT}"
+
+  EXEC="${AGCC} -Isrc  -I additional_aspects --real-instances --path src --path additional_aspects -o ${BIN} -v2 src/*.cc"
+  if  ( ${EXEC} );then true;else
+    ERR_MSG="Failed executing '${EXEC}'";
+    return 1;
+  fi;
+
+  if [ ! -f ${BIN} ];then
+    ERR_MSG="Executable '${BIN}' was not generated";
+    return 1;
+  else
+    ${BIN} > test_09.out;
+  fi;
+
+  echo -n "\n\nDIFF:\n"
+  if ( diff -w  test_09.out test_09.ref );then true;else
+    ERR_MSG="Outputs differ: Probably the programm was not weaved correctly";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+  rm -rf src/bin test_09.out;
+}

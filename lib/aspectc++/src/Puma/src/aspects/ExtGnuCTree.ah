@@ -1,0 +1,164 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//
+// This program is free software;  you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 2 of
+// the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this program; if not, write to the Free
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+// MA  02111-1307  USA
+
+#ifndef __ext_gnu_ctree_ah__
+#define __ext_gnu_ctree_ah__
+
+#include <list>
+
+aspect ExtGnuCTree {
+  
+  // interface for accessing prefixes or suffixes on any syntax tree node 
+  advice "Puma::CTree" : slice class {
+  public:
+    typedef std::list<CTree*> CTreeList;
+    virtual CTreeList *gnu_prefix () { return 0; }
+    virtual CTreeList *gnu_suffix () { return 0; }
+    virtual CTreeList *gnu_infix ()  { return 0; }
+    virtual const CTreeList *gnu_prefix () const { return 0; }
+    virtual const CTreeList *gnu_suffix () const { return 0; }
+    virtual const CTreeList *gnu_infix () const  { return 0; }
+    virtual int gnu_infix_pos () const { return -1; }
+  };
+
+  // extended token/end_token functions that obey gnu extensions
+  //  - needed for correct code transformation
+  advice execution("Puma::Token* Puma::CTree::token () const") : around() {
+    if (tjp->that ()->gnu_prefix () && tjp->that ()->gnu_prefix ()->size () > 0)
+      *tjp->result() = tjp->that ()->gnu_prefix ()->front ()->token ();
+    else
+      tjp->proceed ();
+  }
+  
+  advice execution("Puma::CT_Token* Puma::CTree::token_node () const") : around() {
+    if (tjp->that ()->gnu_prefix () && tjp->that ()->gnu_prefix ()->size () > 0)
+      *tjp->result() = tjp->that ()->gnu_prefix ()->front ()->token_node ();
+    else
+      tjp->proceed ();
+  }
+  
+  advice execution("Puma::Token* Puma::CTree::end_token () const") : around() {
+    if (tjp->that ()->gnu_suffix () && tjp->that ()->gnu_suffix ()->size () > 0)
+      *tjp->result() = tjp->that ()->gnu_suffix ()->back ()->end_token ();
+    else
+      tjp->proceed ();
+  }
+
+  advice execution("Puma::CT_Token* Puma::CTree::end_token_node () const") : around() {
+    if (tjp->that ()->gnu_suffix () && tjp->that ()->gnu_suffix ()->size () > 0)
+      *tjp->result() = tjp->that ()->gnu_suffix ()->back ()->end_token_node ();
+    else
+      tjp->proceed ();
+  }
+
+  // All node types that may have suffixes:
+  // SimpleName extension needed for attributes in namespace definitions
+  // Declarator extension needed for attributes after param declarations
+  // DeclSpeqSeq extension needed for attributes following such sequence
+  advice "Puma::CT_SimpleName" ||
+         "Puma::CT_Declarator" ||
+         "Puma::CT_DeclSpec" ||
+         "Puma::CT_ClassDef" ||
+         "Puma::CT_EnumDef" ||
+         "Puma::CT_DeclSpecSeq" : slice class {
+    CTreeList _gnu_suffix;
+  public:
+    CTreeList *gnu_suffix () { return &_gnu_suffix; }
+    const CTreeList *gnu_suffix () const { return &_gnu_suffix; }
+  };
+
+  // All node types that may have prefixes:
+  // For the __extension__ keyword we need prefix memory on ...
+  // ObjDecl, FctDef, NamespaceDef, TemplateDecl, UsingDirective, LinkageSpec,
+  // UsingDecl, Expression, ExprStmt, NamespaceAliasDef, AsmDef, GnuAsmDef
+  // For attributes before a declaration specifier we need prefix memory in
+  // DeclSpec, SimpleName, ClassDef, EnumDef, and Declarator
+  advice "Puma::CT_ObjDecl" ||
+         "Puma::CT_FctDef" ||
+         "Puma::CT_NamespaceDef" ||
+         "Puma::CT_TemplateDecl" ||
+         "Puma::CT_UsingDirective" ||
+         "Puma::CT_LinkageSpec" ||
+         "Puma::CT_UsingDecl" ||
+         "Puma::CT_Expression" ||
+         "Puma::CT_ExprStmt" ||
+         "Puma::CT_NamespaceAliasDef" ||
+         "Puma::CT_AsmDef" ||
+         "Puma::CT_GnuAsmDef" ||
+         "Puma::CT_SimpleName" ||
+         "Puma::CT_DeclSpec" ||
+         "Puma::CT_ClassDef" ||
+         "Puma::CT_EnumDef" ||
+         "Puma::CT_Declarator" : slice class {
+    CTreeList _gnu_prefix;
+  public:
+    CTreeList *gnu_prefix () { return &_gnu_prefix; }
+    const CTreeList *gnu_prefix () const { return &_gnu_prefix; }
+  };
+
+ // All node types that may have infix attributes:
+ // LabelStmt
+  advice "Puma::CT_LabelStmt" : slice class {
+    CTreeList _gnu_infix;
+  public:
+    CTreeList *gnu_infix () { return &_gnu_infix; }
+    const CTreeList *gnu_infix () const { return &_gnu_infix; }
+    int gnu_infix_pos () const { return 1; }
+  };
+
+  // EnumDef
+  advice "Puma::CT_EnumDef" ||
+         "Puma::CT_EnumSpec" ||
+         "Puma::CT_ClassDef" ||
+         "Puma::CT_ClassSpec": slice class {
+    CTreeList _gnu_infix;
+  public:
+    CTreeList *gnu_infix () { return &_gnu_infix; }
+    const CTreeList *gnu_infix () const { return &_gnu_infix; }
+    int gnu_infix_pos () const { return 0; }
+  };
+
+  // InitDeclarator
+   advice "Puma::CT_InitDeclarator" : slice class {
+     CTreeList _gnu_infix;
+   public:
+     CTreeList *gnu_infix () { return &_gnu_infix; }
+     const CTreeList *gnu_infix () const { return &_gnu_infix; }
+     int gnu_infix_pos () const { return 0; } 
+   };
+
+   // Condition
+    advice "Puma::CT_Condition" : slice class {
+      CTreeList _gnu_infix;
+    public:
+      CTreeList *gnu_infix () { return &_gnu_infix; }
+      const CTreeList *gnu_infix () const { return &_gnu_infix; }
+      int gnu_infix_pos () const { return 1; } 
+    };
+
+    // UsingDirective
+     advice "Puma::CT_UsingDirective" : slice class {
+       CTreeList _gnu_infix;
+     public:
+       CTreeList *gnu_infix () { return &_gnu_infix; }
+       const CTreeList *gnu_infix () const { return &_gnu_infix; }
+       int gnu_infix_pos () const { return 2; }
+     };
+};
+
+#endif /* __ext_gnu_ctree_ah__ */

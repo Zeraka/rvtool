@@ -1,0 +1,37 @@
+#ifndef CLOCKOBSERVER_AH
+#define CLOCKOBSERVER_AH
+
+#include "ObserverPattern.ah"
+
+slice struct Test {
+  void dummy1();
+  void dummy2();
+};
+
+slice void Test::dummy1() {}
+
+
+slice void Test::dummy2() {}
+aspect ClockObserver : public ObserverPattern {
+  pointcut subjectChange (Subject &subject) =
+    execution ("void ClockTimer::Tick()") && that (subject);
+  pointcut observers() = "DigitalClock"||"AnalogClock";
+
+public:
+
+  advice "ClockTimer" : slice struct : public ObserverPattern::Subject;
+  advice observers () : slice struct : public ObserverPattern::Observer;
+  advice observers () : slice struct {
+    void update (ObserverPattern::Subject *subject) {
+      Draw ((const ClockTimer &)*subject);
+    }
+  };
+  advice observers () : slice Test;
+
+  virtual void updateObserver(Subject *subject, Observer *observer) {
+    observer->update (subject);
+  }
+};
+
+#endif // CLOCKOBSERVER_AH
+

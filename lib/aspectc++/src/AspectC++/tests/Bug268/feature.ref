@@ -1,0 +1,24 @@
+Bug268: this pointer used in advice for static member functions
+===============================================================
+called void C::f1(Vector<double> &)
+  that:   NULL
+  target: NULL
+called void C::f2(Vector<int> &)
+  that:   NULL
+  target: not NULL
+called void C::f3()
+  that:   NULL
+  target: NULL
+called void C::f1(Vector<double> &)
+  that:   NULL
+  target: NULL
+called void C::f2(Vector<int> &)
+  that:   NULL
+  target: not NULL
+called void C::f3()
+  that:   NULL
+  target: NULL
+called void C::f2(Vector<int> &)
+  that:   NULL
+  target: not NULL
+===============================================================

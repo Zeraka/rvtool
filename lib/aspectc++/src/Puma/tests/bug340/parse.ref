@@ -1,0 +1,7 @@
+bug340-3.cc:18: error: call to function `g (float)' is ambiguous
+bug340-3.cc:7: candidates are: void g(T &) [with T = float]
+bug340-3.cc:6:                 void g(T) [with T = float]
+bug340-3.cc:27: error: call to function `l (B< int,int >)' is ambiguous
+bug340-3.cc:11: candidates are: void l(B< T,int > &) [with T = int]
+bug340-3.cc:10:                 void l(B< T,T > &) [with T = int]
+bug340-4.cc:28: error: no matching function for call to `f'

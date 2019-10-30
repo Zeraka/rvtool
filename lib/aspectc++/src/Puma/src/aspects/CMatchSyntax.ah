@@ -1,0 +1,599 @@
+// This file is part of PUMA.
+// Copyright (C) 1999-2003  The PUMA developer team.
+//                                                                
+// This program is free software;  you can redistribute it and/or 
+// modify it under the terms of the GNU General Public License as 
+// published by the Free Software Foundation; either version 2 of 
+// the License, or (at your option) any later version.            
+//                                                                
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+// GNU General Public License for more details.                   
+//                                                                
+// You should have received a copy of the GNU General Public      
+// License along with this program; if not, write to the Free     
+// Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+// MA  02111-1307  USA                                            
+
+#ifndef __CMatchSyntax_ah__
+#define __CMatchSyntax_ah__
+
+#include <string.h>
+
+#include "Puma/CWildcardTokens.h"
+#include "Puma/CTokens.h"
+#include "Puma/StrCol.h"
+#include "Puma/Config.h"
+
+
+namespace Puma {
+  class CSyntax;
+  class CCSyntax;
+  class CBuilder;
+  class CSemantic;
+  class Container;
+  class CTree;
+  class CStrLiteral;
+  class CT_Any;
+  class CT_AnyList;
+  class CT_AnyExtension;
+  class CT_AnyCondition;
+  class CT_SimpleName;
+} // namespace Puma
+
+
+namespace Puma {
+  slice class CMatchCSyntax;
+  slice class CMatchCCSyntax;
+  slice class CMatchCBuilder;
+}
+
+aspect CMatchSyntax {
+  pointcut csyntax () = "Puma::CSyntax";
+  pointcut ccsyntax () = "Puma::CCSyntax";  
+  pointcut cbuilder () = "Puma::CBuilder";
+  pointcut csemantic () = "Puma::CSemantic";
+
+protected:
+  // flag to enable/disable parsing match expressions
+  bool match_expr;
+
+protected:
+  CMatchSyntax () : match_expr (false) {}
+  
+  // introduce wildcard rules to CSyntax and CCSyntax
+  advice csyntax () : slice Puma::CMatchCSyntax;
+  advice ccsyntax () : slice Puma::CMatchCCSyntax;
+
+  // extend CBuilder
+  advice cbuilder () : slice Puma::CMatchCBuilder;
+
+  // extend CSemantic
+  advice csemantic () : slice class {
+  public:
+    virtual CTree *wc_extension () {
+      Puma::CT_AnyExtension *ext = (Puma::CT_AnyExtension*)builder ().wc_extension ();
+      if (ext->String ()) {
+        char *name = Puma::StrCol::dup (ext->String ()->token ()->text ());
+        name++;
+        name[strlen (name) - 1] = '\0';
+        ext->SemValue ()->setValue (new Puma::CStrLiteral (name, strlen (name), 0));
+      }
+      return ext;
+    }
+  };
+
+  // let first parse wildcards before parsing anything else
+  advice within (derived (csyntax ())) && 
+   execution ("%::CTree * Puma::%::rule_trans_unit()") : around () { 
+    if (match_expr &&	tjp->that ()->wildcards ()) 
+      *tjp->result () = tjp->that ()->builder ().get_node (); 
+    else 
+      tjp->proceed ();
+  }
+
+  // extend the syntax to parse ANYs
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::CTree * Puma::%::rule_literal()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_EXPR)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::CTree * Puma::%::rule_expr_list()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_EXPR_LIST)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any_list (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::CTree * Puma::%::rule_id_expr()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_ID_EXPR)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_identifier()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_IDENTIFIER)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) &&
+    execution ("bool Puma::%::init_decl_spec()") : after () {
+      tjp->that ()->_decl_spec_1.set (Puma::TOK_ANY_DECL_SPEC);
+  }
+  
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_decl_spec()") : after () { 
+    Puma::CTree *&result = *tjp->result ();
+    if (match_expr && !result &&
+        tjp->that ()->parse (Puma::TOK_ANY_DECL_SPEC) &&
+        tjp->that ()->wc_extension ()) {
+      result = tjp->that ()->builder().any ();
+    }
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_decl_spec_seq()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_DECL_SPEC_SEQ)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any_list (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_init_declarator_list()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_INIT_DECLARATOR_LIST)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any_list (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_init_declarator()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_INIT_DECLARATOR)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_declarator()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_DECLARATOR)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_init()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_INIT)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_arg_decl_seq()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_ARG_DECL_SEQ)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any_list (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_fct_body()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_FCT_BODY)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_class_spec()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_CLASS_SPEC)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_member_spec()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_MEMBER_SPEC)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any_list (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_member_decl()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_MEMBER_DECL)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_stmt()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_STMT)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_stmt_seq()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_STMT_SEQ)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any_list (); 
+    } else 
+      tjp->proceed ();
+  }
+
+  advice within (derived (ccsyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_base_clause()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_BASE_CLAUSE)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any_list (); 
+    } else 
+      tjp->proceed (); 
+  }
+
+  advice within (derived (ccsyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_ctor_init()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_CTOR_INIT)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed (); 
+  }
+
+  advice within (derived (ccsyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_mem_init()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_ANY_MEM_INIT)) {
+      tjp->that ()->wc_extension (); 
+      *tjp->result () = tjp->that ()->builder ().any (); 
+    } else 
+      tjp->proceed (); 
+  }
+
+  // extend the syntax to be able to parse match trees
+
+  advice within (derived (csyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_typedef_name()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_WC_IS_TYPEDEF)) {
+      *tjp->result () = 
+        tjp->that ()->parse (Puma::TOK_ID) ? 
+        tjp->that ()->builder ().is_name () : (Puma::CTree*)0; 
+    } else 
+      tjp->proceed (); 
+  }
+
+  advice within (derived (ccsyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_class_name()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_WC_IS_CLASS)) {
+      *tjp->result () = 
+        tjp->that ()->parse (Puma::TOK_ID) ? 
+        tjp->that ()->builder ().is_name () : (Puma::CTree*)0; 
+    } else 
+      tjp->proceed (); 
+  }
+
+  advice within (derived (ccsyntax ())) && 
+   execution ("%::Puma::CTree * Puma::%::rule_enum_name()") : around () { 
+    if (match_expr && tjp->that ()->parse (Puma::TOK_WC_IS_ENUM)) {
+      *tjp->result () = 
+        tjp->that ()->parse (Puma::TOK_ID) ? 
+        tjp->that ()->builder ().is_name () : (Puma::CTree*)0; 
+    } else 
+      tjp->proceed (); 
+  }
+
+  // configure parsing match expressions
+  
+  advice args (config) && within (derived ("Puma::Syntax")) && 
+   execution ("void Puma::%::configure(...)") : before (Puma::Config &config) {
+    match_expr = (config.Option ("--match-expr"));
+  }
+};
+
+// introduce wildcard rules to CSyntax
+slice class Puma::CMatchCSyntax {
+public:
+  CTree * rule_wildcards ();
+  virtual bool wildcards ();
+  CTree * rule_wc_extension ();
+  virtual bool wc_extension ();
+  CTree * rule_wc_arguments ();
+  virtual bool wc_arguments ();
+  CTree * rule_wc_condition ();
+  virtual bool wc_condition ();
+  CTree * rule_wc_condition1 ();
+  virtual bool wc_condition1 ();
+  CTree * rule_wc_match ();
+  virtual bool wc_match ();
+  CTree * rule_wc_match_list ();
+  virtual bool wc_match_list ();
+  CTree * rule_wc_element ();
+  virtual bool wc_element ();
+};
+
+// introduce wildcard rules to CCSyntax
+slice class Puma::CMatchCCSyntax {
+public:
+  CTree * rule_wildcards ();
+  virtual bool wildcards ();
+};
+
+// extend CBuilder
+slice class Puma::CMatchCBuilder {
+public:
+  virtual Puma::CTree *any ();
+  virtual Puma::CTree *any_list ();
+  virtual Puma::CTree *is_name ();
+  virtual Puma::CTree *wildcards ();
+  virtual Puma::CTree *wc_extension ();
+  virtual Puma::CTree *wc_arguments ();
+  virtual Puma::CTree *wc_condition ();
+  virtual Puma::CTree *wc_condition1 ();
+  virtual Puma::CTree *wc_match ();
+  virtual Puma::CTree *wc_match_list ();
+  virtual Puma::CTree *wc_element ();
+};
+
+slice Puma::CTree *Puma::CMatchCSyntax::rule_wildcards () {
+  return (parse (Puma::TOK_DO_EXPR) ? expr () :
+          parse (Puma::TOK_DO_EXPR_LIST) ? expr_list () : 
+          look_ahead (Puma::TOK_DO_ID_EXPR) ? consume () && id_expr () : 
+          look_ahead (Puma::TOK_DO_IDENTIFIER) ? consume () && identifier () : 
+          look_ahead (Puma::TOK_DO_DECL_SPEC) ? consume () && decl_spec () : 
+          parse (Puma::TOK_DO_DECL_SPEC_SEQ) ? decl_spec_seq () : 
+          parse (Puma::TOK_DO_INIT_DECLARATOR_LIST) ? init_declarator_list () : 
+          parse (Puma::TOK_DO_INIT_DECLARATOR) ? init_declarator () : 
+          parse (Puma::TOK_DO_DECLARATOR) ? declarator () : 
+          parse (Puma::TOK_DO_INIT) ? init () : 
+          parse (Puma::TOK_DO_ARG_DECL_SEQ) ? arg_decl_seq () : 
+          parse (Puma::TOK_DO_FCT_BODY) ? fct_body () : 
+          look_ahead (Puma::TOK_DO_CLASS_SPEC) ? consume () && class_spec () : 
+          parse (Puma::TOK_DO_MEMBER_SPEC) ? member_spec () : 
+          parse (Puma::TOK_DO_MEMBER_DECL) ? member_decl () : 
+          parse (Puma::TOK_DO_STMT) ? stmt () : 
+          parse (Puma::TOK_DO_STMT_SEQ) ? stmt_seq () : 
+          false) ?
+    builder ().wildcards () : (Puma::CTree*)0;
+}
+	 
+slice bool Puma::CMatchCSyntax::wildcards () {
+  return parse (&CMatchCSyntax::rule_wildcards);
+}
+
+slice Puma::CTree *Puma::CMatchCCSyntax::rule_wildcards () {
+  bool DO_parsed = false;
+  if (parse (Puma::TOK_DO_BASE_CLAUSE) && (DO_parsed=true) ? 
+        base_clause () : 
+      parse (Puma::TOK_DO_CTOR_INIT) && (DO_parsed=true) ? 
+        ctor_init () : 
+      parse (Puma::TOK_DO_MEM_INIT) && (DO_parsed=true) ? 
+        mem_init () : 
+      false)
+    return builder ().wildcards ();
+  return ! DO_parsed ? 
+    Puma::CSyntax::rule_wildcards () : (Puma::CTree*)0;
+}
+
+slice bool Puma::CMatchCCSyntax::wildcards () {
+  return parse (&CMatchCCSyntax::rule_wildcards);
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::wildcards () {
+  // ignore DO token und return parsed tree
+  delete get_node (0);
+  return get_node (1);
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::any () {
+  if (nodes () == 1)
+    return new Puma::CT_Any (get_node (0));
+  return new Puma::CT_Any (get_node (0), get_node (1));
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::any_list () {
+  if (nodes () == 1)
+    return new Puma::CT_AnyList (get_node (0));
+  return new Puma::CT_AnyList (get_node (0), get_node (1));
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::is_name () {
+  delete get_node (0);
+  return new Puma::CT_SimpleName (get_node (1));
+}
+
+/*****************************************************************************/
+/*                                                                           */
+/*                              wildcard rules                               */
+/*                                                                           */
+/*****************************************************************************/
+
+slice Puma::CTree *Puma::CMatchCSyntax::rule_wc_extension () {
+  return (parse (Puma::TOK_OPEN_ROUND) && 
+          (wc_arguments (), parse (Puma::TOK_CLOSE_ROUND))) ?
+    semantic ().wc_extension () : (Puma::CTree*)0;
+}
+
+slice bool Puma::CMatchCSyntax::wc_extension () {
+  return parse (&CMatchCSyntax::rule_wc_extension);
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::wc_extension () {
+  if (nodes () == 2)
+    return new Puma::CT_AnyExtension (get_node (0), 0, 0, 0, get_node (1));
+  else {
+    Puma::CTree *result;
+    Container *c = (Container*)get_node (1);
+    if (c->Sons () == 1) {
+      if (c->Son (0)->token ()->type () == Puma::TOK_STRING_VAL)
+        result = new Puma::CT_AnyExtension (get_node (0), c->Son (0), 0, 0, 
+                                      get_node (2));
+      else 
+        result = new Puma::CT_AnyExtension (get_node (0), 0, 0, c->Son (0), 
+                                      get_node (2));
+    } else
+      result = new Puma::CT_AnyExtension (get_node (0), c->Son (0), c->Son (1), 
+                                    c->Son (2), get_node (2));
+    delete c;
+    return result;
+  }
+}
+
+slice Puma::CTree *Puma::CMatchCSyntax::rule_wc_arguments () {
+  return (parse (Puma::TOK_STRING_VAL) ?
+           (parse (Puma::TOK_COMMA) ? wc_condition () : true) :
+	  wc_condition ()) ?
+    builder ().wc_arguments () : (Puma::CTree*)0;
+}
+
+slice bool Puma::CMatchCSyntax::wc_arguments () {
+  return parse (&CMatchCSyntax::rule_wc_arguments);
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::wc_arguments () {
+  return container ();
+}
+
+slice Puma::CTree *Puma::CMatchCSyntax::rule_wc_condition () {
+  static int ops[] = { Puma::TOK_WC_SEQ, Puma::TOK_WC_OR, Puma::TOK_WC_XOR, Puma::TOK_WC_AND, 0 };
+  return list (&Puma::CSyntax::wc_condition1, ops) ? 
+    builder ().wc_condition () : (Puma::CTree*)0;
+}
+
+slice bool Puma::CMatchCSyntax::wc_condition () {
+  return parse (&CMatchCSyntax::rule_wc_condition);
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::wc_condition () {
+  Puma::CTree *result = get_node (0);
+  for (int n = 1; n < nodes (); n += 2)
+    result = new Puma::CT_AnyCondition (result, get_node (n), get_node (n + 1));
+  return result;
+}
+
+slice Puma::CTree *Puma::CMatchCSyntax::rule_wc_condition1 () {
+  return (parse (Puma::TOK_WC_NOT) || parse (Puma::TOK_WC_COLLECT) ? 
+           wc_condition () :
+          parse (Puma::TOK_WC_IF) ? 
+	   wc_condition () && 
+	   (parse (Puma::TOK_WC_ELIF) ? 
+	    wc_condition () : true) &&
+	   parse (Puma::TOK_WC_ENDIF) :
+          parse (Puma::TOK_WC_NODENAME) ?
+	   parse (Puma::TOK_STRING_VAL) :
+	  parse (Puma::TOK_OPEN_ROUND) ?
+	   wc_condition () && parse (Puma::TOK_CLOSE_ROUND) :
+	  wc_match ()) ?
+    builder ().wc_condition1 () : (Puma::CTree*)0;
+}
+	    
+slice bool Puma::CMatchCSyntax::wc_condition1 () {
+  return parse (&CMatchCSyntax::rule_wc_condition1);
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::wc_condition1 () {
+  if (nodes () == 1)
+    return get_node ();
+  if (nodes () == 2)
+    return new Puma::CT_AnyCondition (get_node (0), get_node (1));
+  if (get_node ()->token ()->type () == Puma::TOK_OPEN_ROUND)
+    return new Puma::CT_AnyCondition (get_node (0), get_node (1), get_node (2));
+  if (nodes () == 3)
+    return new Puma::CT_AnyCondition (get_node (0), get_node (1), get_node (2));
+  return new Puma::CT_AnyCondition (get_node (0), get_node (1), 
+    new Puma::CT_AnyCondition (get_node (2), get_node (3), get_node (4)));
+}
+
+slice Puma::CTree *Puma::CMatchCSyntax::rule_wc_match () {
+  static int match_mode[] = { Puma::TOK_WC_EXACT, Puma::TOK_WC_FIRST, Puma::TOK_WC_LAST, 
+                              Puma::TOK_WC_LEAF, Puma::TOK_WC_PRUNE, 0 };
+  return (wc_match_list (), parse (match_mode), wildcards ()) ?
+    builder ().wc_match () : (Puma::CTree*)0;
+}
+
+slice bool Puma::CMatchCSyntax::wc_match () {
+  return parse (&CMatchCSyntax::rule_wc_match);
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::wc_match () {
+  if (nodes () == 1)
+    return new Puma::CT_AnyCondition (get_node (0));
+  if (nodes () == 2)
+    return new Puma::CT_AnyCondition (get_node (0), get_node (1));    
+  return new Puma::CT_AnyCondition (get_node (0), get_node (1), get_node (2));
+}
+
+slice Puma::CTree *Puma::CMatchCSyntax::rule_wc_match_list () {
+  return (parse (Puma::TOK_WC_ELEMENT) &&
+          (parse (Puma::TOK_OPEN_ROUND) ? 
+	   (wc_element () ? 
+	    (parse (Puma::TOK_COMMA) ? 
+	     wc_element () : true) : true) &&
+	   parse (Puma::TOK_CLOSE_ROUND) : true)) ?
+    builder ().wc_match_list () : (Puma::CTree*)0;
+}
+
+slice bool Puma::CMatchCSyntax::wc_match_list () {
+  return parse (&CMatchCSyntax::rule_wc_match_list);
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::wc_match_list () {
+  if (nodes () == 1)
+    return new Puma::CT_AnyCondition (get_node (0));
+  delete get_node (1);
+  delete get_node (nodes () - 1);
+  if (nodes () == 3) 
+    return new Puma::CT_AnyCondition (get_node (0));
+  if (nodes () == 4) 
+    return new Puma::CT_AnyCondition (get_node (0), get_node (2));
+  delete get_node (3);
+  return new Puma::CT_AnyCondition (get_node (0), get_node (2), get_node (4));
+}
+
+slice Puma::CTree *Puma::CMatchCSyntax::rule_wc_element () {
+  static int sign[] = { Puma::TOK_PLUS, Puma::TOK_MINUS, 0 };
+  return (parse (sign), parse (Puma::TOK_INT)) ?
+    builder ().wc_element () : (Puma::CTree*)0;
+}
+
+slice bool Puma::CMatchCSyntax::wc_element () {
+  return parse (&CMatchCSyntax::rule_wc_element);
+}
+
+slice Puma::CTree *Puma::CMatchCBuilder::wc_element () {
+  if (nodes () == 1)
+    return new Puma::CT_AnyCondition (get_node (0));
+  return new Puma::CT_AnyCondition (get_node (0), get_node (1));
+}
+
+#endif /* __CMatchSyntax_ah__ */

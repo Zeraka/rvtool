@@ -1,0 +1,74 @@
+#ifndef __ThreadSafeLogging_ah__
+#define __ThreadSafeLogging_ah__
+
+#include <stdio.h>
+#include <pthread.h>
+
+#include "Log.h"
+
+// This example illustrates how to use the aspectof() function
+// to implement thread-local aspects with the pthread library
+// or others that support thread-local storage in a similiar way.
+
+// The beginning looks quite normal ...
+aspect ThreadSafeLogging {
+
+  int _execs;    // thread local function execution counter
+  int _indent;   // per thread indentation of the log
+
+  advice execution ("% TestClass::%(...)") : before () {
+    _execs++;
+    Log::instance ().print (_indent, true, JoinPoint::signature ());
+    _indent++;
+  }
+
+  advice execution ("% TestClass::%(...)") : after () {
+    _indent--;
+    Log::instance ().print (_indent, false, JoinPoint::signature ());
+  }
+
+public:
+
+  ThreadSafeLogging () : _execs (0), _indent (0) {}
+
+  ~ThreadSafeLogging () {
+    printf ("aspect %p counted %d\n", this, _execs);
+  }
+
+  // Here comes the magic: aspectof() is called at each joinpoint in
+  // order to determine the aspect instrance to be used for the
+  // advice invocation.
+  // The following definition retrieves a thread-local aspect instance
+  // pointer. If it is still NULL, an aspect object is created and assigned.
+
+  static ThreadSafeLogging *aspectof() {
+    extern pthread_key_t tls_aspects_key;
+    
+    ThreadSafeLogging *me =
+      (ThreadSafeLogging*)pthread_getspecific (tls_aspects_key);
+    if (!me) {
+      me = new ThreadSafeLogging;
+      pthread_setspecific (tls_aspects_key, me);
+      printf ("created aspect instance %p\n", me);
+    }
+    return me;
+  }
+
+  static void init () {
+    extern pthread_key_t tls_aspects_key;
+
+    // create a key for thread-local storage
+    pthread_key_create(&tls_aspects_key, &ThreadSafeLogging::destructor);
+  }
+
+  // We passed this function to pthread_key_create as a destructor function.
+  // It is called by the pthread library when the thread terminates.
+
+  static void destructor (void *me) {
+    delete (ThreadSafeLogging*)me;
+    printf ("destroyed aspect instance %p\n", me);
+  }
+
+};
+
+#endif // __ThreadSafeLogging_ah__

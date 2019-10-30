@@ -1,0 +1,5 @@
+StdString: checks advice weaving for the STL string class
+=========================================================
+calling void foo(<<<replaced>>>)
+in foo(this is a string)
+=========================================================

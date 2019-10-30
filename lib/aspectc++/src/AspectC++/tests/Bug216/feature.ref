@@ -1,0 +1,4 @@
+Bug 216: copy constructor generation
+====================================
+in IntroductionTarget::IntroductionTarget()
+====================================

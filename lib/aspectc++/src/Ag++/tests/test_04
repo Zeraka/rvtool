@@ -1,0 +1,20 @@
+DESC="Compile and link source files in one step"
+
+main()
+{
+  EXEC="${AGCC} -v2 --path src src/*.cc";
+  if  ( ${EXEC} );then true;else
+    ERR_MSG="Failed executing '${EXEC}'";
+    return 1;
+  fi;
+
+  if [ ! \( \( -x a.out \) -o \( -x a.exe \) \) ];then
+    ERR_MSG="Executable file was not generated";
+    return 1;
+  fi;
+}
+
+cleanup()
+{
+   rm -f a.out a.exe;
+}

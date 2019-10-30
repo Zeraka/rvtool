@@ -1,0 +1,7 @@
+NonInlineSliceInclude: check for include generation in .cc
+==========================================================
+  function f () introducd by an aspect
+  function ASlice::f1()
+  function ABCrossed::ASlice::f2 calls B::f1
+  function BSlice::f1()
+==========================================================

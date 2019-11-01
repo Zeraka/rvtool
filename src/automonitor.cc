@@ -41,7 +41,7 @@ int main(void)
     Monitor monitor_ ;
     Monitor& monitor = monitor_;
     //读取所有的状态以及接受集，放入Monitor类型的容器中去。
-    Parse_automata_to_map(monitor, pa->aut, dict);
+    Parse_automata_to_monitor(monitor, pa->aut, dict);
 
     //接受MQ发送过来的字符串
 
@@ -57,7 +57,7 @@ int main(void)
 输入： 
 输出：
 */
-int Parse_automata_to_map(Monitor& monitor, spot::twa_graph_ptr &aut, const spot::bdd_dict_ptr &dict)
+int Parse_automata_to_monitor(Monitor& monitor, spot::twa_graph_ptr &aut, const spot::bdd_dict_ptr &dict)
 {
     int num_state = 0;
 
@@ -83,13 +83,20 @@ int Parse_automata_to_map(Monitor& monitor, spot::twa_graph_ptr &aut, const spot
             monitor_label.next_state = t.dst;
             monitor_state.monitor_labels.push_back(monitor_label);
         }
-    
+        monitor_state.label_numbers = monitor_state.monitor_labels.size();
         monitor[num_state] = monitor_state;        
     }
 
     FuncEnd();
     return SUCCESS;
 }
+
+/*
+功能：输出自动机为文本格式
+
+
+*/
+
 
 
 /*
@@ -112,40 +119,34 @@ int check_word_acceptance( spot::twa_graph_ptr &aut,
             {
                 return ERROR;
             }
-            int i = 0;
+            int i = 1;
 
-            std::cout << "length of vector" << monitor[state_number].monitor_labels.size() <<std::endl;
-            //迭代,如果都满足，则使得
-
-
-            //输出所有的monitor的label测试一下。
-            for(auto& t :monitor)
             for(auto& t : monitor[state_number].monitor_labels)
             {
-                printf("dddddddddd\n");
                 //如果满足label，则更新state_munber,
+                std::cout << "state_number is " << state_number <<std::endl;
                 std::cout << "t.label :\""<<t.label <<"\"" << std::endl;
                 std::cout << "accpet_word :\"" << accept_word<< "\"" << std::endl;
 
-                if(t.label == accept_word)
-                {
-                    state_number = t.next_state;
-                    FuncEnd_print("Accept success!");
+                if(accept_word == t.label){
+                    state_number = t.next_state; 
+                    std::cout<< "Accepted"<< std::endl;
                     break;
-                }
-                //如果所有label都不满足，则报错。
-                ++i;
-                if(i > 2)
+                }else if(accept_word != t.label && i < monitor[state_number].label_numbers)
                 {
-                    std::cout << "wrong" << std::endl;
-                    break;
-                    return ERROR;
+                    i++;
+                    continue;
+                }else
+                {
+                    std::cout << "Accepted Failed"<<std::endl;
+                    FuncEnd();
+                    return WORD_ACCEPTANCE_WRONG;
                 }
                 
             }
         return 0;
         }
-    FuncEnd();
+
     return SUCCESS;
 }
 
@@ -156,7 +157,7 @@ int check_word_acceptance( spot::twa_graph_ptr &aut,
 /*
 功能： 测试check_word_acceptance函数是否能够检测输入的字符串
 */
-void test_check_word_acceptance_01( spot::twa_graph_ptr& aut, 
+int test_check_word_acceptance_01( spot::twa_graph_ptr& aut, 
                                 Monitor &monitor, const spot::bdd_dict_ptr &dict){
 
     FuncBegin();
@@ -168,7 +169,11 @@ void test_check_word_acceptance_01( spot::twa_graph_ptr& aut,
     //将字符串输入自动机中去
     for(std::string str:teststr)
     {
-        check_word_acceptance( aut, monitor, dict, str);
+        if(check_word_acceptance( aut, monitor, dict, str) == WORD_ACCEPTANCE_WRONG){
+            std::cout << "Accepted_failed" << std::endl;
+            FuncEnd();
+            return WORD_ACCEPTANCE_WRONG;
+        }
     }
 
     FuncEnd();

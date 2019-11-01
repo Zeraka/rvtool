@@ -4,7 +4,7 @@
 enum{
     SUCCESS = 0,
     ERROR ,
-    WORD_ACCEPTANCE_WRONG
+    WORD_ACCEPTANCE_WRONG,
 };
 
 #define FuncBegin() {                                   \
@@ -19,6 +19,7 @@ enum{
     std::cout <<"Function "<< __FUNCTION__  << " end\n" << std::endl;   \
     std::cout << x << std::endl;                                             \
 }
+
 
 
 #endif

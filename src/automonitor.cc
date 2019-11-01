@@ -1,8 +1,7 @@
 #include <iostream>
 #include <ostream>
-#include <strstream>
 #include <sstream>
-
+#include <cstring>
 #include <string>
 
 #include <spot/tl/parse.hh>
@@ -10,8 +9,6 @@
 #include <spot/twaalgos/hoa.hh>
 #include <spot/twa/bddprint.hh>
 #include <spot/parseaut/public.hh>
-#include <spot/parseaut/parseaut.hh>
-
 
 #include "automonitor.hh"
 #include "util-base.h"
@@ -36,24 +33,20 @@ int main(void)
 
     int initial_state = 0;
     int current_state = 0;
-    std::ostrstream label_ ;
-    std::ostrstream& label = label_;
 
     const spot::bdd_dict_ptr &dict = pa->aut->get_dict();
 
     Monitor monitor_ ;
     Monitor& monitor = monitor_;
-
     //读取所有的状态以及接受集，放入Monitor类型的容器中去。
     Parse_automata_to_map(monitor, pa->aut, dict);
-
 
     //接受MQ发送过来的字符串
 
     //check_word_acceptance(label, pa->aut, monitor, dict, );
 
     //测试是否可以用
-    test_check_word_acceptance(label,pa->aut, monitor, dict);
+    test_check_word_acceptance_01(pa->aut, monitor, dict);
 }
 
 
@@ -66,25 +59,25 @@ int Parse_automata_to_map(Monitor& monitor, spot::twa_graph_ptr &aut, const spot
 {
     int num_state = 0;
 
-    std::ostrstream label;
-    for(num_state; num_state < aut->num_states; ++num_state)
-    {   
-        Monitor_state monitor_state = {0};
+    printf("Parse_automata_to_map begin;\n");
 
+    for(num_state; num_state < aut->num_states(); ++num_state)
+    {   
+        Monitor_state monitor_state ;
 
         monitor_state.current_state = num_state;
         for(auto& t :aut->out(num_state))
         {
-            Monitor_label monitor_label = {0};
-
+            Monitor_label monitor_label ;
             if(t.src != num_state)
             {
                 std::cout << "src != num_state, There is wrong" << std::endl;
                 return ERROR;
             }   
-
-            spot::bdd_print_formula(label, dict, t.cond);
-            monitor_label.label = label.str();
+            
+            monitor_label.label = spot::bdd_format_formula(dict, t.cond);
+            std::cout << "label is \"" << spot::bdd_format_formula(dict, t.cond)<< "\"" << std::endl;
+            std::cout << "label is \"" << monitor_label.label<< "\"" << std::endl;
             monitor_label.next_state = t.dst;
             monitor_state.monitor_labels.push_back(monitor_label);
         }
@@ -92,7 +85,7 @@ int Parse_automata_to_map(Monitor& monitor, spot::twa_graph_ptr &aut, const spot
         monitor[num_state] = monitor_state;        
     }
 
-
+    printf("Parse_automata_to_map end;\n\n");
     return SUCCESS;
 }
 
@@ -102,7 +95,7 @@ int Parse_automata_to_map(Monitor& monitor, spot::twa_graph_ptr &aut, const spot
 输入： 输入一个字
 输入的是Monitorstate
 */
-int check_word_acceptance(std::ostrstream &label, spot::twa_graph_ptr &aut,
+int check_word_acceptance( spot::twa_graph_ptr &aut,
                           Monitor& monitor, const spot::bdd_dict_ptr &dict, std::string accept_word)
 {
 
@@ -117,21 +110,33 @@ int check_word_acceptance(std::ostrstream &label, spot::twa_graph_ptr &aut,
             {
                 return ERROR;
             }
+            int i = 0;
 
-            //迭代
+            std::cout << "length of vector" << monitor[state_number].monitor_labels.size() <<std::endl;
+            //迭代,如果都满足，则使得
             for(auto& t : monitor[state_number].monitor_labels)
             {
-                int i = 0;
+                printf("dddddddddd\n");
                 //如果满足label，则更新state_munber,
+                std::cout << "t.label :\""<<t.label <<"\"" << std::endl;
+                std::cout << "accpet_word :\"" << accept_word<< "\"" << std::endl;
+
                 if(t.label == accept_word)
                 {
                     state_number = t.next_state;
                     break;
                 }
                 //如果所有label都不满足，则报错。
-                if(monitor[state_number].monitor_labels.end)
+                ++i;
+                if(i > 2)
+                {
+                    std::cout << "wrong" << std::endl;
+                    break;
+                    return ERROR;
+                }
+                
             }
-
+        return 0;
         }
 
     return SUCCESS;
@@ -144,7 +149,7 @@ int check_word_acceptance(std::ostrstream &label, spot::twa_graph_ptr &aut,
 /*
 功能： 测试check_word_acceptance函数是否能够检测输入的字符串
 */
-void test_check_word_acceptance(std::ostrstream &label, spot::twa_graph_ptr& aut, 
+void test_check_word_acceptance_01( spot::twa_graph_ptr& aut, 
                                 Monitor &monitor, const spot::bdd_dict_ptr &dict){
 
 
@@ -156,8 +161,8 @@ void test_check_word_acceptance(std::ostrstream &label, spot::twa_graph_ptr& aut
     //将字符串输入自动机中去
     for(std::string str:teststr)
     {
-        check_word_acceptance(label, aut, monitor, dict, str);
+        printf("aaaaaaaaaaa\n");
+        check_word_acceptance( aut, monitor, dict, str);
     }
 }
-
 

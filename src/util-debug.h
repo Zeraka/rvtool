@@ -7,5 +7,7 @@ enum{
     WORD_ACCEPTANCE_WRONG
 };
 
+//开始函数的说明
+//#define FuncBegain() 
 
 #endif

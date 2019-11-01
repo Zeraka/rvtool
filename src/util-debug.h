@@ -8,11 +8,16 @@ enum{
 };
 
 #define FuncBegin() {                                   \
-    std::cout << "Function "<<__FUNCTION__  << " begin" << std::endl;  \
+    std::cout << "\nFunction "<<__FUNCTION__  << " begin" << std::endl;  \
 }
 
 #define FuncEnd(){                                  \
-    std::cout <<"Function "<< __FUNCTION__  << " end" << std::endl;   \
+    std::cout <<"Function "<< __FUNCTION__  << " end\n" << std::endl;   \
+}
+
+#define FuncEnd_print(x){                                  \
+    std::cout <<"Function "<< __FUNCTION__  << " end\n" << std::endl;   \
+    std::cout << x << std::endl;                                             \
 }
 
 

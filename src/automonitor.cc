@@ -100,7 +100,7 @@ int Parse_automata_to_map(Monitor& monitor, spot::twa_graph_ptr &aut, const spot
 int check_word_acceptance( spot::twa_graph_ptr &aut,
                           Monitor& monitor, const spot::bdd_dict_ptr &dict, std::string accept_word)
 {
-
+        FuncBegin();
         int state_number = 0;
 
         //读取初始状态
@@ -116,6 +116,10 @@ int check_word_acceptance( spot::twa_graph_ptr &aut,
 
             std::cout << "length of vector" << monitor[state_number].monitor_labels.size() <<std::endl;
             //迭代,如果都满足，则使得
+
+
+            //输出所有的monitor的label测试一下。
+            for(auto& t :monitor)
             for(auto& t : monitor[state_number].monitor_labels)
             {
                 printf("dddddddddd\n");
@@ -126,6 +130,7 @@ int check_word_acceptance( spot::twa_graph_ptr &aut,
                 if(t.label == accept_word)
                 {
                     state_number = t.next_state;
+                    FuncEnd_print("Accept success!");
                     break;
                 }
                 //如果所有label都不满足，则报错。
@@ -140,7 +145,7 @@ int check_word_acceptance( spot::twa_graph_ptr &aut,
             }
         return 0;
         }
-
+    FuncEnd();
     return SUCCESS;
 }
 
@@ -156,7 +161,7 @@ void test_check_word_acceptance_01( spot::twa_graph_ptr& aut,
 
     FuncBegin();
     //预定义的字符串格式
-    std::string teststr[] = {"c", "!a&c","a"};
+    std::string teststr[] = {"red", "!red & yellow","red & !yellow", "!red"};
 
     //产生的自动机
 

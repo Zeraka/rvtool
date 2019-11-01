@@ -7,7 +7,13 @@ enum{
     WORD_ACCEPTANCE_WRONG
 };
 
-//开始函数的说明
-//#define FuncBegain() 
+#define FuncBegin() {                                   \
+    std::cout << "Function "<<__FUNCTION__  << " begin" << std::endl;  \
+}
+
+#define FuncEnd(){                                  \
+    std::cout <<"Function "<< __FUNCTION__  << " end" << std::endl;   \
+}
+
 
 #endif

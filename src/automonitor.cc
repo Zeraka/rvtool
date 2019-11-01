@@ -4,6 +4,8 @@
 #include <cstring>
 #include <string>
 
+#include <cstdio>
+
 #include <spot/tl/parse.hh>
 #include <spot/twaalgos/translate.hh>
 #include <spot/twaalgos/hoa.hh>
@@ -59,8 +61,7 @@ int Parse_automata_to_map(Monitor& monitor, spot::twa_graph_ptr &aut, const spot
 {
     int num_state = 0;
 
-    printf("Parse_automata_to_map begin;\n");
-
+    FuncBegin();
     for(num_state; num_state < aut->num_states(); ++num_state)
     {   
         Monitor_state monitor_state ;
@@ -76,8 +77,9 @@ int Parse_automata_to_map(Monitor& monitor, spot::twa_graph_ptr &aut, const spot
             }   
             
             monitor_label.label = spot::bdd_format_formula(dict, t.cond);
-            std::cout << "label is \"" << spot::bdd_format_formula(dict, t.cond)<< "\"" << std::endl;
+            //std::cout << "alabel is \"" << spot::bdd_format_formula(dict, t.cond)<< "\"" << std::endl;
             std::cout << "label is \"" << monitor_label.label<< "\"" << std::endl;
+
             monitor_label.next_state = t.dst;
             monitor_state.monitor_labels.push_back(monitor_label);
         }
@@ -85,7 +87,7 @@ int Parse_automata_to_map(Monitor& monitor, spot::twa_graph_ptr &aut, const spot
         monitor[num_state] = monitor_state;        
     }
 
-    printf("Parse_automata_to_map end;\n\n");
+    FuncEnd();
     return SUCCESS;
 }
 
@@ -152,7 +154,7 @@ int check_word_acceptance( spot::twa_graph_ptr &aut,
 void test_check_word_acceptance_01( spot::twa_graph_ptr& aut, 
                                 Monitor &monitor, const spot::bdd_dict_ptr &dict){
 
-
+    FuncBegin();
     //预定义的字符串格式
     std::string teststr[] = {"c", "!a&c","a"};
 
@@ -161,8 +163,9 @@ void test_check_word_acceptance_01( spot::twa_graph_ptr& aut,
     //将字符串输入自动机中去
     for(std::string str:teststr)
     {
-        printf("aaaaaaaaaaa\n");
         check_word_acceptance( aut, monitor, dict, str);
     }
+
+    FuncEnd();
 }
 

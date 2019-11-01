@@ -20,8 +20,7 @@
 
 int main(void)
 {
-    //检测自动机文件，如果有F(a)出现,则警告(当优先级为高的时候)
-
+    FuncBegin();
     //读取并解析自动机文件
     spot::parsed_aut_ptr pa = parse_aut("demo.hoa", spot::make_bdd_dict());
 
@@ -49,6 +48,8 @@ int main(void)
 
     //测试是否可以用
     test_check_word_acceptance_01(pa->aut, monitor, dict);
+
+    FuncEnd();
 }
 
 
@@ -96,6 +97,18 @@ int Parse_automata_to_monitor(Monitor& monitor, spot::twa_graph_ptr &aut, const 
 
 
 */
+/*
+功能： 布尔表达式匹配算法
+*/
+static int is_word_match(std::string label, std::string accept_word)
+{
+    /*
+    将接受到的字符串变为表达式，比如，
+    
+    */
+
+   return SUCCESS;
+}
 
 
 
@@ -144,10 +157,8 @@ int check_word_acceptance( spot::twa_graph_ptr &aut,
                 }
                 
             }
-        return 0;
         }
 
-    return SUCCESS;
 }
 
 //============================================================

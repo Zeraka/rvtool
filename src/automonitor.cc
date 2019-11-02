@@ -16,6 +16,8 @@
 #include "util-base.h"
 #include "util-debug.h"
 
+static int Test_splitstr();
+
 int main(void)
 {
     FuncBegin();
@@ -40,12 +42,18 @@ int main(void)
 
     //接受MQ发送过来的字符串
 
-    //check_word_acceptance(label, pa->aut, monitor, dict, );
-#ifndef TEST_AUTOMONITOR 1
+    //Check_word_acceptance(label, pa->aut, monitor, dict, );
+#ifndef Test_AUTOMONITOR 1
 
 #else
     /*测试一个monitor是否可检测出输入的行为违规*/
-    test_check_word_acceptance_01(pa->aut, monitor, dict);
+    Test_Check_word_acceptance_01(pa->aut, monitor, dict);
+
+    /*测试splitstr()*/
+    Test_splitstr();
+
+    /*测试Test_Parse_bstr_to_wordset()*/
+    Test_Parse_bstr_to_wordset();
 #endif
     FuncEnd();
 }
@@ -67,10 +75,11 @@ int Parse_BoolString_to_set(std::string str, Word_set &word_set,
 */
 
 /*
-功能：将一个只含有 & 运算符的布尔表达式形式的字符串解析到 结构体中。
+功能：将一个只含有 & 运算符的布尔表达式形式的字符串解析到Word_set结构体中。
 */
 int Parse_bstr_to_wordset(std::string str, Word_set &word_set)
 {
+    FuncBegin();
     //按空格分割, 分别加入map中,如果包含！,则值为0，否则为1
     stringList sli = splitstr(str, ' ');
 
@@ -87,6 +96,8 @@ int Parse_bstr_to_wordset(std::string str, Word_set &word_set)
             word_set.wordset[t] = 0;
         }
     }
+    FuncEnd();
+    return SUCCESS;
 }
 
 /*
@@ -116,8 +127,12 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
             monitor_label.label = spot::bdd_format_formula(dict, t.cond);
             //std::cout << "alabel is \"" << spot::bdd_format_formula(dict, t.cond)<< "\"" << std::endl;
             std::cout << "label is \"" << monitor_label.label << "\"" << std::endl;
-            test_bdd_print(dict, t.cond);
+            Test_bdd_print(dict, t.cond);
             monitor_label.next_state = t.dst;
+
+            if (Parse_bstr_to_wordset(monitor_label.label, monitor_label.word_set) != SUCCESS)
+                AMReturn(ERROR);
+
             monitor_state.monitor_labels.push_back(monitor_label);
         }
         monitor_state.label_numbers = monitor_state.monitor_labels.size();
@@ -133,17 +148,27 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
 
 
 */
+
+/*
+功能： word的格式化检查
+*/
+
 /*
 功能： 布尔表达式匹配算法
+输入：word_set 结构体， 格式化的accept_word, "a & !b & c"这样的。
+输出：
 */
-static int is_word_match(std::string label, std::string accept_word)
-{
-    /*
-    将接受到的字符串变为表达式，比如，
-    
-    */
 
-    return SUCCESS;
+int is_word_match(Word_set &word_set, std::string accept_word)
+{
+    //拆分 accept_word
+    stringList slist = splitstr(accept_word, ' ');
+    // word_set里的每一个都要在 accept_word中存在。
+    
+
+    Parse_bstr_to_wordset(accept_word, )
+
+        return SUCCESS;
 }
 
 /*
@@ -151,7 +176,7 @@ static int is_word_match(std::string label, std::string accept_word)
 输入： 输入一个字
 输入的是Monitorstate
 */
-int check_word_acceptance(spot::twa_graph_ptr &aut,
+int Check_word_acceptance(spot::twa_graph_ptr &aut,
                           Monitor &monitor, const spot::bdd_dict_ptr &dict, std::string accept_word)
 {
     FuncBegin();
@@ -204,9 +229,9 @@ int check_word_acceptance(spot::twa_graph_ptr &aut,
 //============================================================
 
 /*
-功能： 测试check_word_acceptance函数是否能够检测输入的字符串
+功能： 测试Check_word_acceptance函数是否能够检测输入的字符串
 */
-int test_check_word_acceptance_01(spot::twa_graph_ptr &aut,
+int Test_Check_word_acceptance_01(spot::twa_graph_ptr &aut,
                                   Monitor &monitor, const spot::bdd_dict_ptr &dict)
 {
 
@@ -219,7 +244,7 @@ int test_check_word_acceptance_01(spot::twa_graph_ptr &aut,
     //将字符串输入自动机中去
     for (std::string str : teststr)
     {
-        if (check_word_acceptance(aut, monitor, dict, str) == WORD_ACCEPTANCE_WRONG)
+        if (Check_word_acceptance(aut, monitor, dict, str) == WORD_ACCEPTANCE_WRONG)
         {
             std::cout << "Accepted_failed" << std::endl;
             FuncEnd();
@@ -233,7 +258,7 @@ int test_check_word_acceptance_01(spot::twa_graph_ptr &aut,
 /*
 功能： 测试bddprint的功能。
 */
-int test_bdd_print(const spot::bdd_dict_ptr &dict, bdd b)
+int Test_bdd_print(const spot::bdd_dict_ptr &dict, bdd b)
 {
     FuncBegin();
     std::cout << "bdd_format_set: " << bdd_format_set(dict, b) << std::endl;
@@ -253,10 +278,88 @@ int test_bdd_print(const spot::bdd_dict_ptr &dict, bdd b)
 /*
 功能： 测试  ltl2tgba -D 'Ga|Gb|Gc' -d
 */
+int Test_Check_word_acceptance_02(spot::twa_graph_ptr &aut,
+                                  Monitor &monitor, const spot::bdd_dict_ptr &dict)
+{
+
+    FuncBegin();
+    //预定义的字符串格式
+    std::string teststr[] = {"red", "!red & yellow", "red & !yellow", "!red"};
+
+    //产生的自动机
+
+    //将字符串输入自动机中去
+    for (std::string str : teststr)
+    {
+        if (Check_word_acceptance(aut, monitor, dict, str) == WORD_ACCEPTANCE_WRONG)
+        {
+            std::cout << "Accepted_failed" << std::endl;
+            FuncEnd();
+            return WORD_ACCEPTANCE_WRONG;
+        }
+    }
+
+    FuncEnd();
+}
+
+/*
+功能： 测试
+*/
 
 /*
 功能： 测试Parse_bstr_to_wordset()
 */
-int test_Parse_bstr_to_wordset(std::string str, Word_set &word_set)
+int Test_Parse_bstr_to_wordset()
 {
+    FuncBegin();
+
+    std::string str = "!red & yellow & green & !pink";
+
+    Word_set word_set_;
+    Word_set &word_set = word_set_;
+
+    std::map<std::string, size_t>::iterator iter; //遍历器
+
+    if (Parse_bstr_to_wordset(str, word_set) != SUCCESS)
+    {
+        FuncEnd();
+        AMReturn(ERROR);
+    }
+    else
+    {
+        std::cout << "word_set.word: " << word_set.word << std::endl;
+        //遍历word_set
+        iter = word_set.wordset.begin();
+        while (iter != word_set.wordset.end())
+        {
+            std::cout << BOLDRED << iter->first << "--" << iter->second << RESET << std::endl;
+            iter++;
+        }
+    }
+
+    //Parse_bstr_to_wordset(str, word_set);
+
+    FuncEnd();
+
+    return SUCCESS;
+}
+
+/*
+功能： 测试splitstr()函数功能
+*/
+static int Test_splitstr()
+{
+    FuncBegin();
+
+    std::string str1 = "!red & yellow & green & !pink";
+    stringList sli = splitstr(str1, ' ');
+
+    for (auto &t : sli)
+    {
+        std::cout << "sli is : " << t << "\n";
+    }
+    //Parse_bstr_to_wordset(str, word_set);
+
+    FuncEnd();
+    return SUCCESS;
 }

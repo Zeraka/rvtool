@@ -1,10 +1,12 @@
 #pragma once
 
-#include "util-base.h"
+#include "util-base.hh"
 #include <vector>
 #include <string>
 
 #define Test_AUTOMONITOR 1
+/*初始化时自动机的全局状态*/
+int state_number = 0;
 
 typedef struct word_set
 {
@@ -29,7 +31,15 @@ typedef struct Monitor_state_t
 /*
     Size_t means state_numbers.
 */
-typedef std::map<size_t, Monitor_state> Monitor;
+
+typedef std::map<size_t, Monitor_state> Nodes;
+
+/*Monitor的实体*/
+typedef struct Monitor_{
+    int state_number;
+    Nodes nodes;
+}Monitor;
+
 
 typedef std::vector<Word_set> acc_word_sets;
 

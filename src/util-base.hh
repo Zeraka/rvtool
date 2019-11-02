@@ -1,5 +1,5 @@
-#ifndef UTIL_BASE_H
-#define UTIL_BASE_H
+#ifndef UTIL_BASE_HH
+#define UTIL_BASE_HH
 
 typedef unsigned int uint4;
 typedef std::vector<std::string> stringList;

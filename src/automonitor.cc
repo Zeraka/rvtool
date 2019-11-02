@@ -13,8 +13,8 @@
 #include <spot/parseaut/public.hh>
 
 #include "automonitor.hh"
-#include "util-base.h"
-#include "util-debug.h"
+#include "util-base.hh"
+#include "util-debug.hh"
 
 static int Test_splitstr();
 
@@ -39,7 +39,7 @@ int main(void)
 
     //读取所有的状态以及接受集，放入Monitor类型的容器中去。
     Parse_automata_to_monitor(monitor, pa->aut, dict);
-
+    monitor.state_number = pa->aut->get_init_state_number(); //全局状态
     //接受MQ发送过来的字符串
 
     //Check_word_acceptance(label, pa->aut, monitor, dict, );
@@ -50,10 +50,10 @@ int main(void)
     Test_Check_word_acceptance_01(pa->aut, monitor, dict);
 
     /*测试splitstr()*/
-    Test_splitstr();
+   // Test_splitstr();
 
     /*测试Test_Parse_bstr_to_wordset()*/
-    Test_Parse_bstr_to_wordset();
+   // Test_Parse_bstr_to_wordset();
 #endif
     FuncEnd();
 }
@@ -127,7 +127,7 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
             monitor_label.label = spot::bdd_format_formula(dict, t.cond);
             //std::cout << "alabel is \"" << spot::bdd_format_formula(dict, t.cond)<< "\"" << std::endl;
             std::cout << "label is \"" << monitor_label.label << "\"" << std::endl;
-            Test_bdd_print(dict, t.cond);
+            //Test_bdd_print(dict, t.cond);
             monitor_label.next_state = t.dst;
 
             if (Parse_bstr_to_wordset(monitor_label.label, monitor_label.word_set) != SUCCESS)
@@ -136,7 +136,7 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
             monitor_state.monitor_labels.push_back(monitor_label);
         }
         monitor_state.label_numbers = monitor_state.monitor_labels.size();
-        monitor[num_state] = monitor_state;
+        monitor.nodes[num_state] = monitor_state;
     }
 
     FuncEnd();
@@ -166,7 +166,7 @@ int is_word_match(Word_set &word_set, std::string accept_word)
     // word_set里的每一个都要在 accept_word中存在。
     
 
-    Parse_bstr_to_wordset(accept_word, )
+    //Parse_bstr_to_wordset(accept_word, )
 
         return SUCCESS;
 }
@@ -180,21 +180,19 @@ int Check_word_acceptance(spot::twa_graph_ptr &aut,
                           Monitor &monitor, const spot::bdd_dict_ptr &dict, std::string accept_word)
 {
     FuncBegin();
-    int state_number = 0;
 
-    //读取初始状态u
-    state_number = aut->get_init_state_number();
-
+    //读取初始状态
+    state_number = monitor.state_number;
     while (1)
     {
         //检测字是否符合
-        if (monitor[state_number].current_state != state_number)
+        if (monitor.nodes[state_number].current_state != state_number)
         {
             return ERROR;
         }
         int i = 1;
 
-        for (auto &monitor_label : monitor[state_number].monitor_labels)
+        for (auto &monitor_label : monitor.nodes[state_number].monitor_labels)
         {
             //如果满足label，则更新state_munber,
             std::cout << "state_number is " << state_number << std::endl;
@@ -203,18 +201,21 @@ int Check_word_acceptance(spot::twa_graph_ptr &aut,
 
             if (accept_word == monitor_label.label)
             {
-                state_number = monitor_label.next_state;
-                std::cout << "Accepted" << std::endl;
-                break;
+                monitor.state_number = monitor_label.next_state;//更新Monitor的全局状态
+                VePrint(monitor.state_number);
+                //VePrint()
+                INFOPrint("Accepted!\n");
+                return SUCCESS; //这里需要优化
             }
-            else if (accept_word != monitor_label.label && i < monitor[state_number].label_numbers)
+            else if (accept_word != monitor_label.label && i < monitor.nodes[state_number].label_numbers)
             {
                 i++;
+                INFOPrint("Try next label\n");
                 continue;
             }
             else
             {
-                std::cout << "\nAccepted Failed" << std::endl;
+                INFOPrint("\nAccepted Failed");
                 std::cout << "The label is \"" << monitor_label.label << std::endl;
                 std::cout << "The accepted word is \"" << accept_word << "\"" << std::endl;
                 FuncEnd();
@@ -243,7 +244,8 @@ int Test_Check_word_acceptance_01(spot::twa_graph_ptr &aut,
 
     //将字符串输入自动机中去
     for (std::string str : teststr)
-    {
+    {   
+        VePrint(str);
         if (Check_word_acceptance(aut, monitor, dict, str) == WORD_ACCEPTANCE_WRONG)
         {
             std::cout << "Accepted_failed" << std::endl;

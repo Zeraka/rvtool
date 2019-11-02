@@ -50,10 +50,10 @@ int main(void)
     Test_Check_word_acceptance_01(pa->aut, monitor, dict);
 
     /*测试splitstr()*/
-   // Test_splitstr();
+    // Test_splitstr();
 
     /*测试Test_Parse_bstr_to_wordset()*/
-   // Test_Parse_bstr_to_wordset();
+    // Test_Parse_bstr_to_wordset();
 #endif
     FuncEnd();
 }
@@ -132,7 +132,8 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
 
             if (Parse_bstr_to_wordset(monitor_label.label, monitor_label.word_set) != SUCCESS)
                 AMReturn(ERROR);
-
+            monitor_label.strlist = splitstr(monitor_label.label, ' ');
+            //VePrint(monitor_label.strlist[0]);
             monitor_state.monitor_labels.push_back(monitor_label);
         }
         monitor_state.label_numbers = monitor_state.monitor_labels.size();
@@ -149,26 +150,39 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
 
 */
 
-/*
-功能： word的格式化检查
-*/
+
+
+
 
 /*
-功能： 布尔表达式匹配算法
-输入：word_set 结构体， 格式化的accept_word, "a & !b & c"这样的。
+功能： 检测输入的布尔表达式是否违规 ,比如 a & !a
+输入：
 输出：
 */
-
-int is_word_match(Word_set &word_set, std::string accept_word)
+int check_accept_word_format(std::string accept_word)
 {
-    //拆分 accept_word
-    stringList slist = splitstr(accept_word, ' ');
-    // word_set里的每一个都要在 accept_word中存在。
+    /*检查 a & !a的情形*/
+    /*检查 a & a的情形*/
+    //切分, 找重复的元素,存在就失败,不存在就成功
     
+}
 
-    //Parse_bstr_to_wordset(accept_word, )
-
-        return SUCCESS;
+/*
+功能： 检测字符串是否匹配
+*/
+int label_match_word(Monitor_label& monitor_label, std::string accept_word)
+{
+    for(auto str: monitor_label.strlist)
+    {
+        //假如，存在red,且不存在!red,才能够说明该str被accept_word包含了
+        if(accept_word.find(str)!=accept_word.npos && accept_word.find("!"+str) == accept_word.npos)
+        {
+            continue;
+        }else{
+            return NOMATCH;
+        }
+    }
+    return SUCCESS;
 }
 
 /*
@@ -199,15 +213,17 @@ int Check_word_acceptance(spot::twa_graph_ptr &aut,
             std::cout << "monitor_label.label :\"" << monitor_label.label << "\"" << std::endl;
             std::cout << "accpet_word :\"" << accept_word << "\"" << std::endl;
 
-            if (accept_word == monitor_label.label)
+            if (label_match_word(monitor_label, accept_word) == SUCCESS)
             {
-                monitor.state_number = monitor_label.next_state;//更新Monitor的全局状态
-                VePrint(monitor.state_number);
+                monitor.state_number = monitor_label.next_state; //更新Monitor的全局状态
                 //VePrint()
-                INFOPrint("Accepted!\n");
+                INFOPrint("Accepted!");
+                VePrint(monitor.state_number);
+                FuncEnd();
                 return SUCCESS; //这里需要优化
             }
-            else if (accept_word != monitor_label.label && i < monitor.nodes[state_number].label_numbers)
+            else if (label_match_word(monitor_label, accept_word) != SUCCESS &&
+                         i < monitor.nodes[state_number].label_numbers)
             {
                 i++;
                 INFOPrint("Try next label\n");
@@ -238,13 +254,15 @@ int Test_Check_word_acceptance_01(spot::twa_graph_ptr &aut,
 
     FuncBegin();
     //预定义的字符串格式
-    std::string teststr[] = {"red", "!red & yellow", "red & !yellow", "!red"};
-
+    //std::string teststr[] = {"red & !yellow", "red", "!red & yellow", "red & !yellow", "!red"};
+    std::string teststr[] = {"red & !red", "red & !yellow", "red", "!red & yellow", "red & !yellow", "!red"};
+    
+    
     //产生的自动机
 
     //将字符串输入自动机中去
     for (std::string str : teststr)
-    {   
+    {
         VePrint(str);
         if (Check_word_acceptance(aut, monitor, dict, str) == WORD_ACCEPTANCE_WRONG)
         {
@@ -365,3 +383,9 @@ static int Test_splitstr()
     FuncEnd();
     return SUCCESS;
 }
+
+/*
+功能：测试 label_match_word函数
+*/
+
+/*检查输入违规字符串的情形*/

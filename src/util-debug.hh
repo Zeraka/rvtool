@@ -6,6 +6,7 @@ enum
     SUCCESS = 0,
     ERROR,
     WORD_ACCEPTANCE_WRONG,
+    NOMATCH
 };
 /*color*/
 #define RESET "\033[0m"
@@ -62,5 +63,8 @@ enum
         std::cout << BOLDRED << "Fucntion " << __FUNCTION__ << " Error!" << RESET << std::endl; \
         return x;                                                                               \
     }
+
+
+
 
 #endif

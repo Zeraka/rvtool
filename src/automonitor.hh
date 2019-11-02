@@ -44,8 +44,6 @@ typedef struct Monitor_
 
 typedef std::vector<Word_set> acc_word_sets;
 
-
-
 int check_accept_word_format(std::string accept_word);
 int Check_word_acceptance(spot::twa_graph_ptr &aut,
                           Monitor &monitor, const spot::bdd_dict_ptr &dict, std::string accept_word);
@@ -56,7 +54,7 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
 int Parse_BoolString_to_set(std::string str, Word_set &word_set,
                             const spot::bdd_dict_ptr &dict);
 int Parse_bstr_to_wordset(std::string str, Word_set &word_set);
-int label_match_word(Monitor_label& monitor_label, std::string accept_word);
+int label_match_word(Monitor_label &monitor_label, std::string accept_word);
 
 /*Unit Test Module*/
 int Test_Parse_bstr_to_wordset();
@@ -65,4 +63,4 @@ int Test_Check_word_acceptance_01(spot::twa_graph_ptr &aut,
 int Test_Check_word_acceptance_02(spot::twa_graph_ptr &aut,
                                   Monitor &monitor, const spot::bdd_dict_ptr &dict);
 int Test_bdd_print(const spot::bdd_dict_ptr &dict, bdd b); //测试bddprint.h
-//end
+                                                           //end

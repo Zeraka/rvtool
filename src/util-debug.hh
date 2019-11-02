@@ -28,6 +28,7 @@ enum
 #define BOLDWHITE "\033[1m\033[37m"   /* Bold White */
 //end
 
+#ifdef DEBUG
 #define FuncBegin()                                                                                                      \
     {                                                                                                                    \
         std::cout << "\n"                                                                                                \
@@ -52,19 +53,30 @@ enum
         std::cout << BOLDYELLOW << "The value of " << #x << ": " << BOLDRED << x << RESET << std::endl; \
     }
 
+#else
+
+#define FuncBegin()
+#define FuncEnd()
+
+#endif //DEBUG
+
 //判断输入的是否是字符串,待补充
-#define INFOPrint(x)                                                        \
-    {                                                                       \
-        std::cout << BOLDYELLOW  << x << RESET << std::endl; \
+#define INFOPrint(x)                                        \
+    {                                                       \
+        std::cout << BOLDYELLOW << x << RESET << std::endl; \
     }
+
+#define VePrint(x)                                                                                      \
+    {                                                                                                   \
+        std::cout << BOLDYELLOW << "The value of " << #x << ": " << BOLDRED << x << RESET << std::endl; \
+    }
+
+//测试时间性能的模块
 
 #define AMReturn(x)                                                                             \
     {                                                                                           \
         std::cout << BOLDRED << "Fucntion " << __FUNCTION__ << " Error!" << RESET << std::endl; \
         return x;                                                                               \
     }
-
-
-
 
 #endif

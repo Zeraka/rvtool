@@ -26,8 +26,8 @@ https://spot.lrde.epita.fr/
 ### 加入gdb调试
 `g++ -g -std=c++14 -I/usr/local/include automonitor.cc -L/usr/local/lib -lspot -lbddx -o automonitor` 
 
-### 用命令行创建确定性Monitor自动机
-`ltl2tgba -D -M 'G(!red | X!yellow)'`
+### 用命令行创建确定性Monitor自动机并保存为hoa格式
+`ltl2tgba -D -M 'G(!red | X!yellow)'` 
 ### 把自动机输出为pdf格式
 `ltl2tgba -D -M 'G(!red | X!yellow)' -d | dot -Tpdf > demo1.pdf`
 

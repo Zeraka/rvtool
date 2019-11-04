@@ -362,7 +362,7 @@ int Test_Parse_bstr_to_wordset()
     }
 
     //Parse_bstr_to_wordset(str, word_set);
-
+    
     FuncEnd();
 
     return SUCCESS;

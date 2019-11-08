@@ -44,7 +44,7 @@ int main(void)
     //接受MQ发送过来的字符串
 
     //Check_word_acceptance(label, pa->aut, monitor, dict, );
-#ifndef Test_AUTOMONITOR 1
+#if Test_AUTOMONITOR == 0
 
 #else
     /*测试一个monitor是否可检测出输入的行为违规*/

@@ -37,6 +37,9 @@ https://spot.lrde.epita.fr/
 ## 安装AspectC++
 
 ## 安装配置
+### 安装zeromq
+ubuntu下    
+`apt install libzmq3-dev`
 
 ## 相关链接
 ### CMU的模型检测库

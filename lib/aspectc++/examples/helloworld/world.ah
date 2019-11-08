@@ -7,7 +7,7 @@ aspect World {
 
   advice execution("void hello()") : after() {
     //print "World" after execution of the 'hello()' function
-    std::cout << "World" << std::endl;
+    std::cout << "Fucking World" << std::endl;
   }
 
 };

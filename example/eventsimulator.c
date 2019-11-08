@@ -93,8 +93,9 @@ int CloseTime=50;//关闭时间，即营业时间长度
  
 //--------------main()------------------//
 int main()
-{
-    Bank_Simulation();
+{   
+    for(int i = 0; i < 100 ; i++)
+        Bank_Simulation();
     return 0;
 }
  

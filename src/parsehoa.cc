@@ -8,22 +8,8 @@ This file shows how to parse HOA format file to your own data structure.
 #include <spot/twaalgos/hoa.hh>
 #include <spot/twa/bddprint.hh>
 
-void custom_print(std::ostream& out, spot::twa_graph_ptr& aut);
 
-int main()
-{
-  spot::parsed_aut_ptr pa = parse_aut("demo.hoa", spot::make_bdd_dict());//解析自动机。得到的pa是解析出来的
-  if (pa->format_errors(std::cerr))//检查有无格式错误。检查有无其他的错误。
-    return 1;
-  // This cannot occur when reading a never claim, but
-  // it could while reading a HOA file.
-  if (pa->aborted)
-    {
-      std::cerr << "--ABORT-- read\n";
-      return 1;
-    }
-  custom_print(std::cout, pa->aut);//pa->aut是其中的
-}
+
 
 void custom_print(std::ostream& out, spot::twa_graph_ptr& aut)//打印出新的格式的自动机
 {
@@ -87,4 +73,19 @@ void custom_print(std::ostream& out, spot::twa_graph_ptr& aut)//打印出新的�
           
         }
     }
+}
+
+int Test_custom_print()
+{
+  spot::parsed_aut_ptr pa = parse_aut("demo.hoa", spot::make_bdd_dict());//解析自动机。得到的pa是解析出来的
+  if (pa->format_errors(std::cerr))//检查有无格式错误。检查有无其他的错误。
+    return 1;
+  // This cannot occur when reading a never claim, but
+  // it could while reading a HOA file.
+  if (pa->aborted)
+    {
+      std::cerr << "--ABORT-- read\n";
+      return 1;
+    }
+  custom_print(std::cout, pa->aut);//pa->aut是其中的
 }

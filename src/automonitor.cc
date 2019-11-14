@@ -17,6 +17,7 @@
 #include "util-base.hh"
 #include "util-debug.hh"
 #include "server.hpp"
+#include "parsehoa.hh"
 
 static int Test_splitstr();
 
@@ -47,7 +48,7 @@ int main(void)
     /*接受MQ发送过来的字符串*/
     //建立通信
 #if ZMQ == 1
-    std::string addr = "tcp://*:25555";
+    std::string addr = "tcp://*:25555";//改为读取配置文件
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_REP);
 
@@ -68,7 +69,7 @@ int main(void)
             zmq::message_t reply(3);
             memcpy(reply.data(), "200", 3);
             socket.send(reply);
-            
+
             return WORD_ACCEPTANCE_WRONG;
         }
         sleep(1);
@@ -78,13 +79,11 @@ int main(void)
         socket.send(reply);
     }
 
-
 #else
 
 #endif
 
 #if Test_AUTOMONITOR == 0
-
 
 #else
     /*测试一个monitor是否可检测出输入的行为违规*/
@@ -441,7 +440,6 @@ static int Test_splitstr()
 /*
 brief\Test the module of Communication
 */
-
 int Test_Commnunication_module_01(spot::twa_graph_ptr &aut, Monitor &monitor, const spot::bdd_dict_ptr &dict)
 {
     FuncBegin();
@@ -462,7 +460,6 @@ int Test_Commnunication_module_01(spot::twa_graph_ptr &aut, Monitor &monitor, co
         socket.recv(&request);
         std::string accpet_word = (char *)request.data();
         VePrint(accpet_word);
-        //为什么速度这么慢呢
         if (Check_word_acceptance(aut, monitor, dict, accpet_word) == WORD_ACCEPTANCE_WRONG)
         {
             INFOPrint("wrong acceptance");

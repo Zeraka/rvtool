@@ -29,6 +29,8 @@ enum
 //end
 
 #define TEST_AUTOMONTIRO 1
+
+
 #define DEBUG 1
 #if DEBUG == 1
 #define FuncBegin()                                                                                                      \

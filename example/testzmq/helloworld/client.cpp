@@ -18,7 +18,7 @@ int main()
         std::cout << "Sending Hello "<< request_nbr << "..."<<std::endl;
 
         socket.send(request);//发送请求
-
+        std::cout << request.data() << std::endl;
         //
         zmq::message_t reply;//
         socket.recv(&reply);//接收回应

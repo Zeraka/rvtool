@@ -12,9 +12,11 @@
 #include <spot/twa/bddprint.hh>
 #include <spot/parseaut/public.hh>
 
+#include <zmq.hpp>
 #include "automonitor.hh"
 #include "util-base.hh"
 #include "util-debug.hh"
+#include "server.hpp"
 
 static int Test_splitstr();
 
@@ -41,20 +43,62 @@ int main(void)
     //读取所有的状态以及接受集，放入Monitor类型的容器中去。
     Parse_automata_to_monitor(monitor, pa->aut, dict);
     monitor.state_number = pa->aut->get_init_state_number(); //全局状态
-    //接受MQ发送过来的字符串
 
-    //Check_word_acceptance(label, pa->aut, monitor, dict, );
+    /*接受MQ发送过来的字符串*/
+    //建立通信
+#if ZMQ == 1
+    std::string addr = "tcp://*:25555";
+    zmq::context_t context(1);
+    zmq::socket_t socket(context, ZMQ_REP);
+
+    socket.bind(addr);
+    INFOPrint("Sever has binded the address");
+
+    while (1)
+    {
+
+        zmq::message_t request;
+        socket.recv(&request);
+        std::string accpet_word = (char *)request.data();
+        VePrint(accpet_word);
+        //为什么速度这么慢呢
+        if (Check_word_acceptance(pa->aut, monitor, dict, accpet_word) == WORD_ACCEPTANCE_WRONG)
+        {
+            INFOPrint("Wrong Acceptance!");
+            zmq::message_t reply(3);
+            memcpy(reply.data(), "200", 3);
+            socket.send(reply);
+            
+            return WORD_ACCEPTANCE_WRONG;
+        }
+        sleep(1);
+
+        zmq::message_t reply(3);
+        memcpy(reply.data(), "200", 3);
+        socket.send(reply);
+    }
+
+
+#else
+
+#endif
+
 #if Test_AUTOMONITOR == 0
+
 
 #else
     /*测试一个monitor是否可检测出输入的行为违规*/
     //Test_Check_word_acceptance_01(pa->aut, monitor, dict);
-    Test_Check_word_acceptance_02(pa->aut, monitor, dict);
+    //Test_Check_word_acceptance_02(pa->aut, monitor, dict);
     /*测试splitstr()*/
     // Test_splitstr();
 
     /*测试Test_Parse_bstr_to_wordset()*/
     // Test_Parse_bstr_to_wordset();
+
+    /*Test Communication module*/
+    //Test_Commnunication_module_01();
+    Test_Commnunication_module_01(pa->aut, monitor, dict);
 #endif
     FuncEnd();
 }
@@ -80,7 +124,7 @@ int Parse_BoolString_to_set(std::string str, Word_set &word_set,
 */
 int Parse_bstr_to_wordset(std::string str, Word_set &word_set)
 {
-    FuncBegin();
+    //FuncBegin();
     //按空格分割, 分别加入map中,如果包含！,则值为0，否则为1
     stringList sli = splitstr(str, ' ');
 
@@ -97,7 +141,7 @@ int Parse_bstr_to_wordset(std::string str, Word_set &word_set)
             word_set.wordset[t] = 0;
         }
     }
-    FuncEnd();
+    //FuncEnd();
     return SUCCESS;
 }
 
@@ -362,7 +406,7 @@ int Test_Parse_bstr_to_wordset()
     }
 
     //Parse_bstr_to_wordset(str, word_set);
-    
+
     FuncEnd();
 
     return SUCCESS;
@@ -393,3 +437,43 @@ static int Test_splitstr()
 */
 
 /*检查输入违规字符串的情形*/
+
+/*
+brief\Test the module of Communication
+*/
+
+int Test_Commnunication_module_01(spot::twa_graph_ptr &aut, Monitor &monitor, const spot::bdd_dict_ptr &dict)
+{
+    FuncBegin();
+
+    //通信得来的字符串作为输入
+
+    std::string addr = "tcp://*:25555"; //自行修改
+    zmq::context_t context(1);
+    zmq::socket_t socket(context, ZMQ_REP);
+
+    socket.bind(addr);
+    INFOPrint("Sever has binded the address");
+
+    while (1)
+    {
+
+        zmq::message_t request;
+        socket.recv(&request);
+        std::string accpet_word = (char *)request.data();
+        VePrint(accpet_word);
+        //为什么速度这么慢呢
+        if (Check_word_acceptance(aut, monitor, dict, accpet_word) == WORD_ACCEPTANCE_WRONG)
+        {
+            INFOPrint("wrong acceptance");
+            return WORD_ACCEPTANCE_WRONG;
+        }
+        sleep(1);
+
+        zmq::message_t reply(3);
+        memcpy(reply.data(), "200", 3);
+        socket.send(reply);
+    }
+
+    FuncEnd();
+}

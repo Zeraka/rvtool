@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#define Test_AUTOMONITOR 1
+#define Test_AUTOMONITOR 0
 /*初始化时自动机的全局状态*/
 int state_number = 0;
 
@@ -63,4 +63,7 @@ int Test_Check_word_acceptance_01(spot::twa_graph_ptr &aut,
 int Test_Check_word_acceptance_02(spot::twa_graph_ptr &aut,
                                   Monitor &monitor, const spot::bdd_dict_ptr &dict);
 int Test_bdd_print(const spot::bdd_dict_ptr &dict, bdd b); //测试bddprint.h
-                                                           //end
+
+int Test_Commnunication_module_01(spot::twa_graph_ptr &aut, Monitor &monitor,
+                                  const spot::bdd_dict_ptr &dict);
+//end

@@ -1,10 +1,12 @@
 #include <zmq.hpp>
 #include <string>
+#include <cstring>
 #include <iostream> //读取文件
 #include <fstream>  //读取文件
 
 #include "client.hpp"
 #include "util-debug.hh"
+
 /*
 改为发送生成的日志，然后把日志发送给服务端，
 保留main函数，可作为单独的消息发送机制;
@@ -12,64 +14,7 @@
 */
 
 
-int main()
-{
-    std::string addr = "tcp://localhost:5555";
-    const char* filename = "event.log";
 
-    
-
-
-}
-/*
-功能： 将消息放入zmq中去
-*/
-static int Str_to_zmq(std::string str)
-{
-
-}
-
-
-
-/*
-功能： 读取文件, 合成序列，然后发送消息给zmq
-*/
-static int read_log_file(std::ifstream &file, const char *filename)
-{
-    //打开文件
-    file.open(filename, std::ios::in); //只读该文件
-    int i = 0;
-    std::string line;
-    if(file.is_open() == 0)
-    {
-        INFOPrint("The file is not opened");
-
-        return ERROR;
-    }
-
-    INFOPrint("Now read the file");
-    //读取文件
-    while (i<10000)
-    {
-        //一行行打印出消息
-        if(getline(file, line) == nullptr)
-        {
-            
-        }
-        //INFOPrint(line);
-        
-        //将line放入zmq中去。
-        Str_to_zmq();
-        i++;//调试 i 行
-
-        //合成消息格式
-        
-        //发送消息
-
-        //等待回复。如果收到回复，如果没有收到回复，或者收到了错误信息，则停止发送，并且报错。
-    }
-    file.close(); //关闭文件
-}
 
 //将日志格式化
 /*
@@ -77,12 +22,18 @@ static int read_log_file(std::ifstream &file, const char *filename)
 
 */
 
+/*
+读取文件的测试
+*/
+
+
 
 /*
 功能： 建立一个zmq连接, 并且读取文件
 */
 int Creat_zmq_client(std::string addr, const char* filename)
 {
+    FuncBegin();
     
     zmq::context_t context(1);//建立一个连接
     zmq::socket_t socket(context, ZMQ_REQ);//
@@ -92,28 +43,76 @@ int Creat_zmq_client(std::string addr, const char* filename)
     //判断输入的地址的格式
     socket.connect(addr);//连接到该地址
 
-    //做10次请求。
-    for(int request_nbr = 0; request_nbr != 10; request_nbr++)
+    std::ifstream file_;
+    std::ifstream& file = file_;
+
+    
+    std::string line_;
+    std::string& line = line_;
+
+    //打开log文件， 读取日志，
+    file.open(filename, std::ios::in);//ios::in的意思是如果文件不存在，则打开出错
+    INFOPrint("open log file");
+
+    if(file.is_open() == 0)
     {
-        zmq::message_t request(5);//分配了空间大小
+        INFOPrint("The file is not opened");
+        return ERROR;
+    }
+
+    //每当读取一次，就发送一次消息给另一端,先发送一个消息给它
+    //发送消息
+
+    //1000次请求， 
+    for(int request_nbr = 0; request_nbr != 100; request_nbr++)
+    {
         
-        memcpy(request.data(), "hello", 5);
-        std::cout << "Sending Hello "<< request_nbr << "..."<<std::endl;
+        //读取文件,判断流的异常
+        getline(file, line);
+        zmq::message_t request(6);
+        
+        //VePrint(line.c_str())
+        memcpy(request.data(), (void*)(line.c_str()), 6);
 
-        socket.send(request);//发送请求
+        //VePrint((char*)request.data());
+        socket.send(request);
+        VePrint(line);
+        zmq::message_t reply;
+        socket.recv(&reply);
 
-        //
-        zmq::message_t reply;//
-        socket.recv(&reply);//接收回应
+        //VePrint((char*)reply.data());
+        if((char*)reply.data() == nullptr)
+        {
+            INFOPrint("Reply failed");
+            return ERROR;
+        }
 
-        std::cout << "Received World "<< request_nbr <<std::endl;
+        if( strncmp((char*)reply.data(), "200", 3) == 0)
+        {
+            INFOPrint("Checked out ERROR");//检测到时序错误，就会自动停止系统。
+            return ERROR;
+        }
+
     }
     
+    file.close();
 
-    //test
-    std::ifstream file_;
-    std::ifstream &file = file_;
-
-    read_log_file(file, filename);
+    FuncEnd();
     return 0;
+}
+
+
+//================================================
+//Test Unit//=====================================
+//================================================
+
+int main()
+{
+    std::string addr = "tcp://localhost:25555";
+    const char* filename = "event.log";
+
+
+    Creat_zmq_client(addr, filename);
+
+
 }

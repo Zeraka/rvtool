@@ -24,6 +24,7 @@ static int Test_splitstr();
 int main(void)
 {
     FuncBegin();
+#if ZMQ == 0
     //读取并解析自动机文件
     //spot::parsed_aut_ptr pa = parse_aut("demo.hoa", spot::make_bdd_dict());
     spot::parsed_aut_ptr pa = parse_aut("demo2.hoa", spot::make_bdd_dict());
@@ -47,8 +48,8 @@ int main(void)
 
     /*接受MQ发送过来的字符串*/
     //建立通信
-#if ZMQ == 1
-    std::string addr = "tcp://*:25555";//改为读取配置文件
+
+    std::string addr = "tcp://*:25555"; //改为读取配置文件
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_REP);
 
@@ -83,7 +84,7 @@ int main(void)
 
 #endif
 
-#if Test_AUTOMONITOR == 0
+#if Test_AUTOMONITOR == 1
 
 #else
     /*测试一个monitor是否可检测出输入的行为违规*/
@@ -97,7 +98,9 @@ int main(void)
 
     /*Test Communication module*/
     //Test_Commnunication_module_01();
-    Test_Commnunication_module_01(pa->aut, monitor, dict);
+    //Test_Commnunication_module_01(pa->aut, monitor, dict);
+    Test_Communication_module_02();
+
 #endif
     FuncEnd();
 }
@@ -117,6 +120,16 @@ int Parse_BoolString_to_set(std::string str, Word_set &word_set,
 功能： 字符串检查
     不可能出现 !a & a 的情况。
 */
+/*
+功能： 解析括号和 "|" 运算符
+
+如果碰到了括号，则 加入栈中，进行一个
+
+*/
+int Parse_symbol()
+{
+    //use the end of the
+}
 
 /*
 功能：将一个只含有 & 运算符的布尔表达式形式的字符串解析到Word_set结构体中。
@@ -126,7 +139,12 @@ int Parse_bstr_to_wordset(std::string str, Word_set &word_set)
     //FuncBegin();
     //按空格分割, 分别加入map中,如果包含！,则值为0，否则为1
     stringList sli = splitstr(str, ' ');
+    //如果出现了bug
 
+    //解析括号和 或 运算符
+    //Parse_symbol();
+
+    //将解析到的结构放入
     word_set.word = str;
     for (auto &t : sli)
     {
@@ -137,10 +155,37 @@ int Parse_bstr_to_wordset(std::string str, Word_set &word_set)
         }
         else
         {
-            word_set.wordset[t] = 0;
+            word_set.wordset[t] = 0; //test a time thing is very good thing.
         }
     }
     //FuncEnd();
+    return SUCCESS;
+}
+
+/*
+功能：
+*/
+int Parse_bstr_to_wordsets(std::string str, std::vector<Word_set> &word_sets)
+{
+    FuncBegin();
+    //把字符串按照 | 分割 然后送入word_set中去
+    if (str.empty())
+    {
+        INFOPrint("str is null");
+        FuncEnd();
+        return ERROR;
+    }
+
+    stringList strli = splitstr(str, '|');
+
+    for (auto &t : strli)
+    {
+        Word_set ws_;
+        Word_set &ws = ws_;
+        Parse_bstr_to_wordset(t, ws);
+        word_sets.push_back(ws);
+    }
+    FuncEnd();
     return SUCCESS;
 }
 
@@ -174,8 +219,11 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
             //Test_bdd_print(dict, t.cond);
             monitor_label.next_state = t.dst;
 
-            if (Parse_bstr_to_wordset(monitor_label.label, monitor_label.word_set) != SUCCESS)
+            //把表示逻辑运算的字符串解析放入wordset数据结构中
+            if (Parse_bstr_to_wordsets(monitor_label.label, monitor_label.word_sets) != SUCCESS)
+            {
                 AMReturn(ERROR);
+            }
             monitor_label.strlist = splitstr(monitor_label.label, ' ');
             //VePrint(monitor_label.strlist[0]);
             monitor_state.monitor_labels.push_back(monitor_label);
@@ -190,8 +238,6 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
 
 /*
 功能：输出自动机为文本格式
-
-
 */
 
 /*
@@ -211,6 +257,37 @@ int check_accept_word_format(std::string accept_word)
 */
 int label_match_word(Monitor_label &monitor_label, std::string accept_word)
 {
+    //解析accept_word,放入word_set中
+    Word_set wset_;
+    Word_set &wset = wset_;
+
+    Parse_bstr_to_wordset(accept_word, wset);
+
+    //比较wset中的字符是否出现在monitor_label中,
+    for (auto &word_set : monitor_label.word_sets)
+    {
+        //如果accept_word的每个字符在word_set中都存在，则判为成功
+        std::map<std::string, size_t>::iterator iter;
+
+        for (iter = wset.wordset.begin(); iter != wset.wordset.end(); iter++)
+        {
+            if (word_set.wordset.find(iter->first) != word_set.wordset.end() &&
+                word_set.wordset[iter->first] == wset.wordset[iter->first])
+            {
+                continue;
+            }
+            else
+            {
+                INFOPrint("not match");
+                return NOMATCH;
+            }
+        }
+    }
+    return SUCCESS;
+}
+/*
+int label_match_word(Monitor_label &monitor_label, std::string accept_word)
+{
     for (auto str : monitor_label.strlist)
     {
         //假如，存在red,且不存在!red,才能够说明该str被accept_word包含了
@@ -225,6 +302,7 @@ int label_match_word(Monitor_label &monitor_label, std::string accept_word)
     }
     return SUCCESS;
 }
+*/
 
 /*
 功能： 检测输入的字是否符合Monitor要求。
@@ -251,15 +329,14 @@ int Check_word_acceptance(spot::twa_graph_ptr &aut,
         {
             //如果满足label，则更新state_munber,
             //VePrint(state_number);
-            //VePrint(monitor_label.label);
-            //VePrint(accept_word);
+            VePrint(monitor_label.label);
+            VePrint(accept_word);
 
             if (label_match_word(monitor_label, accept_word) == SUCCESS)
             {
                 monitor.state_number = monitor_label.next_state; //更新Monitor的全局状态
-                //VePrint()
-                //INFOPrint("Accepted!");
-                //VePrint(monitor.state_number);
+                INFOPrint("Accepted!");
+                VePrint(monitor.state_number);
                 FuncEnd();
                 return SUCCESS; //这里需要优化
             }
@@ -267,7 +344,7 @@ int Check_word_acceptance(spot::twa_graph_ptr &aut,
                      i < monitor.nodes[state_number].label_numbers)
             {
                 i++;
-                //INFOPrint("Try next label\n");
+                INFOPrint("Try next label\n");
                 continue;
             }
             else
@@ -463,6 +540,66 @@ int Test_Commnunication_module_01(spot::twa_graph_ptr &aut, Monitor &monitor, co
         if (Check_word_acceptance(aut, monitor, dict, accpet_word) == WORD_ACCEPTANCE_WRONG)
         {
             INFOPrint("wrong acceptance");
+            return WORD_ACCEPTANCE_WRONG;
+        }
+        sleep(1);
+
+        zmq::message_t reply(3);
+        memcpy(reply.data(), "200", 3);
+        socket.send(reply);
+    }
+
+    FuncEnd();
+}
+
+/*
+brief\ 测试zmq 以及 demo3
+*/
+int Test_Communication_module_02()
+{
+    FuncBegin();
+
+    spot::parsed_aut_ptr pa = parse_aut("demo3.hoa", spot::make_bdd_dict());
+
+    if (pa->format_errors(std::cerr))
+        return ERROR;
+    if (pa->aborted)
+    {
+        std::cerr << "--ABORT-- read\n";
+        return ERROR;
+    }
+
+    const spot::bdd_dict_ptr &dict = pa->aut->get_dict();
+
+    Monitor monitor_;
+    Monitor &monitor = monitor_;
+
+    //读取所有的状态以及接受集，放入Monitor类型的容器中去。
+    Parse_automata_to_monitor(monitor, pa->aut, dict);
+    monitor.state_number = pa->aut->get_init_state_number(); //全局状态
+
+    std::string addr = "tcp://*:25555"; //改为读取配置文件
+    zmq::context_t context(1);
+    zmq::socket_t socket(context, ZMQ_REP);
+
+    socket.bind(addr);
+    INFOPrint("Sever has binded the address");
+
+    while (1)
+    {
+
+        zmq::message_t request;
+        socket.recv(&request);
+        std::string accpet_word = (char *)request.data();
+        VePrint(accpet_word);
+        //为什么速度这么慢呢
+        if (Check_word_acceptance(pa->aut, monitor, dict, accpet_word) == WORD_ACCEPTANCE_WRONG)
+        {
+            INFOPrint("Wrong Acceptance!");
+            zmq::message_t reply(3);
+            memcpy(reply.data(), "200", 3);
+            socket.send(reply);
+
             return WORD_ACCEPTANCE_WRONG;
         }
         sleep(1);

@@ -63,8 +63,9 @@ int Creat_zmq_client(std::string addr, const char* filename)
     //每当读取一次，就发送一次消息给另一端,先发送一个消息给它
     //发送消息
 
-    //1000次请求， 
-    for(int request_nbr = 0; request_nbr != 100; request_nbr++)
+    //请求到末尾 
+    //for(int request_nbr = 0; request_nbr != 100; request_nbr++)
+    while(!file.eof()) //判断是否读至文件末尾
     {
         
         //读取文件,判断流的异常
@@ -111,8 +112,5 @@ int main()
     std::string addr = "tcp://localhost:25555";
     const char* filename = "event.log";
 
-
     Creat_zmq_client(addr, filename);
-
-
 }

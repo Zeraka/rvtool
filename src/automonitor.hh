@@ -8,17 +8,17 @@
 /*初始化时自动机的全局状态*/
 int state_number = 0;
 
-typedef struct word_set
+typedef struct word_set_t
 {
     std::string word;
     std::map<std::string, size_t> wordset;
 } Word_set;
 
-typedef struct Monitor_label_t
+typedef struct Monitor_label_t  
 {
-    std::string label;
-    stringList strlist;
-    Word_set word_set;
+    std::string label;//原始label的字符串格式
+    stringList strlist;//被切分的字符串
+    std::vector<Word_set> word_sets;
     int next_state;
 } Monitor_label;
 
@@ -50,10 +50,10 @@ int Check_word_acceptance(spot::twa_graph_ptr &aut,
 int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const spot::bdd_dict_ptr &dict);
 
 /*自定义输出自动机*/
-
 int Parse_BoolString_to_set(std::string str, Word_set &word_set,
                             const spot::bdd_dict_ptr &dict);
 int Parse_bstr_to_wordset(std::string str, Word_set &word_set);
+int Parse_bstr_to_wordsets(std::string str, std::vector<Word_set> &word_sets);
 int label_match_word(Monitor_label &monitor_label, std::string accept_word);
 
 /*Unit Test Module*/
@@ -66,4 +66,5 @@ int Test_bdd_print(const spot::bdd_dict_ptr &dict, bdd b); //测试bddprint.h
 
 int Test_Commnunication_module_01(spot::twa_graph_ptr &aut, Monitor &monitor,
                                   const spot::bdd_dict_ptr &dict);
+int Test_Communication_module_02();
 //end

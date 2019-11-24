@@ -4,5 +4,3 @@
 
   ltl2tgba -D -M 'Ga|Gb|Gc' -H > demo2.hoa
 ```
-
-

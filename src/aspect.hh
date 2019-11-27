@@ -32,22 +32,25 @@
 #define BOLDWHITE "\033[1m\033[37m"   /* Bold White */
 //end
 
-std::mutex mtx;
+std::mutex mtx; 
 /*
 mycout
 */
-#define AOP_Logger(id, eventName, mycout)                   \
-    {                                                       \
-        mycout << "{\"eventId\":" << id << ","              \
-               << "\"eventName\":"                          \
-               << "\"" << eventName << "\","                \
-               << "\"fileName\":" << tjp->filename() << "," \
-                << "\"line\":" << tjp->line() << ","         \
-               << "\"eventTime\":" <<"\""<< __TIME__  <<"\""   \
-               << "}" << std::endl;                         \
-        id++;                                               \
+#define AOP_Logger(id, eventName, mycout)           \
+    {                                               \
+        mycout << "{\"eventId\":" << id << ","      \
+               << "\"eventName\":"                  \
+               << "\"" << eventName << "\","        \
+               << "\"fileName\":"                   \
+               << "\"" << tjp->filename() << "\""   \
+               << ","                               \
+               << "\"line\":" << tjp->line() << "," \
+               << "\"eventTime\":"                  \
+               << "\"" << __TIME__ << "\""          \
+               << "}" << std::endl;                 \
+        id++;                                       \
     }
-    
+
 /*拥有互斥锁*/
 #define AOP_Logger_mutex(id, eventName, mycout) \
     {                                           \

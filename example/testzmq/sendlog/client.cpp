@@ -95,6 +95,11 @@ int Creat_zmq_client(std::string addr, const char* filename)
             INFOPrint("Checked out ERROR");//检测到时序错误，就会自动停止系统。
             return ERROR;
         }
+        if(strncmp((char*)reply.data(), "300", 3) == 0)
+        {
+            INFOPrint("Parse JSON ERROR");
+            return ERROR;
+        }
 
     }
     

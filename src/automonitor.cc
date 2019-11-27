@@ -20,18 +20,41 @@
 #include "util-debug.hh"
 #include "server.hpp"
 #include "parsehoa.hh"
+#include "ltl-parse.hh"
+
+extern "C"
+{
+
+#include "cJSON.h"
+}
+
 static int state_number = 0;
 static int Test_splitstr();
+
 int main(void)
 {
     FuncBegin();
 
-YAML::Node node = YAML::LoadFile("automonitor.yaml");
+    YAML::Node node = YAML::LoadFile("automonitor.yaml");
+    std::string filename;
+    spot::parsed_aut_ptr pa;
+    //读取并解析自动机文件
+    if (node["monitor_generate_module."]["open_hoa_file"]["enabled"].as<bool>() == true &&
+        node["monitor_generate_module."]["open_ltl_file"]["enabled"].as<bool>() == false)
+    {
+        filename = node["monitor_generate_module."]["open_hoa_file"]["enabled"].as<std::string>();
+        pa = parse_aut(filename, spot::make_bdd_dict());
+    }
+    else if (node["monitor_generate_module."]["open_hoa_file"]["enabled"].as<bool>() == false &&
+             node["monitor_generate_module."]["open_ltl_file"]["enabled"].as<bool>() == true)
+    {
+        filename = node["monitor_generate_module."]["open_ltl_file"]["enabled"].as<std::string>();
+        std::string fileFormat = node["monitor_generate_module."]["open_ltl_file"]["fileformat"].as<std::string>();
+
+        parse_ltl_file(filename, fileFormat);
+    }
 
 #if ZMQ == 1
-    //读取并解析自动机文件
-    //spot::parsed_aut_ptr pa = parse_aut("demo.hoa", spot::make_bdd_dict());
-    spot::parsed_aut_ptr pa = parse_aut("demo2.hoa", spot::make_bdd_dict());
 
     if (pa->format_errors(std::cerr))
         return ERROR;
@@ -66,13 +89,33 @@ YAML::Node node = YAML::LoadFile("automonitor.yaml");
         socket.recv(&request);
         std::string recvlog = (char *)request.data();
         VePrint(recvlog);
-        //为什么速度这么慢呢
-        if (Check_word_acceptance(pa->aut, monitor, dict, recvlog) == WORD_ACCEPTANCE_WRONG)
+
+        //解析json文件
+        //neb::CJsonObject oJson(recvlog);
+
+        cJSON *cj = cJSON_Parse(recvlog.c_str());
+        if (!cj)
+        {
+            INFOPrint("Parse Json Error");
+            zmq::message_t reply(3);
+            memcpy(reply.data(), "300", 3);
+            socket.send(reply);
+            return ERROR;
+        }
+        cJSON *aw = cJSON_GetObjectItem(cj, "eventName");
+        std::string accept_word = aw->valuestring;
+        cJSON_Delete(aw);
+        //oJson.Get("eventName", accept_word);
+        VePrint(accept_word);
+        if (Check_word_acceptance(pa->aut, monitor, dict, accept_word) == WORD_ACCEPTANCE_WRONG)
         {
             INFOPrint("Wrong Acceptance!");
             zmq::message_t reply(3);
             memcpy(reply.data(), "200", 3);
             socket.send(reply);
+            cJSON_Delete(cj);
+
+            //输出错误日志，把json格式输出。
 
             return WORD_ACCEPTANCE_WRONG;
         }
@@ -81,6 +124,8 @@ YAML::Node node = YAML::LoadFile("automonitor.yaml");
         zmq::message_t reply(3);
         memcpy(reply.data(), "200", 3);
         socket.send(reply);
+
+        cJSON_Delete(cj);
     }
 
 #else

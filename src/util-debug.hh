@@ -1,29 +1,23 @@
 #ifndef UTIL_DEBUG_HH
 #define UTIL_DEBUG_HH
 
-enum
-{
-    SUCCESS = 0,
-    ERROR,
-    WORD_ACCEPTANCE_WRONG,
-    NOMATCH
-};
+
 
 typedef enum
 {
-    AOP_LOG_NOTSET = -1,
-    AOP_LOG_NONE = 0,
-    AOP_LOG_EMERGENCY,
-    AOP_LOG_ALERT,
-    AOP_LOG_ERROR,
-    AOP_LOG_WARING,
-    AOP_LOG_NOTICE,
-    AOP_LOG_INFO,
-    AOP_LOG_PERF,
-    AOP_LOG_CONFIG,
-    AOP_LOG_DEBUG,
-    AOP_LOG_LEVEL_MAX
-} AOPLogLevel;
+    AM_LOG_NOTSET = -1,
+    AM_LOG_NONE = 0,
+    AM_LOG_EMERGENCY,
+    AM_LOG_ALERT,
+    AM_LOG_ERROR,
+    AM_LOG_WARING,
+    AM_LOG_NOTICE,
+    AM_LOG_INFO,
+    AM_LOG_PERF,
+    AM_LOG_CONFIG,
+    AM_LOG_DEBUG,
+    AM_LOG_LEVEL_MAX
+} AMLogLevel;
 
 /*color*/
 #define RESET "\033[0m"
@@ -48,6 +42,7 @@ typedef enum
 #define TEST_AUTOMONTIRO 1
 #define ZMQ 1
 #define DEBUG 1
+
 #if DEBUG == 1
 #define FuncBegin()                                                                                                      \
     {                                                                                                                    \

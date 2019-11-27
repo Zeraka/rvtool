@@ -5,7 +5,27 @@ server_bind_addr: "tcp://*:25555"
 
 #解析公式模式为开
 
+#zeromq
 
+#通过输入LTL文件还是HOA自动机文件
+monitor_generate_module:
+  open_hoa_file:
+    enabled: yes
+    filename: demo.hoa
+  #两种配置方式只能选择一种，否则就会报错
+  open_ltl_file:
+    enabled: no
+    filename: ltl.json
+    fileformat: "json"
+  #调用ltl2tgba命令
+  use_ltl2tgba_cmd:
+    enabled: no
+    #example: "G(a -> X b)"
+    ltl:
+    automata_class: "Monitor"
+    isDefined: true
 #要解析的自动机文件
 #解析文件模式为开
 
+# 生成日志的文件名 以及 路径
+# 解

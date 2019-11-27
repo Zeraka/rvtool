@@ -8,6 +8,23 @@ enum
     WORD_ACCEPTANCE_WRONG,
     NOMATCH
 };
+
+typedef enum
+{
+    AOP_LOG_NOTSET = -1,
+    AOP_LOG_NONE = 0,
+    AOP_LOG_EMERGENCY,
+    AOP_LOG_ALERT,
+    AOP_LOG_ERROR,
+    AOP_LOG_WARING,
+    AOP_LOG_NOTICE,
+    AOP_LOG_INFO,
+    AOP_LOG_PERF,
+    AOP_LOG_CONFIG,
+    AOP_LOG_DEBUG,
+    AOP_LOG_LEVEL_MAX
+} AOPLogLevel;
+
 /*color*/
 #define RESET "\033[0m"
 #define BLACK "\033[30m"              /* Black */

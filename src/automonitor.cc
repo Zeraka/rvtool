@@ -12,19 +12,23 @@
 #include <spot/twa/bddprint.hh>
 #include <spot/parseaut/public.hh>
 
+#include <yaml-cpp/yaml.h>
 #include <zmq.hpp>
+
 #include "automonitor.hh"
 #include "util-base.hh"
 #include "util-debug.hh"
 #include "server.hpp"
 #include "parsehoa.hh"
-
+static int state_number = 0;
 static int Test_splitstr();
-
 int main(void)
 {
     FuncBegin();
-#if ZMQ == 0
+
+YAML::Node node = YAML::LoadFile("automonitor.yaml");
+
+#if ZMQ == 1
     //读取并解析自动机文件
     //spot::parsed_aut_ptr pa = parse_aut("demo.hoa", spot::make_bdd_dict());
     spot::parsed_aut_ptr pa = parse_aut("demo2.hoa", spot::make_bdd_dict());
@@ -47,9 +51,8 @@ int main(void)
     monitor.state_number = pa->aut->get_init_state_number(); //全局状态
 
     /*接受MQ发送过来的字符串*/
-    //建立通信
-
-    std::string addr = "tcp://*:25555"; //改为读取配置文件
+    std::string addr = node["server_bind_addr"].as<std::string>(); //改为读取配置文件
+    VePrint(addr);
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_REP);
 
@@ -61,10 +64,10 @@ int main(void)
 
         zmq::message_t request;
         socket.recv(&request);
-        std::string accpet_word = (char *)request.data();
-        VePrint(accpet_word);
+        std::string recvlog = (char *)request.data();
+        VePrint(recvlog);
         //为什么速度这么慢呢
-        if (Check_word_acceptance(pa->aut, monitor, dict, accpet_word) == WORD_ACCEPTANCE_WRONG)
+        if (Check_word_acceptance(pa->aut, monitor, dict, recvlog) == WORD_ACCEPTANCE_WRONG)
         {
             INFOPrint("Wrong Acceptance!");
             zmq::message_t reply(3);
@@ -90,11 +93,10 @@ int main(void)
     /*测试一个monitor是否可检测出输入的行为违规*/
     //Test_Check_word_acceptance_01(pa->aut, monitor, dict);
     //Test_Check_word_acceptance_02(pa->aut, monitor, dict);
-    /*测试splitstr()*/
-    // Test_splitstr();
 
-    /*测试Test_Parse_bstr_to_wordset()*/
-    // Test_Parse_bstr_to_wordset();
+    // Test_splitstr();/*测试splitstr()*/
+
+    // Test_Parse_bstr_to_wordset();/*测试Test_Parse_bstr_to_wordset()*/
 
     /*Test Communication module*/
     //Test_Commnunication_module_01();
@@ -327,7 +329,7 @@ int Check_word_acceptance(spot::twa_graph_ptr &aut,
 
         for (auto &monitor_label : monitor.nodes[state_number].monitor_labels)
         {
-            //如果满足label，则更新state_munber,
+            //如果满足label，则更新state_number,
             //VePrint(state_number);
             VePrint(monitor_label.label);
             VePrint(accept_word);

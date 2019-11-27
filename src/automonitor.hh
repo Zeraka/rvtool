@@ -6,7 +6,6 @@
 
 #define Test_AUTOMONITOR 0
 /*初始化时自动机的全局状态*/
-int state_number = 0;
 
 typedef struct word_set_t
 {

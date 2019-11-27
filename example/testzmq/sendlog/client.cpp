@@ -70,10 +70,12 @@ int Creat_zmq_client(std::string addr, const char* filename)
         
         //读取文件,判断流的异常
         getline(file, line);
-        zmq::message_t request(6);
+        //VePrint(line.length());
+        int length = line.length();
+        zmq::message_t request(length);
         
         //VePrint(line.c_str())
-        memcpy(request.data(), (void*)(line.c_str()), 6);
+        memcpy(request.data(), (void*)(line.c_str()), length);
 
         //VePrint((char*)request.data());
         socket.send(request);

@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <regex>
 
 #include "CJsonObject.hpp"
 
@@ -16,9 +17,12 @@ static AMError parse_ltl_json_file(const std::string& filename)
     }
 
     //读取文件, 读取直到第一次碰到LTL公式。
-    std::ofstream file;
+    std::ifstream file;
     file.open(filename, std::ios::in);
     
+    std::string line;
+    std::string re = "asf";
+
     if(file.is_open() == 0)
     {
         ErrorPrintNReturn(LTL_FILE_NOT_EXIT);
@@ -27,12 +31,22 @@ static AMError parse_ltl_json_file(const std::string& filename)
     while(!file.eof())
     {
         getline(file, line);
+        
+        if(line.compare("\n"))
+        {
+            continue;
+        }
+        else if(regex_match(line, re)) //use the regex to match LTL expression
+        {
+            
+            
+        }
 
     }
 
     neb::CJsonObject ojson(filename);
     
-    //解析后生成
+    //解析后生成一个自动机格式
 }
 
 /*Parse ltl file*/
@@ -49,6 +63,7 @@ AMError parse_ltl_file(const std::string& filename, const std::string& fileForma
     {
         ErrorPrintNReturn(LTL_FILE_FORMAT_WRONG);
     }
+
 }
 
 AMError parse_ltl_by_ltl2tgba(){

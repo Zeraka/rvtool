@@ -1,0 +1,39 @@
+BEGIN
+0x7fffc8ddb8a0
+construct
+0x7fffc8ddb898
+construct
+0x7fffc8ddb894
+construct
+add t1: 0x7fffc8ddb894
+add t2: 0x7fffc8ddb898
+add t3: 0x7fffc8ddb8a0
+0x7fffc8ddb880
+construct
+copy construct
+copy construct
+0x7fffc8ddb88c
+construct
+0x7fffc8ddb890
+construct
+0x7fffc8ddb8a0
+construct
+move construct
+copy assignment
+0x7fffc8ddb8a0
+construct
+move assignment
+0x7fffc8ddb8a0
+construct
+move assignment
+L59::__exec_old_Event2Func - Hello World! 1234
+L49::__exec_old_Event0Func
+L59::__exec_old_Event2Func - Hello World Again! 54321
+L49::__exec_old_Event0Func
+L54::__exec_old_Event1Func - 42.310000
+L54::__exec_old_Event1Func - 452.361000
+L54::__exec_old_Event1Func - 4523610000000.000000
+0x7f5119a7fd24
+construct
+move construct
+copy construct

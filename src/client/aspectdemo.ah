@@ -1,0 +1,58 @@
+#ifndef __ASPECTDEMO_H
+#define __ASPECTDEMO_H
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "EventLoop.hpp"
+#include "aspect.hh"
+#include "automonitor-client.hpp"
+
+#include <thread>
+#include <mutex>
+int eventid = 0;
+
+
+std::ofstream mycout("event.log");
+//aspect 类似于C++中的class,以至于是一个非常好的情况。
+//传参数要怎么办呢？
+
+//std::mutex mtx;
+
+zmqMessageClient client()
+aspect AspectDemo {
+
+    pointcut logger1() = execution("void Event1Func(...)") ; //对该函数进行切入。
+    pointcut logger2() = execution("void Event2Func(...)") ;
+    pointcut logger3() = execution("void Event3Func(...)") ; //对该函数进行切入。
+    pointcut logger4() = execution("void Event4Func(...)") ;
+
+    advice logger1() : after() {
+            //AOP_Logger_mutex(eventid,"event1",mycout);//
+
+    }
+
+    advice logger2() : after() {
+            AOP_Logger_mutex(eventid,"event2",mycout);
+    }
+    advice logger3() : after() {
+            AOP_Logger_mutex(eventid,"event3",mycout);
+    }
+
+    advice logger4():after(){
+            //FormatEvent("event4", mycout);
+            //mtx.lock();
+            AOP_Logger_mutex(eventid,"event4",mycout);
+            //mtx.unlock();
+
+    }
+/*
+    pointcut logger() = execution("void Event%(...)");
+
+    advice logger() : after(){
+        mycout << __LINE__ <<" :: "<< __FUNCTION__<< std::endl; //如何把函数名给
+    }
+    */
+};
+
+#endif 

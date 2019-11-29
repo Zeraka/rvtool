@@ -1,13 +1,8 @@
 #ifndef UTIL_DEBUG_HH
 #define UTIL_DEBUG_HH
 
-enum
-{
-    SUCCESS = 0,
-    ERROR,
-    WORD_ACCEPTANCE_WRONG,
-    NOMATCH
-};
+
+
 /*color*/
 #define RESET "\033[0m"
 #define BLACK "\033[30m"              /* Black */

@@ -8,6 +8,8 @@ typedef enum
     NOMATCH,
     LTL_FILE_NOT_EXIT,
     LTL_FILE_FORMAT_WRONG,
+    LTL_FILE_NOT_JSON,
+    
 } AMError;
 
 const char *AMErrorToString(AMError err);

@@ -14,6 +14,7 @@ const char *AMErrorToString(AMError err)
         CASE_CODE(NOMATCH);
         CASE_CODE(LTL_FILE_NOT_EXIT);
         CASE_CODE(LTL_FILE_FORMAT_WRONG);
+        CASE_CODE(LTL_FILE_NOT_JSON);
         //CASE_CODE();
     }
 

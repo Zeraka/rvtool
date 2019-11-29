@@ -1,6 +1,9 @@
 #ifndef UTIL_BASE_HH
 #define UTIL_BASE_HH
 
+#include "util-error.hh"
+#include "util-debug.hh"
+
 typedef unsigned int uint4;
 typedef std::vector<std::string> stringList;
 
@@ -35,5 +38,15 @@ stringList splitstr(const std::string &str, char tag)
 
     return li;
 }
+
+/*Free the memory*/
+#define AMFree(x)                             \
+    {                                         \
+        if (x)                                \
+        {                                     \
+            free(x);                          \
+            INFOPrint(#x + "has been freed"); \
+        }                                     \
+    }
 
 #endif

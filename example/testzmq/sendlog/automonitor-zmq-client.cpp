@@ -4,9 +4,9 @@
 #include <iostream> //读取文件
 #include <fstream>  //读取文件
 
-#include "client.hpp"
+#include "automonitor-zmq-client.hpp"
 #include "util-debug.hh"
-
+#include "util-error.hh"
 /*
 改为发送生成的日志，然后把日志发送给服务端，
 保留main函数，可作为单独的消息发送机制;

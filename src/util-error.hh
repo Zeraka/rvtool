@@ -21,3 +21,4 @@ const char *AMErrorToString(AMError err);
                   << std::endl;                            \
         return AMError;                                    \
     }
+    

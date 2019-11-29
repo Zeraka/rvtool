@@ -45,7 +45,7 @@ stringList splitstr(const std::string &str, char tag)
         if (x)                                \
         {                                     \
             free(x);                          \
-            INFOPrint(#x + "has been freed"); \
+            INFOPrint(#x"has been freed"); \
         }                                     \
     }
 

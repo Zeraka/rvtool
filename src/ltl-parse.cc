@@ -21,7 +21,6 @@ static AMError parse_ltl_json_file(const std::string &filename)
     file.open(filename, std::ios::in);
 
     std::string line;
-    std::string re = "/[^,:{}\\[\\]0-9.\-+Eaeflnr-u \n\r\t]/"; //Regex represents json format.
 
     if (file.is_open() == 0)
     {
@@ -35,11 +34,7 @@ static AMError parse_ltl_json_file(const std::string &filename)
         if (line.compare("\n"))
         {
             continue;
-        }
-        else if (std::regex_match(line, re) == 1) //use the regex to match LTL expression
-        {
-
-        }
+        }//\todo Parse the format is json or not.
         else
         {
             ErrorPrintNReturn(LTL_FILE_NOT_JSON);
@@ -67,9 +62,9 @@ AMError parse_ltl_file(const std::string &filename, const std::string &fileForma
         ErrorPrintNReturn(LTL_FILE_FORMAT_WRONG);
     }
 }
-
+//\todo 
 AMError parse_ltl_by_ltl2tgba()
 {
 }
 
-AMError 
+//\todo s

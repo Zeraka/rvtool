@@ -5,8 +5,9 @@
 #include <fstream>  //读取文件
 
 #include "automonitor-client.hpp"
-#include "util-debug.hh"
-#include "util-error.hh"
+#include "../util-debug.hh"
+#include "../util-error.hh"
+#include "../util-base.hh"
 
 using namespace std;
 
@@ -25,11 +26,13 @@ int zmqMessageClient::creatZmqContext()
 
     return 0;
 }
-int zmqMessageClient::deleteZmqContext(){
-    free(client_context);
-    free(client_reply);
-    free(client_socket);
-    free(client_request);
+int zmqMessageClient::deleteZmqContext()
+{
+
+    AMFree(client_context);
+    AMFree(client_reply);
+    AMFree(client_socket);
+    AMFree(client_request);
 }
 /*
 改为发送生成的日志，然后把日志发送给服务端，
@@ -135,7 +138,7 @@ int zmqMessageClient::Creat_zmq_client(const char *filename, zmq::socket_t &sock
 brief\ send string buffer to zmq server.
 Param str\ That needed to be sent to server.
 */
-int zmqMessageClient::sendBufferToZmq(string str, zmq::socket_t &socket, zmq::mess)
+int zmqMessageClient::sendBufferToZmq(string str, zmq::socket_t &socket)
 {
     zmq::message_t request(str.length());
 
@@ -169,13 +172,21 @@ int zmqMessageClient::sendBufferToZmq(string str, zmq::socket_t &socket, zmq::me
 //Test Unit//=====================================
 //================================================
 
-int main()
+int test()
 {
     string addr = "tcp://localhost:25555";
     const char *filename = "event.log";
     zmqMessageClient zmmsg(addr);
     //zmqMessage zmmsg2 = zmqMessage(addr);
-    zmq::socket_t socket();
+    zmq::context_t context(1);
+    zmq::socket_t socket(context, ZMQ_REQ);
 
-    zmmsg.Creat_zmq_client(filename, );
+    zmmsg.Creat_zmq_client(filename, socket);
 }
+
+#if TESTCLIENT == 1
+int main()
+{
+    test();
+}
+#endif

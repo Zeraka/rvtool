@@ -56,7 +56,8 @@ static int interceptCString(char *str, char n)
 int zmq_server(std::string addr)
 {
     FuncBegin();
-
+    std::string str = "{\"eventId\":7,\"eventName\":\"event4\",\"fileName\":\"test.cpp\",\"line\":80,\"eventTime\":\"14:07:44\"}";
+    std::cout << "The length " << str.length() << std::endl;
     //Creat the log file
     std::string filename = "accept.log";
 
@@ -75,12 +76,21 @@ int zmq_server(std::string addr)
         socket.recv(&request);
 
         char *event = (char *)request.data();
-        //interceptCString(event, '}');
-        //std::cout<<event;
-        //VePrint(event);
-        //把事件送入检测函数里面去？
-        mycout << event;
-        INFOPrint("has accepted a event");
+        std::string str = event;
+        int position =0;
+        position = str.find_first_of("}");
+        //str.find_last_of()
+        std::cout << str.length() << std::endl;
+        std::cout <<"} position is " <<position << std::endl;
+        *(event+position+1)='\0';
+        //std::string newstr = str.insert(position+2,"\0");
+        //Position+2 to be '\0';
+        //str = str.replace(str.find_first_of("}"+2),str.end(),"","\0");
+        std::cout << event << std::endl;
+
+        mycout << event << std::endl;
+
+        //INFOPrint("has accepted a event");
 
         // 返回消息给client
         zmq::message_t reply(5);

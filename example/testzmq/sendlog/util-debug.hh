@@ -36,7 +36,6 @@ typedef enum
 
 #define TEST_AUTOMONTIRO 1
 
-
 #define DEBUG 1
 #if DEBUG == 1
 #define FuncBegin()                                                                                                      \
@@ -82,5 +81,12 @@ typedef enum
         std::cout << BOLDRED << "Fucntion " << __FUNCTION__ << " Error!" << RESET << std::endl; \
         return x;                                                                               \
     }
+    
+#define StrLength(str)                                                              \
+    {                                                                               \
+        std::cout << "The length of" << #str << "is " << str.length() << std::endl; \
+    }
+
+
 
 #endif

@@ -39,25 +39,15 @@ stringList splitstr(const std::string &str, char tag)
     return li;
 }
 /*
-Intercepts the string and prints from scratch to the first occureence
-of the character n (including n).
+Format the received log.
 */
-static int interceptCString(char *str, char n)
-{
-    char *p = str;
-
-    while (*p != '\0')
-    {
-        if (*p == n)
-        {
-            break;
-        }
-        else
-        {
-            p = p + 1;
-        }
-    }
+void Check_json_log_format(char *event){
+        int position = 0;
+        std::string tmp = event;
+        position = tmp.find_first_of("}");
+        *(event + position + 1) = '\0';
 }
+
 
 
 /*Free the memory*/

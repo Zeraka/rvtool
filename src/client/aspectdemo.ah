@@ -16,8 +16,7 @@
 
 using namespace std;
 
-int eventid = 0;
-int socket_connect_state = -1;
+
 
 string addr = "tcp://localhost:25555";
 /*

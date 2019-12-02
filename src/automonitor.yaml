@@ -1,6 +1,9 @@
 #服务器绑定的地址端口
 server_bind_addr: "tcp://*:25555"
 
+#Log of error output
+output:
+  error_log: "error.log"
 #要解析的LTL公式
 
 #解析公式模式为开
@@ -12,7 +15,7 @@ server_bind_addr: "tcp://*:25555"
 #通过输入LTL文件还是HOA自动机文件
 monitor_generate_module:
   open_hoa_file:
-    enabled: false
+    enabled: true
     filename: "demo.hoa"
 
   #两种配置方式只能选择一种，否则就会报错
@@ -22,7 +25,7 @@ monitor_generate_module:
     fileformat: "json"
 
   input_ltl_exp:
-    enabled: true
+    enabled: false
     ltl_exp: ""
 
 #要解析的自动机文件

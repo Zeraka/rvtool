@@ -91,5 +91,9 @@ typedef enum
         std::cout << BOLDRED << "Fucntion " << __FUNCTION__ << " Error!" << RESET << std::endl; \
         return x;                                                                               \
     }
+#define TABPrint()                                                                                                                 \
+    {                                                                                                                              \
+        std::cout << BOLDRED << "In Fucntion " << __FUNCTION__ << "In Line" << __LINE__ << "In" << __FILE__ << RESET << std::endl; \
+    }
 
 #endif

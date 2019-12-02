@@ -44,6 +44,8 @@ char *errorfilename = "error.log";
 ofstream errorcout(errorfilename);
 */
 int fileIsExisted = -1;
+int eventid = 0;
+int socket_connect_state = -1;
 
 typedef struct AspectState
 {
@@ -103,9 +105,22 @@ char* getDate()
 #define GetConfigFromServer() \
     {                         \
     }
+#define DATE_FORMAT "%Y-%m-%d-%H:%M:%s"
+
+#define TimeStamp_str(tstr)                                         \
+    {                                                               \
+        time_t timep;                                               \
+        time(&timep);                                               \
+        char tmp[64]={'\0'};                                               \
+        strftime(tmp, sizeof(tmp), DATE_FORMAT, localtime(&timep)); \
+        tstr = tmp;                                                 \
+    }
+#define TimeStamp_Num(num)
 
 #define AOPLogger(id, eventName, mycout)            \
     {                                               \
+        std::string tstr;                           \
+        TimeStamp_str(tstr);                        \
         mycout << "{\"eventId\":" << id << ","      \
                << "\"eventName\":"                  \
                << "\"" << eventName << "\","        \
@@ -114,12 +129,14 @@ char* getDate()
                << ","                               \
                << "\"line\":" << tjp->line() << "," \
                << "\"eventTime\":"                  \
-               << "\"" << __TIME__ << "\""          \
+               << "\"" << tstr << "\""              \
                << "}" << std::endl;                 \
     }
 
 #define AOPLogger_ID_ADD(id, eventName, mycout)     \
     {                                               \
+        std::string tstr;                           \
+        TimeStamp_str(tstr);                        \
         mycout << "{\"eventId\":" << id << ","      \
                << "\"eventName\":"                  \
                << "\"" << eventName << "\","        \
@@ -128,7 +145,7 @@ char* getDate()
                << ","                               \
                << "\"line\":" << tjp->line() << "," \
                << "\"eventTime\":"                  \
-               << "\"" << __TIME__ << "\""          \
+               << "\"" << tstr << "\""              \
                << "}" << std::endl;                 \
         id++;                                       \
     }
@@ -224,9 +241,9 @@ Print the event log to mycout.
         string str = sstream.str();                                             \
         zmq::message_t request(str.length());                                   \
         sstream.clear();                                                        \
-        cout << str;                                                            \
+        cout << str << "str.length=" << str.length() << std::endl;              \
         memcpy(request.data(), (void *)(str.c_str()), str.length());            \
-        socket.send(request);                                                   \
+        socket.send(request.data(), str.length());                              \
         socket.recv(&reply);                                                    \
         mtx.unlock();                                                           \
     } while (0);

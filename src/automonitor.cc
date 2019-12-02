@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstring>
 #include <string>
+#include <fstream> //Using ofstream
 
 #include <cstdio>
 
@@ -28,6 +29,8 @@ extern "C"
 #include "cJSON.h"
 }
 
+using namespace std;
+
 static int state_number = 0;
 static int Test_splitstr();
 
@@ -36,31 +39,46 @@ int main(void)
     FuncBegin();
 
     YAML::Node node = YAML::LoadFile("automonitor.yaml");
-    
+
+
+
     if(node == nullptr)
     {
         AMErrorToString(YAML_FILE_IS_NULL);
     }
+    
+
+    std::ofstream errorLog(node["output"]["error_log"].as<std::string>(),std::ios::app);
 
     std::string filename;
+    std::string fileFormat;
     spot::parsed_aut_ptr pa;
     //读取并解析自动机文件
-    if (node["monitor_generate_module"]["open_hoa_file"]["enabled"].as<bool>() == true &&
-        node["monitor_generate_module"]["open_ltl_file"]["enabled"].as<bool>() == false)
+
+    if (node["monitor_generate_module"]["open_hoa_file"]["enabled"].as<bool>() == true)
     {
         //LocationPrint();
         filename = node["monitor_generate_module"]["open_hoa_file"]["filename"].as<std::string>();
+        VePrint(filename);
         pa = parse_aut(filename, spot::make_bdd_dict());
     }
-    else if (node["monitor_generate_module"]["open_hoa_file"]["enabled"].as<bool>() == false &&
-             node["monitor_generate_module"]["open_ltl_file"]["enabled"].as<bool>() == true)
+    else if (node["monitor_generate_module"]["open_ltl_file"]["enabled"].as<bool>() == true)
     {
         filename = node["monitor_generate_module"]["open_ltl_file"]["enabled"].as<std::string>();
         std::string fileFormat = node["monitor_generate_module"]["open_ltl_file"]["fileformat"].as<std::string>();
-
         parse_ltl_file(filename, fileFormat);
     }
+    else if(0)
+    {
 
+    }
+    else
+    {
+        ErrorPrintNReturn(YAML_NODE_PARSE_ERROR);
+    }
+
+    //filename="demo.hoa";
+     
 #if ZMQ == 1
 
     if (pa->format_errors(std::cerr))
@@ -70,7 +88,6 @@ int main(void)
         std::cerr << "--ABORT-- read\n";
         return ERROR;
     }
-
     const spot::bdd_dict_ptr &dict = pa->aut->get_dict();
 
     Monitor monitor_;
@@ -94,7 +111,10 @@ int main(void)
 
         zmq::message_t request;
         socket.recv(&request);
-        std::string recvlog = (char *)request.data();
+        char *event = (char *)request.data();
+        Check_json_log_format(event);
+
+        std::string recvlog = event;
         VePrint(recvlog);
 
         //解析json文件
@@ -120,6 +140,8 @@ int main(void)
             zmq::message_t reply(3);
             memcpy(reply.data(), "200", 3);
             socket.send(reply);
+            std::cout<<recvlog<<std::endl;
+            errorLog<<recvlog<<std::endl;
             cJSON_Delete(cj);
 
             //输出错误日志，把json格式输出。

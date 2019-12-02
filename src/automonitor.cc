@@ -10,6 +10,7 @@
 #include <spot/tl/parse.hh>
 #include <spot/twaalgos/translate.hh>
 #include <spot/twaalgos/hoa.hh>
+#include <spot/twaalgos/dot.hh>
 
 #include <spot/twa/bddprint.hh>
 #include <spot/parseaut/public.hh>
@@ -25,6 +26,8 @@
 
 #include <yaml-cpp/yaml.h>
 #include <zmq.hpp>
+
+#include <graphviz/gvc.h> // if you want to get dot file to image.
 
 #include "automonitor.hh"
 #include "util-base.hh"
@@ -95,6 +98,7 @@ int main(void)
         std::string ltl_exp = node["monitor_generate_module"]["input_ltl_exp"]["ltl_exp"].as<std::string>();
         spot::parsed_formula pf = spot::parse_infix_psl(ltl_exp);
         std::string outputfilename = node["monitor_generate_module"]["input_ltl_exp"]["outputfilename"].as<std::string>();
+        std::string outputImageName = node["monitor_generate_module"]["input_ltl_exp"]["outputImage"].as<std::string>();
         if (pf.format_errors(std::cerr))
         {
             ErrorPrintNReturn(LTL_EXPRESSION_FORMAT_ERROR);
@@ -109,13 +113,31 @@ int main(void)
 
         aut = autmata;
         std::ofstream mycout(outputfilename);
-
+        std::string dotname = outputfilename.replace(outputfilename.find(".hoa"),4,".dot",4);
         INFOPrint("Output the HOA file of LTL: " + ltl_exp);
         print_hoa(std::cout, autmata) << '\n';
         print_hoa(mycout, autmata) << '\n';
-
+        std::ofstream dotfile(dotname);
         //Print hoa to pdf
-        
+        print_dot(dotfile, autmata, "d"); //d is one of options, means origin format of dot.
+        dotfile.close();
+
+        /*Make dot file into image like pdf format.*/
+        graph_t *g;
+        GVC_t *gvc;
+        FILE *fp;
+
+        gvc = gvContext();
+        fp = fopen(dotname.c_str(), "r");
+        g = agread(fp, 0);
+        gvLayout(gvc, g, "dot");
+        gvRenderFilename(gvc, g, "pdf", outputImageName.c_str());//Output for pdf format.
+        //gvRender(gvc, g, "pdf", )
+        gvFreeLayout(gvc, g);
+        agclose(g);
+        //<<end
+
+        mycout.close();
     }
     else
     {

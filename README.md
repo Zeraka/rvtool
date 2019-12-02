@@ -43,7 +43,8 @@ ubuntu下
 `apt install libzmq3-dev`
 ### 安装yaml-cpp
 `https://github.com/jbeder/yaml-cpp/`
-
+### 安装graphviz-dev
+`apt install libgraphviz-dev`
 ### 安装libjsoncpp-dev
 
 ## 相关链接

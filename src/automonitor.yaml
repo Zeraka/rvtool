@@ -29,6 +29,7 @@ monitor_generate_module:
     enabled: true
     ltl_exp: "G(press -> red U green)" # example
     outputfilename: "ltlparse.hoa"
+    outputImage: "ltlparse.pdf"
     #automata: monitor
 
 

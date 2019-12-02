@@ -15,6 +15,8 @@ const char *AMErrorToString(AMError err)
         CASE_CODE(LTL_FILE_NOT_EXIT);
         CASE_CODE(LTL_FILE_FORMAT_WRONG);
         CASE_CODE(LTL_FILE_NOT_JSON);
+        CASE_CODE(YAML_FILE_IS_NULL);
+        CASE_CODE(SOCKET_SEND_ERROR);
         //CASE_CODE();
     }
 

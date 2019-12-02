@@ -8,45 +8,61 @@
 #include "aspect.hh"
 #include "automonitor-client.hpp"
 
+#include <zmq.hpp>
+#include <queue>
+
 #include <thread>
 #include <mutex>
+
+using namespace std;
+
 int eventid = 0;
+int socket_connect_state = -1;
 
-
-std::ofstream mycout("event.log");
-//aspect 类似于C++中的class,以至于是一个非常好的情况。
-//传参数要怎么办呢？
-
-//std::mutex mtx;
-
-zmqMessageClient client()
-aspect AspectDemo {
-
-    pointcut logger1() = execution("void Event1Func(...)") ; //对该函数进行切入。
-    pointcut logger2() = execution("void Event2Func(...)") ;
-    pointcut logger3() = execution("void Event3Func(...)") ; //对该函数进行切入。
-    pointcut logger4() = execution("void Event4Func(...)") ;
-
-    advice logger1() : after() {
-            //AOP_Logger_mutex(eventid,"event1",mycout);//
-
-    }
-
-    advice logger2() : after() {
-            AOP_Logger_mutex(eventid,"event2",mycout);
-    }
-    advice logger3() : after() {
-            AOP_Logger_mutex(eventid,"event3",mycout);
-    }
-
-    advice logger4():after(){
-            //FormatEvent("event4", mycout);
-            //mtx.lock();
-            AOP_Logger_mutex(eventid,"event4",mycout);
-            //mtx.unlock();
-
-    }
+string addr = "tcp://localhost:25555";
 /*
+std::ofstream mycout(filename);
+zmqMessageClient client(addr);
+*/
+const char *filename = "event.log";
+
+EVENTLOG(mycout);
+CREATSOCKET();
+
+//std::ofstream mycout(filename);
+
+aspect AspectDemo
+{
+        pointcut logger1() = execution("void Event1Func(...)"); //对该函数进行切入。
+        pointcut logger2() = execution("void Event2Func(...)");
+        pointcut logger3() = execution("void Event3Func(...)"); //对该函数进行切入。
+        pointcut logger4() = execution("void Event4Func(...)");
+        advice logger1() : after()
+        {
+                //AOPLogger_mutex(eventid, "event1", mycout); //
+                AOPLoggerToBufferNewFile(eventid, "event1", addr,mycout);
+        }
+
+        advice logger2() : after()
+        {
+                // AOPLogger_mutex(eventid, "event2", mycout);
+                AOPLoggerToBufferNewFile(eventid, "event2", addr,mycout);
+        }
+        advice logger3() : after()
+        {
+                // AOPLogger_mutex(eventid, "event3", mycout);
+                AOPLoggerToBufferNewFile(eventid, "event3", addr,mycout);
+        }
+
+        advice logger4() : after()
+        {
+                // AOPLogger_mutex(eventid, "event3", mycout);
+                //mtx.lock();
+                AOPLoggerToBufferNewFile(eventid, "event4", addr,mycout);
+                //mtx.unlock();
+                //AOPLoggerBufferToZmq(eventid, "event4", mycout);
+        }
+        /*
     pointcut logger() = execution("void Event%(...)");
 
     advice logger() : after(){
@@ -55,4 +71,4 @@ aspect AspectDemo {
     */
 };
 
-#endif 
+#endif

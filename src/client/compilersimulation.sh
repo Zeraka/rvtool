@@ -1,2 +1,2 @@
 #!/bin/sh
-ag++ test.cpp EventLoop.cpp EventLoop.hpp  -o test -lpthread
+ag++ -g test.cpp EventLoop.cpp automonitor-client.cpp EventLoop.hpp  -o test -lpthread -lzmq 

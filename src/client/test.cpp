@@ -6,6 +6,10 @@
 
 #include "EventLoop.hpp"
 #include "aspectdemo.ah"
+#include "automonitor-client.hpp"
+
+#include <zmq.hpp>
+
 #include <unistd.h>
 using namespace std;
 
@@ -78,6 +82,7 @@ void Event4Func(EventLoop *el)
     //fprintf(stdout, "L%d::%s\n", __LINE__, __FUNCTION__);
     sleep(1);
     el->Post([=] { Event4Func(el); });
+    //std::cout<<"eventid is "<<eventid<<std::endl;
 }
 
 void Event5Func(test t)
@@ -103,6 +108,7 @@ int main(int argc, char **argv)
 {
     cout << "BEGIN" << endl;
 
+
     testRef(test(), test(), test());
     test t0;
     test t1(t0);
@@ -126,7 +132,6 @@ int main(int argc, char **argv)
 
     gEventLoop.Post(bind(gEvent2Func, string("Hello World!"), 1234));
     gEventLoop.Post(bind(gEvent22Func, string("Hello World Again!")));
-
     gEventLoop.Post(gEvent0Func);
     gEventLoop.Post(Event0Func);
 

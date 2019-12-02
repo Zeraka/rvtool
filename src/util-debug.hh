@@ -1,8 +1,6 @@
 #ifndef UTIL_DEBUG_HH
 #define UTIL_DEBUG_HH
 
-
-
 typedef enum
 {
     AM_LOG_NOTSET = -1,
@@ -74,14 +72,20 @@ typedef enum
     {                                                       \
         std::cout << BOLDYELLOW << x << RESET << std::endl; \
     }
+
 /*打印x的值,便于debug*/
 #define VePrint(x)                                                                                      \
     {                                                                                                   \
         std::cout << BOLDYELLOW << "The value of " << #x << ": " << BOLDRED << x << RESET << std::endl; \
     }
 
-//测试时间性能的模块
+/*Locate the line number*/
+#define LocationPrint()                       \
+    {                                         \
+        INFOPrint("Located at " << __LINE__); \
+    }
 
+//测试时间性能的模块
 #define AMReturn(x)                                                                             \
     {                                                                                           \
         std::cout << BOLDRED << "Fucntion " << __FUNCTION__ << " Error!" << RESET << std::endl; \

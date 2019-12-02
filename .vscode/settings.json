@@ -58,6 +58,11 @@
         "thread": "cpp",
         "typeinfo": "cpp",
         "condition_variable": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "complex": "cpp",
+        "forward_list": "cpp",
+        "regex": "cpp"
     }
 }

@@ -5,9 +5,8 @@
 #include <fstream>  //读取文件
 
 #include "automonitor-client.hpp"
-#include "../util-debug.hh"
-#include "../util-error.hh"
-#include "../util-base.hh"
+#include "util-debug.hh"
+
 
 using namespace std;
 
@@ -130,19 +129,19 @@ int sendLoggerToZmq(const char *filename, zmq::socket_t &socket, string addr)
 brief\ send string buffer to zmq server.
 Param str\ That needed to be sent to server.
 */
-
-int sendBufferToZmq(string str,zmq::socket_t&socket, zmq::message_t&request)
+/*
+int zmqMessageClient::sendBufferToZmq(string str,)
 {
     //zmqMessageClient::request= make_shared<zmq::message_t>(str.length());
     //zmq::message_t request(zmqMessageClient::msgLength);
-    memcpy(request.data(), (void *)(str.c_str()), str.length());
+    memcpy(zmqMessageClient::request->data(), (void *)(str.c_str()), str.length());
 
     //zmqMessageClient::socket->send(requ;
 
-    socket.send(request);
+    zmqMessageClient::socket->send(*zmqMessageClient::request);
     zmq::message_t reply;
 
-    socket.recv(&reply);
+    zmqMessageClient::socket->recv(&reply);
 
     //VePrint((char*)reply.data());
     if ((char *)reply.data() == nullptr)
@@ -164,7 +163,7 @@ int sendBufferToZmq(string str,zmq::socket_t&socket, zmq::message_t&request)
 
     return 0;
 }
-
+*/
 //================================================
 //Test Unit//=====================================
 //================================================
@@ -176,15 +175,14 @@ void test_automonitor_client_Creat_zmq_client()
     //zmqMessageClient zmmsg(addr);
     zmq::context_t context(1);
     zmq::socket_t socket(context, ZMQ_REQ);
-    //socket.connect(addr);
+    socket.connect(addr);
 
     sendLoggerToZmq(filename, socket, addr);
 }
 
-#if TESTCLIENT == 1
-/*
+#if TESTCLIENT == 0
 int main()
 {
     test_automonitor_client_Creat_zmq_client();
-}*/
+}
 #endif

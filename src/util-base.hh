@@ -38,15 +38,47 @@ stringList splitstr(const std::string &str, char tag)
 
     return li;
 }
+/*
+Intercepts the string and prints from scratch to the first occureence
+of the character n (including n).
+*/
+static int interceptCString(char *str, char n)
+{
+    char *p = str;
+
+    while (*p != '\0')
+    {
+        if (*p == n)
+        {
+            break;
+        }
+        else
+        {
+            p = p + 1;
+        }
+    }
+}
+
 
 /*Free the memory*/
-#define AMFree(x)                             \
-    {                                         \
-        if (x)                                \
-        {                                     \
-            free(x);                          \
-            INFOPrint(#x"has been freed"); \
-        }                                     \
+#define AMFree(x)                            \
+    {                                        \
+        if (x)                               \
+        {                                    \
+            free(x);                         \
+            x = nullptr;                     \
+            INFOPrint(#x " has been freed"); \
+        }                                    \
     }
 
+/*Free the memory*/
+#define AMDelete(x)                          \
+    {                                        \
+        if (x)                               \
+        {                                    \
+            delete x;                        \
+            x = nullptr;                     \
+            INFOPrint(#x " has been freed"); \
+        }                                    \
+    }
 #endif

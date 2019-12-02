@@ -11,7 +11,10 @@
 #include <string>
 #include <thread>
 #include <mutex>
+#include <sstream>
+#include <time.h>
 
+#include "automonitor-client.hpp"
 /*color*/
 #define RESET "\033[0m"
 #define BLACK "\033[30m"              /* Black */
@@ -31,30 +34,200 @@
 #define BOLDCYAN "\033[1m\033[36m"    /* Bold Cyan */
 #define BOLDWHITE "\033[1m\033[37m"   /* Bold White */
 //end
-
+using namespace std;
 std::mutex mtx;
 /*
 mycout
 */
-#define AOP_Logger(id, eventName, mycout)                   \
-    {                                                       \
-        mycout << "{\"eventId\":" << id << ","              \
-               << "\"eventName\":"                          \
-               << "\"" << eventName << "\","                \
-               << "\"fileName\":" <<"\""<< tjp->filename()<<"\"" << "," \
-                << "\"line\":" << tjp->line() << ","         \
-               << "\"eventTime\":" <<"\""<< __TIME__  <<"\""   \
-               << "}" << std::endl;                         \
-        id++;                                               \
-    }
-    
-/*拥有互斥锁*/
-#define AOP_Logger_mutex(id, eventName, mycout) \
-    {                                           \
-        mtx.lock();                             \
-        AOP_Logger(id, eventName, mycout);      \
-        mtx.unlock();                           \
+/*
+char *errorfilename = "error.log";
+ofstream errorcout(errorfilename);
+*/
+int fileIsExisted = -1;
+
+typedef struct AspectState
+{
+
+} AspectState;
+/*
+char* getDate()
+{
+    time_t timep;
+    time(&timep);
+    char tmp[64];
+    strftime(tmp, sizeof(tmp), "%Y_%m_%d_%H_%M_%S", localtime(&timep));
+    return tmp;
+}
+*/
+#define EVENTLOG(mycout) std::ofstream mycout;
+
+#define CREATELOGFILEBYDATE(filename)                                       \
+    {                                                                       \
+        std::stringstream sstream;                                          \
+        time_t timep;                                                       \
+        time(&timep);                                                       \
+        char tmp[64];                                                       \
+        strftime(tmp, sizeof(tmp), "%Y_%m_%d_%H_%M_%S", localtime(&timep)); \
+        sstream << filename << "_" << tmp << std::endl;                     \
+        std::cout << sstream.str();                                         \
     }
 
+//#define ADDATE(filename)  std::cout<<filename+GETDATE()<<std::endl;
 
+/*Use this To build a zeromq socket*/
+#define CREATSOCKET()          \
+    zmq::context_t context(1); \
+    zmq::socket_t socket(context, ZMQ_REQ);
+
+#define CHECKSOCKETCONNECT(socket)                                   \
+    {                                                                \
+        if (socket_connect_state == -1)                              \
+        {                                                            \
+            socket.connect(addr);                                    \
+            socket_connect_state = 0;                                \
+            cout << "is connected? -" << socket.connected() << endl; \
+            if (socket.connected() == false)                         \
+            {                                                        \
+                cout << "socket is not connected\n"                  \
+                     << "Check out the network\n";                   \
+            }                                                        \
+        }                                                            \
+        if (socket.connected() == false)                             \
+        {                                                            \
+            socket.connect(addr);                                    \
+            cout << "socket is not connected\n"                      \
+                 << "Check out the network\n";                       \
+        }                                                            \
+    }
+/*Get the Config from Server's yaml*/
+#define GetConfigFromServer() \
+    {                         \
+    }
+
+#define AOPLogger(id, eventName, mycout)            \
+    {                                               \
+        mycout << "{\"eventId\":" << id << ","      \
+               << "\"eventName\":"                  \
+               << "\"" << eventName << "\","        \
+               << "\"fileName\":"                   \
+               << "\"" << tjp->filename() << "\""   \
+               << ","                               \
+               << "\"line\":" << tjp->line() << "," \
+               << "\"eventTime\":"                  \
+               << "\"" << __TIME__ << "\""          \
+               << "}" << std::endl;                 \
+    }
+
+#define AOPLogger_ID_ADD(id, eventName, mycout)     \
+    {                                               \
+        mycout << "{\"eventId\":" << id << ","      \
+               << "\"eventName\":"                  \
+               << "\"" << eventName << "\","        \
+               << "\"fileName\":"                   \
+               << "\"" << tjp->filename() << "\""   \
+               << ","                               \
+               << "\"line\":" << tjp->line() << "," \
+               << "\"eventTime\":"                  \
+               << "\"" << __TIME__ << "\""          \
+               << "}" << std::endl;                 \
+        id++;                                       \
+    }
+
+/*拥有互斥锁
+Print the event log to mycout.
+*/
+#define AOPLogger_mutex(id, eventName, mycout) \
+    {                                          \
+        mtx.lock();                            \
+        AOPLogger(id, eventName, mycout);      \
+        mtx.unlock();                          \
+    }
+
+// Here are functions about Send buffer to zmq Server.
+/**/
+
+#define AOPLoggerToBufferNFile(id, eventName, mycout, addr)           \
+    do                                                                \
+    {                                                                 \
+        mtx.lock();                                                   \
+        if (socket_connect_state == -1)                               \
+        {                                                             \
+            socket.connect(addr);                                     \
+            socket_connect_state = 0;                                 \
+            cout << "is connected? ：" << socket.connected() << endl; \
+            if (socket.connected() == false)                          \
+            {                                                         \
+                cout << "socket is not connected\n"                   \
+                     << "Check out the network\n";                    \
+            }                                                         \
+        }                                                             \
+        if (socket.connected() == false)                              \
+        {                                                             \
+            socket.connect(addr);                                     \
+            cout << "socket is not connected\n"                       \
+                 << "Check out the network\n";                        \
+        }                                                             \
+        zmq::message_t reply;                                         \
+        stringstream sstream;                                         \
+        AOPLogger_ID_ADD(id, eventName, sstream);                     \
+        AOPLogger(id, eventName, mycout);                             \
+        string str = sstream.str();                                   \
+        zmq::message_t request(str.length());                         \
+        sstream.clear();                                              \
+        cout << str;                                                  \
+        memcpy(request.data(), (void *)(str.c_str()), str.length());  \
+        socket.send(request);                                         \
+        socket.recv(&reply);                                          \
+        mtx.unlock();                                                 \
+    } while (0);
+
+#define AOPLoggerToBufferNewFile(id, eventName, addr, mycout)                   \
+    do                                                                          \
+    {                                                                           \
+        mtx.lock();                                                             \
+        string filename;                                                        \
+        if (fileIsExisted == -1)                                                \
+        {                                                                       \
+            std::cout << "Ceate a new log file." << std::endl;                  \
+            std::stringstream sstream;                                          \
+            time_t timep;                                                       \
+            time(&timep);                                                       \
+            char tmp[64];                                                       \
+            strftime(tmp, sizeof(tmp), "%Y_%m_%d_%H_%M_%S", localtime(&timep)); \
+            sstream << filename << "_" << tmp << std::endl;                     \
+            std::cout << "Created event.log" << sstream.str();                  \
+            filename = "event.log" + sstream.str();                             \
+            mycout.open(filename, ios::app);                                    \
+            fileIsExisted = 0;                                                  \
+        }                                                                       \
+        if (socket_connect_state == -1)                                         \
+        {                                                                       \
+            socket.connect(addr);                                               \
+            socket_connect_state = 0;                                           \
+            cout << "is connected? ：" << socket.connected() << endl;           \
+            if (socket.connected() == false)                                    \
+            {                                                                   \
+                cout << "socket is not connected\n"                             \
+                     << "Check out the network\n";                              \
+            }                                                                   \
+        }                                                                       \
+        if (socket.connected() == false)                                        \
+        {                                                                       \
+            socket.connect(addr);                                               \
+            cout << "socket is not connected\n"                                 \
+                 << "Check out the network\n";                                  \
+        }                                                                       \
+        zmq::message_t reply;                                                   \
+        stringstream sstream;                                                   \
+        AOPLogger_ID_ADD(id, eventName, sstream);                               \
+        AOPLogger(id, eventName, mycout);                                       \
+        string str = sstream.str();                                             \
+        zmq::message_t request(str.length());                                   \
+        sstream.clear();                                                        \
+        cout << str;                                                            \
+        memcpy(request.data(), (void *)(str.c_str()), str.length());            \
+        socket.send(request);                                                   \
+        socket.recv(&reply);                                                    \
+        mtx.unlock();                                                           \
+    } while (0);
 #endif

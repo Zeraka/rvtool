@@ -1,7 +1,18 @@
 #ifndef UTIL_DEBUG_HH
 #define UTIL_DEBUG_HH
 
-
+typedef enum
+{
+    SUCCESS = 0,
+    ERROR,
+    WORD_ACCEPTANCE_WRONG,
+    NOMATCH,
+    LTL_FILE_NOT_EXIT,
+    LTL_FILE_FORMAT_WRONG,
+    LTL_FILE_NOT_JSON,
+    YAML_FILE_IS_NULL,
+    SOCKET_SEND_ERROR
+} AMError;
 
 /*color*/
 #define RESET "\033[0m"

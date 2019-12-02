@@ -1,0 +1,32 @@
+#pragma once
+
+#include <iostream>
+#include <fstream>
+#include <zmq.hpp>
+#include <memory>
+using namespace std;
+
+#define MSGLENGTH 128 //The zmq message length.
+#define TESTCLIENT 0
+
+typedef shared_ptr<zmq::context_t> context_ptr;
+typedef shared_ptr<zmq::socket_t> socket_ptr;
+typedef shared_ptr<zmq::message_t> message_ptr;
+
+typedef struct Client
+{
+    string address;
+    context_ptr context;
+    socket_ptr socket;
+    message_ptr request;
+    message_ptr reply;
+} Client;
+
+
+
+int Init_Client(string address, Client &client); //Needed
+
+int Delete_Client(Client *client);
+int read_log_file(std::ifstream &file, const char *filename);
+int Creat_zmq_client(std::string addr, const char *filename);
+int sendBufferToServer(string str, zmq::socket_t &socket);

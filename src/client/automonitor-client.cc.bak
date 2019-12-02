@@ -4,13 +4,11 @@
 #include <iostream> //读取文件
 #include <fstream>  //读取文件
 
-#include "automonitor-client.hpp"
-#include "../util-debug.hh"
-#include "../util-error.hh"
-#include "../util-base.hh"
+#include "automonitor-client.hh"
+#include "util-debug.hh"
+#include "util-error.hh"
 
 using namespace std;
-
 
 /*
 改为发送生成的日志，然后把日志发送给服务端，
@@ -28,20 +26,29 @@ using namespace std;
 读取文件的测试
 */
 
+/*Initialize the Client*/
+int Init_Client(string address, Client &client)
+{
+    client.address = address;
+
+    client.context = make_shared<zmq::context_t>(1);
+    client.socket = make_shared<zmq::socket_t>(*client.context, ZMQ_REQ);
+}
+
 /*
 功能： 建立一个zmq连接, 并且读取文件
 */
-int sendLoggerToZmq(const char *filename, zmq::socket_t &socket, string addr)
+int Creat_zmq_client(const char *filename, zmq::socket_t &socket, string address)
 {
     FuncBegin();
 
     //zmq::context_t context(1);              //建立一个连接
     //zmq::socket_t socket(context, ZMQ_REQ); //
-    //socket_ptr socket = zmqMessageClient::socket;
+
     std::cout << "Connecting to Monitor's server..." << std::endl;
-    socket.connect(addr);
+
     //判断输入的地址的格式
-    //socket->connect(zmqMessageClient::address); //连接到该地址
+    socket.connect(address); //连接到该地址
 
     std::ifstream file_;
     std::ifstream &file = file_;
@@ -51,51 +58,37 @@ int sendLoggerToZmq(const char *filename, zmq::socket_t &socket, string addr)
 
     //打开log文件， 读取日志，
     file.open(filename, std::ios::in); //ios::in的意思是如果文件不存在，则打开出错
-    INFOPrint("open log file" << filename);
+    INFOPrint("open log file");
 
     if (file.is_open() == 0)
     {
-        INFOPrint("The file is not opened" << filename);
+        INFOPrint("The file is not opened");
         return ERROR;
     }
-    else
-    {
-        INFOPrint("Open the file:" << filename);
-    }
-
+    int msgLength = MSGLENGTH;
     //每当读取一次，就发送一次消息给另一端,先发送一个消息给它
     //发送消息
-    zmq::message_t request(MSGLENGTH);
+    zmq::message_t request(msgLength);
     zmq::message_t reply;
-
-    /*Judge the connection is established or not*/
-
     //请求到末尾
     //for(int request_nbr = 0; request_nbr != 100; request_nbr++)
     while (!file.eof()) //判断是否读至文件末尾
     {
+
         //读取文件,判断流的异常
         getline(file, line);
         //VePrint(line.length());
         int length = line.length();
         //VePrint(line.c_str())
-        if (length >= MSGLENGTH)
+        if (length >= msgLength)
         {
             INFOPrint("The zmq::message_t instance's MSGLENGTH is not enough");
             return ERROR;
         }
         memcpy(request.data(), (void *)(line.c_str()), length);
+
         //VePrint((char*)request.data());
-
-        try
-        {
-            socket.send(request);
-        }
-        catch (zmq::error_t error)
-        {
-            INFOPrint("Error: socket_send() in line: " << __LINE__ << " in" << __FILE__);
-        }
-
+        socket.send(request);
         VePrint(line);
 
         socket.recv(&reply);
@@ -126,18 +119,12 @@ int sendLoggerToZmq(const char *filename, zmq::socket_t &socket, string addr)
     FuncEnd();
     return 0;
 }
-/*
-brief\ send string buffer to zmq server.
-Param str\ That needed to be sent to server.
-*/
 
-int sendBufferToZmq(string str,zmq::socket_t&socket, zmq::message_t&request)
+int sendBufferToServer(string str, zmq::socket_t &socket)
 {
-    //zmqMessageClient::request= make_shared<zmq::message_t>(str.length());
-    //zmq::message_t request(zmqMessageClient::msgLength);
-    memcpy(request.data(), (void *)(str.c_str()), str.length());
+    zmq::message_t request(str.length());
 
-    //zmqMessageClient::socket->send(requ;
+    memcpy(request.data(), (void *)(str.c_str()), str.length());
 
     socket.send(request);
     zmq::message_t reply;
@@ -161,30 +148,16 @@ int sendBufferToZmq(string str,zmq::socket_t&socket, zmq::message_t&request)
         INFOPrint("Parse JSON ERROR");
         return ERROR;
     }
-
-    return 0;
 }
 
 //================================================
 //Test Unit//=====================================
 //================================================
 
-void test_automonitor_client_Creat_zmq_client()
-{
-    string addr = "tcp://localhost:25555";
-    const char *filename = "event.log";
-    //zmqMessageClient zmmsg(addr);
-    zmq::context_t context(1);
-    zmq::socket_t socket(context, ZMQ_REQ);
-    //socket.connect(addr);
-
-    sendLoggerToZmq(filename, socket, addr);
-}
-
-#if TESTCLIENT == 1
-/*
 int main()
 {
-    test_automonitor_client_Creat_zmq_client();
-}*/
-#endif
+    std::string addr = "tcp://localhost:25555";
+    const char *filename = "event.log";
+
+    Creat_zmq_client(addr, filename);
+}

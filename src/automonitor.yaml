@@ -12,29 +12,19 @@ server_bind_addr: "tcp://*:25555"
 #通过输入LTL文件还是HOA自动机文件
 monitor_generate_module:
   open_hoa_file:
-    enabled: yes
-    filename: demo.hoa
+    enabled: false
+    filename: "demo.hoa"
 
   #两种配置方式只能选择一种，否则就会报错
   open_ltl_file:
-    enabled: no
-    filename: ltl.json
+    enabled: false
+    filename: "ltl.json"
     fileformat: "json"
 
-  #AutoMonitor自解析LTL
-  Automonitor_parse_ltl:
-    enabled: no
-    ltl: "G a -> b"
-    automata_class: "Monitor"
-    isDefined: ture
+  input_ltl_exp:
+    enabled: true
+    ltl_exp: ""
 
-  #调用ltl2tgba命令
-  use_ltl2tgba_cmd:
-    enabled: no
-    #example: "G(a -> X b)"
-    ltl: "G(a -> X b)"
-    automata_class: "Monitor"
-    isDefined: true
 #要解析的自动机文件
 #解析文件模式为开
 

@@ -36,20 +36,27 @@ int main(void)
     FuncBegin();
 
     YAML::Node node = YAML::LoadFile("automonitor.yaml");
+    
+    if(node == nullptr)
+    {
+        AMErrorToString(YAML_FILE_IS_NULL);
+    }
+
     std::string filename;
     spot::parsed_aut_ptr pa;
     //读取并解析自动机文件
-    if (node["monitor_generate_module."]["open_hoa_file"]["enabled"].as<bool>() == true &&
-        node["monitor_generate_module."]["open_ltl_file"]["enabled"].as<bool>() == false)
+    if (node["monitor_generate_module"]["open_hoa_file"]["enabled"].as<bool>() == true &&
+        node["monitor_generate_module"]["open_ltl_file"]["enabled"].as<bool>() == false)
     {
-        filename = node["monitor_generate_module."]["open_hoa_file"]["enabled"].as<std::string>();
+        //LocationPrint();
+        filename = node["monitor_generate_module"]["open_hoa_file"]["filename"].as<std::string>();
         pa = parse_aut(filename, spot::make_bdd_dict());
     }
-    else if (node["monitor_generate_module."]["open_hoa_file"]["enabled"].as<bool>() == false &&
-             node["monitor_generate_module."]["open_ltl_file"]["enabled"].as<bool>() == true)
+    else if (node["monitor_generate_module"]["open_hoa_file"]["enabled"].as<bool>() == false &&
+             node["monitor_generate_module"]["open_ltl_file"]["enabled"].as<bool>() == true)
     {
-        filename = node["monitor_generate_module."]["open_ltl_file"]["enabled"].as<std::string>();
-        std::string fileFormat = node["monitor_generate_module."]["open_ltl_file"]["fileformat"].as<std::string>();
+        filename = node["monitor_generate_module"]["open_ltl_file"]["enabled"].as<std::string>();
+        std::string fileFormat = node["monitor_generate_module"]["open_ltl_file"]["fileformat"].as<std::string>();
 
         parse_ltl_file(filename, fileFormat);
     }

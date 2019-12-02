@@ -15,6 +15,8 @@
 #include <time.h>
 
 #include "automonitor-client.hpp"
+
+using namespace std;
 /*color*/
 #define RESET "\033[0m"
 #define BLACK "\033[30m"              /* Black */
@@ -34,15 +36,15 @@
 #define BOLDCYAN "\033[1m\033[36m"    /* Bold Cyan */
 #define BOLDWHITE "\033[1m\033[37m"   /* Bold White */
 //end
-using namespace std;
+
+typedef enum
+{
+    NONE = 0,
+    PRINTLOGTOTERM,
+} CLIENTCONFIG;
+
 std::mutex mtx;
-/*
-mycout
-*/
-/*
-char *errorfilename = "error.log";
-ofstream errorcout(errorfilename);
-*/
+
 int fileIsExisted = -1;
 int eventid = 0;
 int socket_connect_state = -1;
@@ -111,10 +113,12 @@ char* getDate()
     {                                                               \
         time_t timep;                                               \
         time(&timep);                                               \
-        char tmp[64]={'\0'};                                               \
+        char tmp[64] = {'\0'};                                      \
         strftime(tmp, sizeof(tmp), DATE_FORMAT, localtime(&timep)); \
         tstr = tmp;                                                 \
     }
+
+    
 #define TimeStamp_Num(num)
 
 #define AOPLogger(id, eventName, mycout)            \

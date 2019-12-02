@@ -4,6 +4,7 @@ server_bind_addr: "tcp://*:25555"
 #Log of error output
 output:
   error_log: "error.log"
+  event_log: "event.log"
 #要解析的LTL公式
 
 #解析公式模式为开
@@ -15,18 +16,21 @@ output:
 #通过输入LTL文件还是HOA自动机文件
 monitor_generate_module:
   open_hoa_file:
-    enabled: true
+    enabled: false
     filename: "demo.hoa"
 
   #两种配置方式只能选择一种，否则就会报错
-  open_ltl_file:
+  open_ltl_file: #Todo\ Still not complished.
     enabled: false
     filename: "ltl.json"
     fileformat: "json"
 
   input_ltl_exp:
-    enabled: false
-    ltl_exp: ""
+    enabled: true
+    ltl_exp: "G(press -> red U green)" # example
+    outputfilename: "ltlparse.hoa"
+    #automata: monitor
+
 
 #要解析的自动机文件
 #解析文件模式为开

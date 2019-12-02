@@ -10,8 +10,18 @@
 #include <spot/tl/parse.hh>
 #include <spot/twaalgos/translate.hh>
 #include <spot/twaalgos/hoa.hh>
+
 #include <spot/twa/bddprint.hh>
 #include <spot/parseaut/public.hh>
+
+/*
+//Parse ltl_expression string to TGBA and output a hoa file.
+#include <spot/twaalgos/ltl2tgba_fm.hh>
+#include <spot/twaalgos/sccfilter.hh>
+#include <spot/twaalgos/stripacc.hh>
+#include <spot/twaalgos/minimize.hh>
+//end
+*/
 
 #include <yaml-cpp/yaml.h>
 #include <zmq.hpp>
@@ -40,37 +50,72 @@ int main(void)
 
     YAML::Node node = YAML::LoadFile("automonitor.yaml");
 
-
-
-    if(node == nullptr)
+    if (node == nullptr)
     {
         AMErrorToString(YAML_FILE_IS_NULL);
     }
-    
 
-    std::ofstream errorLog(node["output"]["error_log"].as<std::string>(),std::ios::app);
+    std::ofstream errorLog(node["output"]["error_log"].as<std::string>(), std::ios::app);
 
     std::string filename;
     std::string fileFormat;
     spot::parsed_aut_ptr pa;
-    //读取并解析自动机文件
+    spot::twa_graph_ptr aut;
 
+    //Parse the Yaml file to Generate monitor.
     if (node["monitor_generate_module"]["open_hoa_file"]["enabled"].as<bool>() == true)
     {
         //LocationPrint();
+        INFOPrint("Enter open_hoa_file module");
         filename = node["monitor_generate_module"]["open_hoa_file"]["filename"].as<std::string>();
         VePrint(filename);
         pa = parse_aut(filename, spot::make_bdd_dict());
+
+        if (pa->format_errors(std::cerr))
+        {
+            ErrorPrintNReturn(HOA_FORMAT_ERROR);
+        }
+        if (pa->aborted)
+        {
+            std::cerr << "--ABORT-- read\n";
+            ErrorPrintNReturn(HOA_PARSE_ABORT_ERROR);
+        }
+        aut = pa->aut;
     }
     else if (node["monitor_generate_module"]["open_ltl_file"]["enabled"].as<bool>() == true)
     {
+        INFOPrint("Enter open_ltl_file module");
         filename = node["monitor_generate_module"]["open_ltl_file"]["enabled"].as<std::string>();
         std::string fileFormat = node["monitor_generate_module"]["open_ltl_file"]["fileformat"].as<std::string>();
         parse_ltl_file(filename, fileFormat);
     }
-    else if(0)
+    else if (node["monitor_generate_module"]["input_ltl_exp"]["enabled"].as<bool>() == true)
     {
+        INFOPrint("Enter input ltl exp module");
+        std::string ltl_exp = node["monitor_generate_module"]["input_ltl_exp"]["ltl_exp"].as<std::string>();
+        spot::parsed_formula pf = spot::parse_infix_psl(ltl_exp);
+        std::string outputfilename = node["monitor_generate_module"]["input_ltl_exp"]["outputfilename"].as<std::string>();
+        if (pf.format_errors(std::cerr))
+        {
+            ErrorPrintNReturn(LTL_EXPRESSION_FORMAT_ERROR);
+        }
+        /*
+            Translate LTL formula into a Monitor, form spot/twaalgos/ltl2tgba_fm.hh
+        */
+        spot::translator trans;
+        trans.set_type(spot::postprocessor::Monitor);
+        trans.set_pref(spot::postprocessor::Deterministic);
+        spot::twa_graph_ptr autmata = trans.run(pf.f);
 
+        aut = autmata;
+        std::ofstream mycout(outputfilename);
+
+        INFOPrint("Output the HOA file of LTL: " + ltl_exp);
+        print_hoa(std::cout, autmata) << '\n';
+        print_hoa(mycout, autmata) << '\n';
+
+        //Print hoa to pdf
+        
     }
     else
     {
@@ -78,24 +123,17 @@ int main(void)
     }
 
     //filename="demo.hoa";
-     
+
 #if ZMQ == 1
 
-    if (pa->format_errors(std::cerr))
-        return ERROR;
-    if (pa->aborted)
-    {
-        std::cerr << "--ABORT-- read\n";
-        return ERROR;
-    }
-    const spot::bdd_dict_ptr &dict = pa->aut->get_dict();
+    const spot::bdd_dict_ptr &dict = aut->get_dict();
 
     Monitor monitor_;
     Monitor &monitor = monitor_;
 
     //读取所有的状态以及接受集，放入Monitor类型的容器中去。
-    Parse_automata_to_monitor(monitor, pa->aut, dict);
-    monitor.state_number = pa->aut->get_init_state_number(); //全局状态
+    Parse_automata_to_monitor(monitor, aut, dict);
+    monitor.state_number = aut->get_init_state_number(); //全局状态
 
     /*接受MQ发送过来的字符串*/
     std::string addr = node["server_bind_addr"].as<std::string>(); //改为读取配置文件
@@ -134,14 +172,14 @@ int main(void)
         cJSON_Delete(aw);
         //oJson.Get("eventName", accept_word);
         VePrint(accept_word);
-        if (Check_word_acceptance(pa->aut, monitor, dict, accept_word) == WORD_ACCEPTANCE_WRONG)
+        if (Check_word_acceptance(aut, monitor, dict, accept_word) == WORD_ACCEPTANCE_WRONG)
         {
             INFOPrint("Wrong Acceptance!");
             zmq::message_t reply(3);
             memcpy(reply.data(), "200", 3);
             socket.send(reply);
-            std::cout<<recvlog<<std::endl;
-            errorLog<<recvlog<<std::endl;
+            std::cout << recvlog << std::endl;
+            errorLog << recvlog << std::endl;
             cJSON_Delete(cj);
 
             //输出错误日志，把json格式输出。

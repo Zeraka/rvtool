@@ -35,6 +35,7 @@
 #include "server.hpp"
 #include "parsehoa.hh"
 #include "ltl-parse.hh"
+#include "util-error.hh"
 
 extern "C"
 {
@@ -55,7 +56,7 @@ int main(void)
 
     if (node == nullptr)
     {
-        AMErrorToString(YAML_FILE_IS_NULL);
+        ErrorPrintNReturn(YAML_FILE_IS_NULL);
     }
 
     std::ofstream errorLog(node["output"]["error_log"].as<std::string>(), std::ios::app);
@@ -113,7 +114,7 @@ int main(void)
 
         aut = autmata;
         std::ofstream mycout(outputfilename);
-        std::string dotname = outputfilename.replace(outputfilename.find(".hoa"),4,".dot",4);
+        std::string dotname = outputfilename.replace(outputfilename.find(".hoa"), 4, ".dot", 4);
         INFOPrint("Output the HOA file of LTL: " + ltl_exp);
         print_hoa(std::cout, autmata) << '\n';
         print_hoa(mycout, autmata) << '\n';
@@ -131,7 +132,7 @@ int main(void)
         fp = fopen(dotname.c_str(), "r");
         g = agread(fp, 0);
         gvLayout(gvc, g, "dot");
-        gvRenderFilename(gvc, g, "pdf", outputImageName.c_str());//Output for pdf format.
+        gvRenderFilename(gvc, g, "pdf", outputImageName.c_str()); //Output for pdf format.
         //gvRender(gvc, g, "pdf", )
         gvFreeLayout(gvc, g);
         agclose(g);
@@ -143,8 +144,6 @@ int main(void)
     {
         ErrorPrintNReturn(YAML_NODE_PARSE_ERROR);
     }
-
-    //filename="demo.hoa";
 
 #if ZMQ == 1
 
@@ -206,7 +205,7 @@ int main(void)
 
             //输出错误日志，把json格式输出。
 
-            return WORD_ACCEPTANCE_WRONG;
+            ErrorPrintNReturn(WORD_ACCEPTANCE_WRONG);
         }
         sleep(1);
 

@@ -51,6 +51,7 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
 /*自定义输出自动机*/
 int Parse_BoolString_to_set(std::string str, Word_set &word_set,
                             const spot::bdd_dict_ptr &dict);
+std::vector<std::string> Parse_label_exp_to_RPN(std::string label);
 int Parse_bstr_to_wordset(std::string str, Word_set &word_set);
 int Parse_bstr_to_wordsets(std::string str, std::vector<Word_set> &word_sets);
 int label_match_word(Monitor_label &monitor_label, std::string accept_word);
@@ -66,4 +67,5 @@ int Test_bdd_print(const spot::bdd_dict_ptr &dict, bdd b); //测试bddprint.h
 int Test_Commnunication_module_01(spot::twa_graph_ptr &aut, Monitor &monitor,
                                   const spot::bdd_dict_ptr &dict);
 int Test_Communication_module_02();
+int Test_Parse_label_exp_to_RPN();
 //end

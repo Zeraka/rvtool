@@ -38,17 +38,23 @@ stringList splitstr(const std::string &str, char tag)
 
     return li;
 }
+
+/*
+    Split the string by many chars.
+    tag[] can be {' ', '(',')','&','|'};
+*/
+
+
 /*
 Format the received log.
 */
-void Check_json_log_format(char *event){
-        int position = 0;
-        std::string tmp = event;
-        position = tmp.find_first_of("}");
-        *(event + position + 1) = '\0';
+void Check_json_log_format(char *event)
+{
+    int position = 0;
+    std::string tmp = event;
+    position = tmp.find_first_of("}");
+    *(event + position + 1) = '\0';
 }
-
-
 
 /*Free the memory*/
 #define AMFree(x)                            \
@@ -71,4 +77,13 @@ void Check_json_log_format(char *event){
             INFOPrint(#x " has been freed"); \
         }                                    \
     }
+
+//===========================================
+//Test Unit==================================
+//===========================================
+
+//void TestsplitstrBycharArray(void);
+
+
 #endif
+

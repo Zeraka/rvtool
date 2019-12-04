@@ -4,6 +4,7 @@
 #include <cstring>
 #include <string>
 #include <fstream> //Using ofstream
+#include <stack>
 
 #include <cstdio>
 
@@ -51,6 +52,7 @@ static int Test_splitstr();
 int main(void)
 {
     FuncBegin();
+#if Test_AUTOMONITOR == 1
 
     YAML::Node node = YAML::LoadFile("automonitor.yaml");
 
@@ -220,8 +222,6 @@ int main(void)
 
 #endif
 
-#if Test_AUTOMONITOR == 1
-
 #else
     /*测试一个monitor是否可检测出输入的行为违规*/
     //Test_Check_word_acceptance_01(pa->aut, monitor, dict);
@@ -234,7 +234,8 @@ int main(void)
     /*Test Communication module*/
     //Test_Commnunication_module_01();
     //Test_Commnunication_module_01(pa->aut, monitor, dict);
-    Test_Communication_module_02();
+    //Test_Communication_module_02();
+    Test_Parse_label_exp_to_RPN();
 
 #endif
     FuncEnd();
@@ -323,7 +324,93 @@ int Parse_bstr_to_wordsets(std::string str, std::vector<Word_set> &word_sets)
     FuncEnd();
     return SUCCESS;
 }
+//===================================================================
 
+/*
+    RPN means Reverse Polish notation.
+*/
+std::vector<std::string> Parse_label_exp_to_RPN(std::string label)
+{
+    std::stack<std::string> a_stack;
+    std::vector<std::string> rpn;
+    int startPosition = 0;
+    int endPosition = 0;
+
+    /*The label example: "!green & (press | red)"*/
+    char *labelstr = (char *)label.c_str();
+    VePrint(label.c_str());
+
+    while (endPosition != label.length())
+    {
+        char ch = *(labelstr + endPosition);
+        //VePrint(ch);
+        if (ch == '(' || ch == '&' || ch == '|')
+        {
+            //INFOPrint("Enter 1");
+            std::string tmp = "";
+            tmp.append(1, ch);
+            a_stack.push(tmp);
+            endPosition++;
+            startPosition = endPosition;
+        }
+        else if (ch == ' ')
+        {
+            //INFOPrint("Enter 2");
+            //VePrint(startPosition)
+            //VePrint(endPosition);
+
+            if (startPosition != endPosition)
+            {
+                string tmp = label.substr(startPosition, endPosition - startPosition);
+                //VePrint(tmp);
+                rpn.push_back(tmp);
+            }
+            endPosition++;
+            startPosition = endPosition;
+        }
+        else if (ch == ')')
+        {
+            //INFOPrint("Enter 3");
+            if (startPosition != endPosition)
+            {
+                std::string tmp = label.substr(startPosition, endPosition - startPosition);
+                //VePrint(tmp);
+                rpn.push_back(tmp); //Test the value of RPN?
+            }
+            endPosition++;
+            startPosition = endPosition;
+
+            while (a_stack.top() != "(")
+            {
+                std::string tmp = a_stack.top();
+                a_stack.pop();
+                rpn.push_back(tmp);
+            }
+            a_stack.pop();
+        }
+        else
+        {
+            //INFOPrint("Enter 4");
+
+            endPosition++;
+        }
+    }
+    while (a_stack.empty() == false)
+    {
+        std::string tmp = a_stack.top();
+        a_stack.pop();
+        rpn.push_back(tmp);
+    }
+
+    return rpn;
+}
+/*Parse the label string */
+
+int Parse_label_RPN_to_word_sets(std::string label, std::vector<string> rpn)
+{
+}
+
+//===================================================================
 /*
 功能：解析后的自动机的状态信息被放入结构体中
 输入： 
@@ -744,5 +831,26 @@ int Test_Communication_module_02()
         socket.send(reply);
     }
 
+    FuncEnd();
+}
+
+int Test_Parse_label_exp_to_RPN()
+{
+    FuncBegin();
+    std::string label = "(event1 & event3) | (!event4 & event2) | event5";
+    std::string label2 = "!green & (press | red)";
+    std::string label3 = "( event1 & event3 ) | ( !event4 & event2) | event5";
+    std::vector<std::string> rpn;
+    rpn = Parse_label_exp_to_RPN(label3);
+
+    /*Print the rpn*/
+    INFOPrint("Print the RPN's elements");
+    for (int i = 0; i < rpn.size(); i++)
+    {
+        std::cout << rpn[i] << ",";
+    }
+    std::cout << "\n";
+
+    return SUCCESS;
     FuncEnd();
 }

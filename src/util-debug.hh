@@ -73,12 +73,33 @@ typedef enum
         std::cout << BOLDYELLOW << x << RESET << std::endl; \
     }
 
+#define ERRORPrint(x){\
+        std::cout << BOLDRED << x << RESET << std::endl; \
+}
+
+#define ENTERPrint(x)                                                                \
+    {                                                                                \
+        std::cout << BOLDGREEN << "Now Enter Condition " <<BOLDRED<< x << RESET << std::endl; \
+    }
 /*打印x的值,便于debug*/
 #define VePrint(x)                                                                                      \
     {                                                                                                   \
         std::cout << BOLDYELLOW << "The value of " << #x << ": " << BOLDRED << x << RESET << std::endl; \
     }
-
+#define VePrintByArg(x, i)                                                  \
+    {                                                                       \
+        std::cout << BOLDYELLOW << "The value of " << #x << "[" << i << "]" \
+                  << ": " << BOLDRED << x[i] << RESET << std::endl;         \
+    }
+#define VePrintVector(x)                                  \
+    {                                                     \
+        INFOPrint("The values of " << #x << "+++++++++"); \
+        for (int i = 0; i < x.size(); i++)                \
+        {                                                 \
+            VePrintByArg(x, i);                           \
+        }                                                 \
+        INFOPrint("++++++++++++++");                      \
+    }
 /*Locate the line number*/
 #define LocationPrint()                       \
     {                                         \

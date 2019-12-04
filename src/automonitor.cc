@@ -224,7 +224,7 @@ int main(void)
 
 #else
     /*测试一个monitor是否可检测出输入的行为违规*/
-    //Test_Check_word_acceptance_01(pa->aut, monitor, dict);
+    Test_Check_word_acceptance_01();
     //Test_Check_word_acceptance_02(pa->aut, monitor, dict);
 
     // Test_splitstr();/*测试splitstr()*/
@@ -235,101 +235,18 @@ int main(void)
     //Test_Commnunication_module_01();
     //Test_Commnunication_module_01(pa->aut, monitor, dict);
     //Test_Communication_module_02();
-    Test_Parse_label_exp_to_RPN();
-
+    //Test_Parse_label_exp_to_RPN();
+    //Test_Parse_label_RPN_to_string_sets();
 #endif
     FuncEnd();
 }
 
-/*
-功能： 将一个只含有 & 运算符的布尔表达式形式的字符串解析到 结构体中。
-输入：
-输出：
-*/
-int Parse_BoolString_to_set(std::string str, Word_set &word_set,
-                            const spot::bdd_dict_ptr &dict)
-{
-    //将
-}
-
-/*
-功能： 字符串检查
-    不可能出现 !a & a 的情况。
-*/
-/*
-功能： 解析括号和 "|" 运算符
-
-如果碰到了括号，则 加入栈中，进行一个
-
-*/
-int Parse_symbol()
-{
-    //use the end of the
-}
-
-/*
-功能：将一个只含有 & 运算符的布尔表达式形式的字符串解析到Word_set结构体中。
-*/
-int Parse_bstr_to_wordset(std::string str, Word_set &word_set)
-{
-    //FuncBegin();
-    //按空格分割, 分别加入map中,如果包含！,则值为0，否则为1
-    stringList sli = splitstr(str, ' ');
-    //如果出现了bug
-
-    //解析括号和 或 运算符
-    //Parse_symbol();
-
-    //将解析到的结构放入
-    word_set.word = str;
-    for (auto &t : sli)
-    {
-        //如果不包含"!"
-        if (t[0] != '!')
-        {
-            word_set.wordset[t] = 1;
-        }
-        else
-        {
-            word_set.wordset[t] = 0; //test a time thing is very good thing.
-        }
-    }
-    //FuncEnd();
-    return SUCCESS;
-}
-
-/*
-功能：
-*/
-int Parse_bstr_to_wordsets(std::string str, std::vector<Word_set> &word_sets)
-{
-    FuncBegin();
-    //把字符串按照 | 分割 然后送入word_set中去
-    if (str.empty())
-    {
-        INFOPrint("str is null");
-        FuncEnd();
-        return ERROR;
-    }
-
-    stringList strli = splitstr(str, '|');
-
-    for (auto &t : strli)
-    {
-        Word_set ws_;
-        Word_set &ws = ws_;
-        Parse_bstr_to_wordset(t, ws);
-        word_sets.push_back(ws);
-    }
-    FuncEnd();
-    return SUCCESS;
-}
 //===================================================================
 
 /*
     RPN means Reverse Polish notation.
 */
-std::vector<std::string> Parse_label_exp_to_RPN(std::string label)
+std::vector<std::string> Parse_label_exp_to_RPN(std::string &label)
 {
     std::stack<std::string> a_stack;
     std::vector<std::string> rpn;
@@ -339,7 +256,7 @@ std::vector<std::string> Parse_label_exp_to_RPN(std::string label)
     /*The label example: "!green & (press | red)"*/
     char *labelstr = (char *)label.c_str();
     VePrint(label.c_str());
-
+    //VePrint(label.length());
     while (endPosition != label.length())
     {
         char ch = *(labelstr + endPosition);
@@ -395,6 +312,21 @@ std::vector<std::string> Parse_label_exp_to_RPN(std::string label)
             endPosition++;
         }
     }
+
+    if (endPosition == label.length())
+    {
+        if (startPosition != endPosition)
+        {
+            std::string tmp = label.substr(startPosition, endPosition - startPosition);
+            VePrint(tmp);
+            rpn.push_back(tmp); //Test the value of RPN?
+        }
+    }
+    else
+    {
+        INFOPrint("PARSE_LABEL_TO_RPN_ERROR");
+    }
+
     while (a_stack.empty() == false)
     {
         std::string tmp = a_stack.top();
@@ -402,14 +334,163 @@ std::vector<std::string> Parse_label_exp_to_RPN(std::string label)
         rpn.push_back(tmp);
     }
 
+    if (rpn.front() == "|" || rpn.front() == "&")
+    {
+        INFOPrint("PARSE_LABEL_TO_RPN_ERROR");
+    }
     return rpn;
 }
-/*Parse the label string */
 
-int Parse_label_RPN_to_word_sets(std::string label, std::vector<string> rpn)
+/**/
+std::vector<std::string> Operate_Logic_AND(std::vector<std::string> &strs1, std::vector<std::string> &strs2)
 {
+    std::vector<std::string> newstrs;
+
+    for (int m = 0; m < strs1.size(); m++)
+    {
+        for (int n = 0; n < strs2.size(); n++)
+        {
+            std::string tmp = strs1[m] + " & " + strs2[n];
+            newstrs.push_back(tmp);
+        }
+    }
+    return newstrs;
 }
 
+std::vector<std::string> Operate_Logic_OR(std::vector<std::string> &strs1, std::vector<std::string> &strs2)
+{
+    std::vector<std::string> newstrs;
+
+    for (int n = 0; n < strs2.size(); n++)
+    {
+        strs1.push_back(strs2[n]);
+    }
+    newstrs = strs1;
+
+    return newstrs;
+}
+
+/*Parse the label string */
+//Test exmple "(a | b) | (c | d)"
+std::vector<std::string> Parse_label_RPN_to_string_sets(std::vector<string> &rpn)
+{
+    typedef std::vector<std::string> Strvector;
+    typedef std::vector<Strvector> Strvectorbucket;
+
+    int m = -1;
+
+    Strvectorbucket strvbu;
+    for (int i = 0; i < rpn.size(); i++)
+    {
+        //VePrintByArg(rpn, i);
+        if (rpn[i] != "|" && rpn[i] != "&")
+        {
+            //ENTERPrint(1);
+            Strvector strv1;
+            strv1.push_back(rpn[i]);
+            strvbu.push_back(strv1);
+            m++;
+            //VePrint(m);
+        }
+        else if (rpn[i] == "|")
+        {
+            //ENTERPrint(2);
+
+            Strvector strv2 = Operate_Logic_OR(strvbu[m - 1], strvbu[m]);
+            //VePrintVector(strv2);
+            m--;
+            //VePrint(m);
+            strvbu.pop_back();
+            strvbu.pop_back();
+            strvbu.push_back(strv2);
+        }
+        else if (rpn[i] == "&")
+        {
+            //ENTERPrint(3);
+            //立即进行新字符串的合成。产生 a & b 类型的字符串。
+            Strvector strv3 = Operate_Logic_AND(strvbu[m - 1], strvbu[m]);
+            //VePrintVector(strv3);
+            m--;
+            //VePrint(m);
+            strvbu.pop_back();
+            strvbu.pop_back();
+            strvbu.push_back(strv3);
+        }
+    }
+    //Print the a_stack
+    VePrintVector(strvbu[0]);
+    if (m != 0)
+    {
+        ERRORPrint("Parse_label_RPN_to_string_sets Wrong");
+    }
+    FuncEnd();
+    return strvbu[0];
+}
+/*
+功能：将一个只含有 & 运算符的布尔表达式形式的字符串解析到Word_set结构体中。
+*/
+int Parse_bstr_to_wordset(std::string &str, Word_set &word_set)
+{
+    //FuncBegin();
+    //按空格分割, 分别加入map中,如果包含！,则值为0，否则为1
+    stringList sli = splitstr(str, ' ');
+    //如果出现了bug
+
+    //将解析到的结构放入
+    word_set.word = str;
+    for (auto &t : sli)
+    {
+        //如果不包含"!"
+        if (t[0] != '!')
+        {
+            word_set.wordset[t] = 1;
+        }
+        else
+        {
+            word_set.wordset[t] = 0; //test a time thing is very good thing.
+        }
+    }
+    //FuncEnd();
+    return SUCCESS;
+}
+/*
+Function: Parse the label to vector<Word_set>
+*/
+int Parse_label_to_word_sets(std::string &label, std::vector<Word_set> &word_sets)
+{
+    FuncBegin();
+    //把字符串按照 | 分割 然后送入word_set中去
+    if (label.empty() == true)
+    {
+        INFOPrint("str is null");
+        FuncEnd();
+        return ERROR;
+    }
+
+    std::vector<std::string> rpn = Parse_label_exp_to_RPN(label);
+    std::vector<std::string> label_set = Parse_label_RPN_to_string_sets(rpn);
+
+    for (auto &t : label_set)
+    {
+        Word_set ws;
+        Parse_bstr_to_wordset(t, ws);
+        word_sets.push_back(ws);
+    }
+
+    /*
+    stringList strli = splitstr(label, '|');
+
+        for (auto &t : strli)
+        {
+            Word_set ws_;
+            Word_set &ws = ws_;
+            Parse_bstr_to_wordset(t, ws);
+            word_sets.push_back(ws);
+*/
+    std::cout << "Parse label " << label << " SUCCESS" << std::endl;
+    FuncEnd();
+    return SUCCESS;
+}
 //===================================================================
 /*
 功能：解析后的自动机的状态信息被放入结构体中
@@ -425,7 +506,7 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
     {
         Monitor_state monitor_state;
 
-        monitor_state.current_state = num_state;
+        monitor_state.own_state = num_state;
         for (auto &t : aut->out(num_state))
         {
             Monitor_label monitor_label;
@@ -437,17 +518,17 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
 
             monitor_label.label = spot::bdd_format_formula(dict, t.cond);
 
-            //VePrint(monitor_label.label);
-            //Test_bdd_print(dict, t.cond);
+            VePrint(monitor_label.label);
+            Test_bdd_print(dict, t.cond);
             monitor_label.next_state = t.dst;
 
             //把表示逻辑运算的字符串解析放入wordset数据结构中
-            if (Parse_bstr_to_wordsets(monitor_label.label, monitor_label.word_sets) != SUCCESS)
+            if (Parse_label_to_word_sets(monitor_label.label, monitor_label.word_sets) != SUCCESS)
             {
                 AMReturn(ERROR);
             }
             monitor_label.strlist = splitstr(monitor_label.label, ' ');
-            //VePrint(monitor_label.strlist[0]);
+            VePrint(monitor_label.strlist[0]);
             monitor_state.monitor_labels.push_back(monitor_label);
         }
         monitor_state.label_numbers = monitor_state.monitor_labels.size();
@@ -472,6 +553,55 @@ int check_accept_word_format(std::string accept_word)
     /*检查 a & !a的情形*/
     /*检查 a & a的情形*/
     //切分, 找重复的元素,存在就失败,不存在就成功
+    //每个字符串的第一个位置可以为 ！， 其余只能出现字母和数字
+}
+
+int Parse_acceptword_to_wordset(std::string &accept_word, Word_set &word_set)
+{
+    //FuncBegin();
+    //按空格分割, 分别加入map中,如果包含！,则值为0，否则为1
+    stringList sli = splitstr(accept_word, ' ');
+    //如果出现了bug
+
+    //将解析到的结构放入
+    word_set.word = accept_word;
+    for (auto t : sli)
+    {
+        //考虑到了 a & !a 的情况
+        VePrint(t);
+        if (t.find("!") == std::string::npos)
+        {
+            //Not contain "!"
+            if (word_set.wordset.find(t) == word_set.wordset.end())
+            {
+                word_set.wordset[t] = 1;
+            }
+            else
+            {
+                ErrorPrintNReturn(ACCEPT_WORD_FORMAT_WRONG);
+            }
+        }
+        else if (t.find("!") == 0)
+        {
+            //Contain "!"
+            std::string tmp = t.substr(1, t.length() - 1);
+            //VePrint(tmp);
+            if (word_set.wordset.find(tmp) == word_set.wordset.end())
+            {
+                word_set.wordset[tmp] = 0;
+            }
+            else
+            {
+                ErrorPrintNReturn(ACCEPT_WORD_FORMAT_WRONG);
+            }
+        }
+        else
+        {
+            ErrorPrintNReturn(PARSE_ACCEPTEORD_TO_WORDSET_ERROR);
+        }
+    }
+    //FuncEnd();
+    return SUCCESS;
 }
 
 /*
@@ -480,10 +610,13 @@ int check_accept_word_format(std::string accept_word)
 int label_match_word(Monitor_label &monitor_label, std::string accept_word)
 {
     //解析accept_word,放入word_set中
-    Word_set wset_;
-    Word_set &wset = wset_;
+    Word_set wset;
 
-    Parse_bstr_to_wordset(accept_word, wset);
+    if (Parse_acceptword_to_wordset(accept_word, wset) == ACCEPT_WORD_FORMAT_WRONG)
+    {
+        ERRORPrint("ACCEPT_WORD_FORMAT_WRONG");
+        exit(0);
+    }
 
     //比较wset中的字符是否出现在monitor_label中,
     for (auto &word_set : monitor_label.word_sets)
@@ -541,7 +674,7 @@ int Check_word_acceptance(spot::twa_graph_ptr &aut,
     while (1)
     {
         //检测字是否符合
-        if (monitor.nodes[state_number].current_state != state_number)
+        if (monitor.nodes[state_number].own_state != state_number)
         {
             return ERROR;
         }
@@ -588,28 +721,45 @@ int Check_word_acceptance(spot::twa_graph_ptr &aut,
 /*
 功能： 测试Check_word_acceptance函数是否能够检测输入的字符串
 */
-int Test_Check_word_acceptance_01(spot::twa_graph_ptr &aut,
-                                  Monitor &monitor, const spot::bdd_dict_ptr &dict)
+int Test_Check_word_acceptance_01()
 {
 
     FuncBegin();
     //预定义的字符串格式
     //std::string teststr[] = {"red & !yellow", "red", "!red & yellow", "red & !yellow", "!red"};
     std::string teststr[] = {"red & !red", "red & !yellow", "red", "!red & yellow", "red & !yellow", "!red"};
-
+    std::string filename = "demo.hoa";
     //产生的自动机
-
-    //将字符串输入自动机中去
-    for (std::string str : teststr)
+    const spot::bdd_dict_ptr &dict = spot::make_bdd_dict();
+    spot::parsed_aut_ptr pa = parse_aut(filename, dict);
+    if (pa->format_errors(std::cerr))
     {
-        VePrint(str);
-        if (Check_word_acceptance(aut, monitor, dict, str) == WORD_ACCEPTANCE_WRONG)
+        ErrorPrintNReturn(HOA_FORMAT_ERROR);
+    }
+    if (pa->aborted)
+    {
+        std::cerr << "--ABORT-- read\n";
+        ErrorPrintNReturn(HOA_PARSE_ABORT_ERROR);
+    }
+    spot::twa_graph_ptr aut = pa->aut;
+    Monitor monitor;
+    Parse_automata_to_monitor(monitor, aut, dict);
+    //将字符串输入自动机中去
+    for (std::string to_be_tested_str : teststr)
+    {
+        VePrint(to_be_tested_str);
+        if (Check_word_acceptance(aut, monitor, dict, to_be_tested_str) == WORD_ACCEPTANCE_WRONG)
         {
             INFOPrint("Accepted Failed");
             FuncEnd();
-            return WORD_ACCEPTANCE_WRONG;
+            ErrorPrintNReturn(WORD_ACCEPTANCE_WRONG);
+        }
+        else
+        {
+            INFOPrint("Check SUCCESS");
         }
     }
+    INFOPrint("teststr is compished");
 
     FuncEnd();
 }
@@ -840,6 +990,9 @@ int Test_Parse_label_exp_to_RPN()
     std::string label = "(event1 & event3) | (!event4 & event2) | event5";
     std::string label2 = "!green & (press | red)";
     std::string label3 = "( event1 & event3 ) | ( !event4 & event2) | event5";
+    std::string label4 = "(a | b) | (c | d)";
+    std::string label5 = "(!a & !b)|(!a & c)";
+
     std::vector<std::string> rpn;
     rpn = Parse_label_exp_to_RPN(label3);
 
@@ -850,6 +1003,33 @@ int Test_Parse_label_exp_to_RPN()
         std::cout << rpn[i] << ",";
     }
     std::cout << "\n";
+
+    return SUCCESS;
+    FuncEnd();
+}
+
+int Test_Parse_label_RPN_to_string_sets()
+{
+    FuncBegin();
+    std::string label = "(event1 & event3) | (!event4 & event2) | event5";
+    std::string label2 = "!green & (press | red)";
+    std::string label3 = "( event1 & event3 ) | ( !event4 & event2) | event5";
+    std::string label4 = "(a | b) | (c | d)";
+    std::string label5 = "(!a & !b)|(!a & c)";
+
+    std::vector<std::string> rpn;
+    rpn = Parse_label_exp_to_RPN(label3);
+
+    /*Print the rpn*/
+    INFOPrint("Print the RPN's elements");
+    for (int i = 0; i < rpn.size(); i++)
+    {
+        std::cout << rpn[i] << ",";
+    }
+    std::cout << "\n";
+
+    INFOPrint("Now test this funcion:");
+    Parse_label_RPN_to_string_sets(rpn);
 
     return SUCCESS;
     FuncEnd();

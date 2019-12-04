@@ -23,7 +23,7 @@ typedef struct Monitor_label_t
 
 typedef struct Monitor_state_t
 {
-    int current_state;
+    int own_state;
     int label_numbers;
     std::vector<Monitor_label> monitor_labels;
 } Monitor_state;
@@ -51,15 +51,14 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
 /*自定义输出自动机*/
 int Parse_BoolString_to_set(std::string str, Word_set &word_set,
                             const spot::bdd_dict_ptr &dict);
-std::vector<std::string> Parse_label_exp_to_RPN(std::string label);
-int Parse_bstr_to_wordset(std::string str, Word_set &word_set);
-int Parse_bstr_to_wordsets(std::string str, std::vector<Word_set> &word_sets);
+std::vector<std::string> Parse_label_exp_to_RPN(std::string &label);
+//int Parse_bstr_to_wordset(std::string&str, Word_set &word_set);
 int label_match_word(Monitor_label &monitor_label, std::string accept_word);
+int Parse_label_to_word_sets(std::string& label, std::vector<Word_set> &word_sets);
 
 /*Unit Test Module*/
 int Test_Parse_bstr_to_wordset();
-int Test_Check_word_acceptance_01(spot::twa_graph_ptr &aut,
-                                  Monitor &monitor, const spot::bdd_dict_ptr &dict);
+int Test_Check_word_acceptance_01();
 int Test_Check_word_acceptance_02(spot::twa_graph_ptr &aut,
                                   Monitor &monitor, const spot::bdd_dict_ptr &dict);
 int Test_bdd_print(const spot::bdd_dict_ptr &dict, bdd b); //测试bddprint.h
@@ -68,4 +67,5 @@ int Test_Commnunication_module_01(spot::twa_graph_ptr &aut, Monitor &monitor,
                                   const spot::bdd_dict_ptr &dict);
 int Test_Communication_module_02();
 int Test_Parse_label_exp_to_RPN();
+int Test_Parse_label_RPN_to_string_sets();
 //end

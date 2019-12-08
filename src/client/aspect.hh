@@ -13,7 +13,7 @@
 #include <mutex>
 #include <sstream>
 #include <time.h>
-
+#include <cstring>
 #include "automonitor-client.hpp"
 
 using namespace std;
@@ -43,11 +43,20 @@ typedef enum
     PRINTLOGTOTERM,
 } CLIENTCONFIG;
 
+typedef enum
+{
+    CLIENTSUCCESS = 0,
+    CLIENTERROR,
+
+} CLIENTRETURN;
+
 std::mutex mtx;
 
 int fileIsExisted = -1;
 int eventid = 0;
 int socket_connect_state = -1;
+
+#define INIT_AOP_CONFIG
 
 typedef struct AspectState
 {
@@ -118,9 +127,37 @@ char* getDate()
         tstr = tmp;                                                 \
     }
 
-    
 #define TimeStamp_Num(num)
+//======================================
+//Logger module=========================
+//======================================
+#define INFOPrint(x)                                        \
+    {                                                       \
+        std::cout << BOLDYELLOW << x << RESET << std::endl; \
+    }
+//END Logger module=====================
 
+//======================================
+//ZeroMQ module=========================
+//======================================
+#define ZMQ_SOCKET_RECV(Reply)                             \
+    if ((char *)Reply.data() == nullptr)                   \
+    {                                                      \
+        INFOPrint("REPLY IS NULL");                        \
+        exit(0);                                           \
+    }                                                      \
+    else if (strncmp((char *)Reply.data(), "200", 3) == 0) \
+    {                                                      \
+        INFOPrint("CHECK OUT WRONG");                      \
+        exit(0);                                           \
+    }                                                      \
+    else if (strncmp((char *)Reply.data(), "300", 3) == 0) \
+    {                                                      \
+        INFOPrint("PARSE JSON WRONG");                     \
+        exit(0);                                           \
+    }
+
+//End ZeroMQ module=====================
 #define AOPLogger(id, eventName, mycout)            \
     {                                               \
         std::string tstr;                           \
@@ -198,7 +235,7 @@ Print the event log to mycout.
         cout << str;                                                  \
         memcpy(request.data(), (void *)(str.c_str()), str.length());  \
         socket.send(request);                                         \
-        socket.recv(&reply);                                          \
+        ZMQ_SOCKET_RECV(reply);                                       \
         mtx.unlock();                                                 \
     } while (0);
 
@@ -249,6 +286,8 @@ Print the event log to mycout.
         memcpy(request.data(), (void *)(str.c_str()), str.length());            \
         socket.send(request.data(), str.length());                              \
         socket.recv(&reply);                                                    \
+        ZMQ_SOCKET_RECV(reply);                                                 \
         mtx.unlock();                                                           \
     } while (0);
+
 #endif

@@ -16,15 +16,6 @@
 #include <spot/twa/bddprint.hh>
 #include <spot/parseaut/public.hh>
 
-/*
-//Parse ltl_expression string to TGBA and output a hoa file.
-#include <spot/twaalgos/ltl2tgba_fm.hh>
-#include <spot/twaalgos/sccfilter.hh>
-#include <spot/twaalgos/stripacc.hh>
-#include <spot/twaalgos/minimize.hh>
-//end
-*/
-
 #include <yaml-cpp/yaml.h>
 #include <zmq.hpp>
 
@@ -52,7 +43,7 @@ static int Test_splitstr();
 int main(void)
 {
     FuncBegin();
-#if Test_AUTOMONITOR == 1
+#if Test_AUTOMONITOR == 0
 
     YAML::Node node = YAML::LoadFile("automonitor.yaml");
 
@@ -67,6 +58,8 @@ int main(void)
     std::string fileFormat;
     spot::parsed_aut_ptr pa;
     spot::twa_graph_ptr aut;
+
+    //Todo Init the Log();
 
     //Parse the Yaml file to Generate monitor.
     if (node["monitor_generate_module"]["open_hoa_file"]["enabled"].as<bool>() == true)
@@ -165,6 +158,7 @@ int main(void)
     zmq::socket_t socket(context, ZMQ_REP);
 
     socket.bind(addr);
+    
     INFOPrint("Sever has binded the address");
 
     while (1)
@@ -207,12 +201,11 @@ int main(void)
 
             //输出错误日志，把json格式输出。
 
-            ErrorPrintNReturn(WORD_ACCEPTANCE_WRONG);
+            ErrorPrintNEXIT_0(WORD_ACCEPTANCE_WRONG);
         }
         sleep(1);
-
         zmq::message_t reply(3);
-        memcpy(reply.data(), "200", 3);
+        memcpy(reply.data(), "100", 3);
         socket.send(reply);
 
         cJSON_Delete(cj);
@@ -434,7 +427,6 @@ int Parse_bstr_to_wordset(std::string &str, Word_set &word_set)
     //FuncBegin();
     //按空格分割, 分别加入map中,如果包含！,则值为0，否则为1
     stringList sli = splitstr(str, ' ');
-    //如果出现了bug
 
     //将解析到的结构放入
     word_set.word = str;
@@ -487,7 +479,7 @@ int Parse_label_to_word_sets(std::string &label, std::vector<Word_set> &word_set
             Parse_bstr_to_wordset(t, ws);
             word_sets.push_back(ws);
 */
-    std::cout << "Parse label " << label << " SUCCESS" << std::endl;
+    std::cout <<BOLDBLUE <<"Parse label " << label << " SUCCESS" <<RESET<< std::endl;
     FuncEnd();
     return SUCCESS;
 }
@@ -519,7 +511,7 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
             monitor_label.label = spot::bdd_format_formula(dict, t.cond);
 
             VePrint(monitor_label.label);
-            Test_bdd_print(dict, t.cond);
+            //Test_bdd_print(dict, t.cond);
             monitor_label.next_state = t.dst;
 
             //把表示逻辑运算的字符串解析放入wordset数据结构中
@@ -568,7 +560,7 @@ int Parse_acceptword_to_wordset(std::string &accept_word, Word_set &word_set)
     for (auto t : sli)
     {
         //考虑到了 a & !a 的情况
-        VePrint(t);
+        //VePrint(t);
         if (t.find("!") == std::string::npos)
         {
             //Not contain "!"
@@ -819,10 +811,6 @@ int Test_Check_word_acceptance_02(spot::twa_graph_ptr &aut,
 }
 
 /*
-功能： 测试
-*/
-
-/*
 功能： 测试Parse_bstr_to_wordset()
 */
 int Test_Parse_bstr_to_wordset()
@@ -964,7 +952,6 @@ int Test_Communication_module_02()
         socket.recv(&request);
         std::string accpet_word = (char *)request.data();
         VePrint(accpet_word);
-        //为什么速度这么慢呢
         if (Check_word_acceptance(pa->aut, monitor, dict, accpet_word) == WORD_ACCEPTANCE_WRONG)
         {
             INFOPrint("Wrong Acceptance!");

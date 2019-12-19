@@ -197,10 +197,7 @@ int main(void)
             socket.send(reply);
             std::cout << recvlog << std::endl;
             errorLog << recvlog << std::endl;
-            cJSON_Delete(cj);
-
             //输出错误日志，把json格式输出。
-
             ErrorPrintNEXIT_0(WORD_ACCEPTANCE_WRONG);
         }
         sleep(1);
@@ -208,7 +205,7 @@ int main(void)
         memcpy(reply.data(), "100", 3);
         socket.send(reply);
 
-        cJSON_Delete(cj);
+        //cJSON_Delete(cj);
     }
 
 #else
@@ -428,18 +425,19 @@ int Parse_bstr_to_wordset(std::string &str, Word_set &word_set)
     //按空格分割, 分别加入map中,如果包含！,则值为0，否则为1
     stringList sli = splitstr(str, ' ');
 
-    //将解析到的结构放入
     word_set.word = str;
     for (auto &t : sli)
     {
-        //如果不包含"!"
+        if(t == "&") continue;
+        VePrint(t);
         if (t[0] != '!')
         {
             word_set.wordset[t] = 1;
         }
         else
         {
-            word_set.wordset[t] = 0; //test a time thing is very good thing.
+            t = t.substr(1,t.size()-1);
+            word_set.wordset[t] = 0; 
         }
     }
     //FuncEnd();
@@ -511,7 +509,6 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
             monitor_label.label = spot::bdd_format_formula(dict, t.cond);
 
             VePrint(monitor_label.label);
-            //Test_bdd_print(dict, t.cond);
             monitor_label.next_state = t.dst;
 
             //把表示逻辑运算的字符串解析放入wordset数据结构中
@@ -553,13 +550,10 @@ int Parse_acceptword_to_wordset(std::string &accept_word, Word_set &word_set)
     //FuncBegin();
     //按空格分割, 分别加入map中,如果包含！,则值为0，否则为1
     stringList sli = splitstr(accept_word, ' ');
-    //如果出现了bug
 
-    //将解析到的结构放入
     word_set.word = accept_word;
     for (auto t : sli)
     {
-        //考虑到了 a & !a 的情况
         //VePrint(t);
         if (t.find("!") == std::string::npos)
         {
@@ -576,11 +570,11 @@ int Parse_acceptword_to_wordset(std::string &accept_word, Word_set &word_set)
         else if (t.find("!") == 0)
         {
             //Contain "!"
-            std::string tmp = t.substr(1, t.length() - 1);
-            //VePrint(tmp);
-            if (word_set.wordset.find(tmp) == word_set.wordset.end())
+            std::string labelkey = t.substr(1, t.length() - 1);
+            VePrint(labelkey);
+            if (word_set.wordset.find(labelkey) == word_set.wordset.end())
             {
-                word_set.wordset[tmp] = 0;
+                word_set.wordset[labelkey] = 0;
             }
             else
             {
@@ -595,13 +589,28 @@ int Parse_acceptword_to_wordset(std::string &accept_word, Word_set &word_set)
     //FuncEnd();
     return SUCCESS;
 }
+/*
+功能：打印Word_set结构体
+*/
+static int Print_Word_set(Word_set & wset)
+{
+    string WordsetStr = wset.word;
+    VePrint(WordsetStr);
+
+    std::map<std::string,size_t>::iterator iter;
+    for(iter=wset.wordset.begin();iter!=wset.wordset.end();iter++)
+    {
+        std::cout<< iter->first <<" : "<<iter->second<<std::endl;
+    }
+}
+
 
 /*
 功能： 检测字符串是否匹配
 */
 int label_match_word(Monitor_label &monitor_label, std::string accept_word)
 {
-    //解析accept_word,放入word_set中
+    //解析accept_word,放入wset中
     Word_set wset;
 
     if (Parse_acceptword_to_wordset(accept_word, wset) == ACCEPT_WORD_FORMAT_WRONG)
@@ -609,24 +618,54 @@ int label_match_word(Monitor_label &monitor_label, std::string accept_word)
         ERRORPrint("ACCEPT_WORD_FORMAT_WRONG");
         exit(0);
     }
-
-    //比较wset中的字符是否出现在monitor_label中,
-    for (auto &word_set : monitor_label.word_sets)
+    Print_Word_set(wset);
+    
+    //检查label中的每个key是否存在于 accept_word中
+    for (auto &word_set : monitor_label.word_sets)//遍历每个word_set，
     {
         //如果accept_word的每个字符在word_set中都存在，则判为成功
         std::map<std::string, size_t>::iterator iter;
-
-        for (iter = wset.wordset.begin(); iter != wset.wordset.end(); iter++)
+        //遍历word_set
+        for (iter = word_set.wordset.begin(); iter != word_set.wordset.end(); iter++)
         {
-            if (word_set.wordset.find(iter->first) != word_set.wordset.end() &&
-                word_set.wordset[iter->first] == wset.wordset[iter->first])
+            //如果key的值为0
+            if(iter->second == 0)
             {
-                continue;
+                //如果accept_word中不存在这个key,则检测成功，进行下一步检测
+                if(wset.wordset.find(iter->first) == wset.wordset.end())
+                {
+                    INFOPrint("qwer");
+                    continue;
+                }
+                else if(wset.wordset.find(iter->first) != wset.wordset.end() && wset.wordset[iter->first] == word_set.wordset[iter->first])
+                    {
+                        INFOPrint("asdf");
+                        continue;
+                    }
+                else{
+                    INFOPrint("Not Match");
+                    return NOMATCH;
+                }
             }
-            else
+            else if(iter->second == 1)
             {
-                INFOPrint("not match");
-                return NOMATCH;
+                //如果accept_word中不存在这个key,则直接报错
+                if(wset.wordset.find(iter->first) == wset.wordset.end())
+                {
+                    INFOPrint("NOT MATCH");
+                    return NOMATCH;
+                }
+                else if(wset.wordset.find(iter->first) != wset.wordset.end() && wset.wordset[iter->first]==word_set.wordset[iter->first]){
+                    continue;
+                }
+                else{
+                    INFOPrint("NOT MATCH");
+                    return NOMATCH;
+                }
+            }
+            else{
+                INFOPrint("Unknown Wrong");
+                exit(0);
             }
         }
     }

@@ -29,7 +29,7 @@ EVENTLOG(mycout);
 CREATSOCKET();
 
 //std::ofstream mycout(filename);
-
+// aspect的基本文档 。 
 aspect AspectDemo
 {
         pointcut logger1() = execution("void Event1Func(...)"); //对该函数进行切入。

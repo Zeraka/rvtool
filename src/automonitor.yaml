@@ -11,11 +11,11 @@ output:
 
 #zeromq
 
-
+# 易用性， 测试 ，文档， 傻瓜化， 做一个用户用的软件，
 #通过输入LTL文件还是HOA自动机文件
 monitor_generate_module:
   open_hoa_file:
-    enabled: false
+    enabled: false #是否通过打开hoa文件的方式解析自动机， hoa是什么，
     filename: "demo.hoa"
 
   #两种配置方式只能选择一种，否则就会报错
@@ -24,13 +24,15 @@ monitor_generate_module:
     filename: "ltl.json"
     fileformat: "json"
 
+# 用户直接输入LTL就行，越少越好 ，LTL的语法应该如何写
+# output 是hoa文件
   input_ltl_exp:
     enabled: true
-    ltl_exp: "G(press -> red U green)" # example
-    outputfilename: "ltlparse.hoa"
+    ltl_exp: "G(!event3 | X(!event1 & !event3 & event4))" # example
+    outputfilename: "ltlparse.hoa" # 
     outputImage: "ltlparse.pdf"
     #automata: monitor
-
+# spot规定的LTL格式， 
 
 #要解析的自动机文件
 #解析文件模式为开

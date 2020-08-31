@@ -4,8 +4,9 @@
 ## 原理
 Monitor自动机是一种特殊类型的buchi自动机,可以表示运行时系统的行为,故可用来监控运行时系统。      
 AutoMonitor运用了spot库中Monitor生成算法，将buchi自动机转化为能够接受一连串有限字的Monitor自动机，并增加了字检测功能，从而可以监控运行时系统。      
-AutoMonitor拥有一个长期的开发计划,目标是实现一款易用的模型驱动工具。
-
+Automonitor也支持生成solidity监控器用于监控以太坊合约。
+## 架构
+![](images/instra.png)
 
 ## 从本地安装spot库
 本软件自带了spot 2.8,进入lib/libspot下, 

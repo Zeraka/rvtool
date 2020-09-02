@@ -46,12 +46,12 @@ int main(void)
 #if Test_AUTOMONITOR == 0
 
     YAML::Node node = YAML::LoadFile("automonitor.yaml");
-
+/*
     if (node == nullptr)
     {
         ErrorPrintNReturn(YAML_FILE_IS_NULL);
     }
-
+*/
     std::ofstream errorLog(node["output"]["error_log"].as<std::string>(), std::ios::app);
 
     std::string filename;
@@ -290,7 +290,7 @@ std::vector<std::string> Parse_label_exp_to_RPN(std::string &label)
             while (a_stack.top() != "(")
             {
                 std::string tmp = a_stack.top();
-                a_stack.pop();
+                a_stack.pop();//
                 rpn.push_back(tmp);
             }
             a_stack.pop();
@@ -482,11 +482,6 @@ int Parse_label_to_word_sets(std::string &label, std::vector<Word_set> &word_set
     return SUCCESS;
 }
 //===================================================================
-/*
-功能：解析后的自动机的状态信息被放入结构体中
-输入： 
-输出：
-*/
 int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const spot::bdd_dict_ptr &dict)
 {
     int num_state = 0;
@@ -531,6 +526,7 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
 /*
 功能：输出自动机为文本格式
 */
+
 
 /*
 功能： 检测输入的布尔表达式是否违规 ,比如 a & !a

@@ -63,6 +63,8 @@
         "hash_set": "cpp",
         "complex": "cpp",
         "forward_list": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "cfenv": "cpp",
+        "typeindex": "cpp"
     }
 }

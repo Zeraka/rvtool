@@ -24,24 +24,21 @@ contract monitor_automata{
     }
 
     //声明一个Monitor对象
-    Monitor monitor;
+    Monitor public monitor;
+
+    word_set[] public acc_word_sets;
+    //word_sets是用于什么的？
     
-    word_set[] acc_word_sets;
     //只写什么函数
     Monitor_state monitor_state;
 
-    //该函数用于将
-    function add_monitor_label()  private returns(){
-        
-    }
 
     function Monitor_init() public{
+        //最开始将其完成的内容是什么
+        
         monitor_state.own_state = 0;
 
-        //声明一个monitor_label
-        //push(add_monitor_label());
-        add_monitor_label();
+  
     }
     
-    //接收外来字符，进行检测
 }

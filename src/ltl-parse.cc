@@ -5,8 +5,9 @@
 #include <fstream>
 #include <regex>
 
-#include "CJsonObject.hpp"
 
+#include "CJsonObject.hpp"
+using namespace std;
 static AMError parse_ltl_json_file(const std::string &filename);
 
 static AMError parse_ltl_json_file(const std::string &filename)

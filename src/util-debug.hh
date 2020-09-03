@@ -1,6 +1,6 @@
 #ifndef UTIL_DEBUG_HH
 #define UTIL_DEBUG_HH
-
+#include <iostream>
 typedef enum
 {
     AM_LOG_NOTSET = -1,

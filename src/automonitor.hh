@@ -3,6 +3,16 @@
 #include "util-base.hh"
 #include <vector>
 #include <string>
+#include <map>
+#include <cstring>
+
+#include <spot/tl/parse.hh>
+#include <spot/twaalgos/translate.hh>
+#include <spot/twaalgos/hoa.hh>
+#include <spot/twaalgos/dot.hh>
+
+#include <spot/twa/bddprint.hh>
+#include <spot/parseaut/public.hh>
 
 #define Test_AUTOMONITOR 0
 /*初始化时自动机的全局状态*/

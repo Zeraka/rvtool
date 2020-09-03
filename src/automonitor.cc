@@ -28,6 +28,9 @@
 #include "parsehoa.hh"
 #include "ltl-parse.hh"
 #include "util-error.hh"
+#include "util-parse.hh"
+
+#include "solidity.hh"
 
 extern "C"
 {
@@ -148,9 +151,10 @@ int main(void)
     Monitor &monitor = monitor_;
 
     //读取所有的状态以及接受集，放入Monitor类型的容器中去。
-    Parse_automata_to_monitor(monitor, aut, dict);
+    //Parse_automata_to_monitor(monitor, aut, dict);
+    export_automata_to_solidity(monitor,aut,dict);
     monitor.state_number = aut->get_init_state_number(); //全局状态
-
+    
     /*接受MQ发送过来的字符串*/
     std::string addr = node["server_bind_addr"].as<std::string>(); //改为读取配置文件
     VePrint(addr);
@@ -232,190 +236,6 @@ int main(void)
 }
 
 //===================================================================
-
-/*
-    RPN means Reverse Polish notation.
-*/
-std::vector<std::string> Parse_label_exp_to_RPN(std::string &label)
-{
-    std::stack<std::string> a_stack;
-    std::vector<std::string> rpn;
-    int startPosition = 0;
-    int endPosition = 0;
-
-    /*The label example: "!green & (press | red)"*/
-    char *labelstr = (char *)label.c_str();
-    VePrint(label.c_str());
-    //VePrint(label.length());
-    while (endPosition != label.length())
-    {
-        char ch = *(labelstr + endPosition);
-        //VePrint(ch);
-        if (ch == '(' || ch == '&' || ch == '|')
-        {
-            //INFOPrint("Enter 1");
-            std::string tmp = "";
-            tmp.append(1, ch);
-            a_stack.push(tmp);
-            endPosition++;
-            startPosition = endPosition;
-        }
-        else if (ch == ' ')
-        {
-            //INFOPrint("Enter 2");
-            //VePrint(startPosition)
-            //VePrint(endPosition);
-
-            if (startPosition != endPosition)
-            {
-                string tmp = label.substr(startPosition, endPosition - startPosition);
-                //VePrint(tmp);
-                rpn.push_back(tmp);
-            }
-            endPosition++;
-            startPosition = endPosition;
-        }
-        else if (ch == ')')
-        {
-            //INFOPrint("Enter 3");
-            if (startPosition != endPosition)
-            {
-                std::string tmp = label.substr(startPosition, endPosition - startPosition);
-                //VePrint(tmp);
-                rpn.push_back(tmp); //Test the value of RPN?
-            }
-            endPosition++;
-            startPosition = endPosition;
-
-            while (a_stack.top() != "(")
-            {
-                std::string tmp = a_stack.top();
-                a_stack.pop();//
-                rpn.push_back(tmp);
-            }
-            a_stack.pop();
-        }
-        else
-        {
-            //INFOPrint("Enter 4");
-
-            endPosition++;
-        }
-    }
-
-    if (endPosition == label.length())
-    {
-        if (startPosition != endPosition)
-        {
-            std::string tmp = label.substr(startPosition, endPosition - startPosition);
-            VePrint(tmp);
-            rpn.push_back(tmp); //Test the value of RPN?
-        }
-    }
-    else
-    {
-        INFOPrint("PARSE_LABEL_TO_RPN_ERROR");
-    }
-
-    while (a_stack.empty() == false)
-    {
-        std::string tmp = a_stack.top();
-        a_stack.pop();
-        rpn.push_back(tmp);
-    }
-
-    if (rpn.front() == "|" || rpn.front() == "&")
-    {
-        INFOPrint("PARSE_LABEL_TO_RPN_ERROR");
-    }
-    return rpn;
-}
-
-/**/
-std::vector<std::string> Operate_Logic_AND(std::vector<std::string> &strs1, std::vector<std::string> &strs2)
-{
-    std::vector<std::string> newstrs;
-
-    for (int m = 0; m < strs1.size(); m++)
-    {
-        for (int n = 0; n < strs2.size(); n++)
-        {
-            std::string tmp = strs1[m] + " & " + strs2[n];
-            newstrs.push_back(tmp);
-        }
-    }
-    return newstrs;
-}
-
-std::vector<std::string> Operate_Logic_OR(std::vector<std::string> &strs1, std::vector<std::string> &strs2)
-{
-    std::vector<std::string> newstrs;
-
-    for (int n = 0; n < strs2.size(); n++)
-    {
-        strs1.push_back(strs2[n]);
-    }
-    newstrs = strs1;
-
-    return newstrs;
-}
-
-/*Parse the label string */
-//Test exmple "(a | b) | (c | d)"
-std::vector<std::string> Parse_label_RPN_to_string_sets(std::vector<string> &rpn)
-{
-    typedef std::vector<std::string> Strvector;
-    typedef std::vector<Strvector> Strvectorbucket;
-
-    int m = -1;
-
-    Strvectorbucket strvbu;
-    for (int i = 0; i < rpn.size(); i++)
-    {
-        //VePrintByArg(rpn, i);
-        if (rpn[i] != "|" && rpn[i] != "&")
-        {
-            //ENTERPrint(1);
-            Strvector strv1;
-            strv1.push_back(rpn[i]);
-            strvbu.push_back(strv1);
-            m++;
-            //VePrint(m);
-        }
-        else if (rpn[i] == "|")
-        {
-            //ENTERPrint(2);
-
-            Strvector strv2 = Operate_Logic_OR(strvbu[m - 1], strvbu[m]);
-            //VePrintVector(strv2);
-            m--;
-            //VePrint(m);
-            strvbu.pop_back();
-            strvbu.pop_back();
-            strvbu.push_back(strv2);
-        }
-        else if (rpn[i] == "&")
-        {
-            //ENTERPrint(3);
-            //立即进行新字符串的合成。产生 a & b 类型的字符串。
-            Strvector strv3 = Operate_Logic_AND(strvbu[m - 1], strvbu[m]);
-            //VePrintVector(strv3);
-            m--;
-            //VePrint(m);
-            strvbu.pop_back();
-            strvbu.pop_back();
-            strvbu.push_back(strv3);
-        }
-    }
-    //Print the a_stack
-    VePrintVector(strvbu[0]);
-    if (m != 0)
-    {
-        ERRORPrint("Parse_label_RPN_to_string_sets Wrong");
-    }
-    FuncEnd();
-    return strvbu[0];
-}
 /*
 功能：将一个只含有 & 运算符的布尔表达式形式的字符串解析到Word_set结构体中。
 */
@@ -487,6 +307,7 @@ int Parse_automata_to_monitor(Monitor &monitor, spot::twa_graph_ptr &aut, const 
     int num_state = 0;
 
     FuncBegin();
+    
     for (num_state; num_state < aut->num_states(); ++num_state)
     {
         Monitor_state monitor_state;

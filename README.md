@@ -1,6 +1,3 @@
-## v0.2 Added the zeromq module.  
-## v0.1 完成字检测模块
-
 ## 原理
 Monitor自动机是一种特殊类型的buchi自动机,可以表示运行时系统的行为,故可用来监控运行时系统。      
 AutoMonitor运用了spot库中Monitor生成算法，将buchi自动机转化为能够接受一连串有限字的Monitor自动机，并增加了字检测功能，从而可以监控运行时系统。      
@@ -60,4 +57,4 @@ ubuntu下
 借鉴逆波兰算法，用栈的方式将表达式中的字符输入。去掉括号。
 该函数去掉括号后得到的数组
 
-函数Parse_label_RPN_to_string_sets作用是将去除括号得到的PRN字符串数组进一步解析为
+函数Parse_label_RPN_to_string_sets作用是将去除括号得到的PRN字符串数组进一步解析为只包含&关系的字符串数组。

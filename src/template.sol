@@ -23,7 +23,7 @@ contract monitor_automata {
         int256 state_number;
         mapping(uint256 => Monitor_state) nodes;
     }
-    //这一步怎么办？
+    
     Monitor monitor;
     Monitor_state monitor_state_0;
     Monitor_label monitor_label_0;
@@ -75,4 +75,6 @@ contract monitor_automata {
         monitor_state_1.label_numbers = 1;
         monitor.nodes[1] = monitor_state_1;
     }
+
+    //将输入的字符串解析为数据结构。然后将其
 }

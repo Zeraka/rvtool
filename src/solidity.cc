@@ -73,7 +73,7 @@ int m = 0,i=0,j=0;
     return SUCCESS;
 }
 
- int Parse_label_to_word_sets_of_sol_pre(int i, std::string &label, std::vector<Word_set> &word_sets,ofstream& ofile)
+static int Parse_label_to_word_sets_of_sol_pre(int i, std::string &label, std::vector<Word_set> &word_sets,ofstream& ofile)
 {
     FuncBegin();
     //把字符串按照 | 分割 然后送入word_set中去
@@ -251,9 +251,49 @@ int export_automata_to_solidity(Monitor &monitor, spot::twa_graph_ptr &aut, cons
         j++;
     }
         ofile << "  }" << endl;
+    //monitor.state == ?
+
+    //print the check function
+
     ofile << "}" << endl;
     FuncEnd();
     return SUCCESS;
 }
-//缺少将Monitor结构体进行赋值的状态。
+//缺少将Monitor结构体进行赋值的状态。读取初始状态
 //声明Monitor以及需要将Monitor进行一个比较。
+/*生成检测模块*/
+
+int generate_Check_word_acceptance(Monitor &monitor, std::string accept_word, ofstream& ofile)
+{
+    FuncBegin();
+    ofile<< "function check_word_acceptance(string accept_word) public{\n"
+            "   state_number=monitor.state_number;\n"
+            "   while(1)\n"
+            "   {\n"
+            "       if(monitor.nodes[state_number].own_state!=state_number\n"
+            "       {\n"
+            "           return ERROR;\n"
+            "       }\n"
+            "       int i = 1;\n\n"
+            "       while(j)\n//j要设置"
+            "       {\n"
+            "           string monitor_label = monitor.nodes[state_number].monitor_labels[j];\n"
+            "           if(label_match_word(monitor_label,accpet_word)==0)\n"
+            "           {\n"
+            "               monitor.state_number = monitor_label.next_state;\n"
+            "               return SUCCESS;\n"
+            "            }\n"
+            "           else if(label_match_word(monitor_label,accept_word)!=SUCCESS && i < monitor.nodes[state_number].label_numbers)\n"
+            "           {\n"
+            "               i++;\n"
+            "               continue;\n"
+            "           }\n"
+            "           else\n"
+            "           {\n"
+            "               logger(\"Accepted Failed\");\n"
+            "               return WORD_ACCEPTANCE_WRONG;\n"
+            "           }\n"
+            "       }\n"
+            "   }\n"
+            "}\n"
+}
